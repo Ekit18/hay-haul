@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { AuthService } from './auth.service';
 import { Login } from './dto/login.dto';
 
@@ -16,9 +16,10 @@ export class AuthController {
 
   @Post('/registration')
   async registration(
-    @Body() userDto: CreateUserDto,
+    @Body() userDto: RegisterUserDto,
     @Res() response: Response,
   ) {
+    console.log('REGISTRATION CONTROLLER');
     const data = await this.authService.registration(userDto, response);
     response.json(data);
   }

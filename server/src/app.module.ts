@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { CompanyDetails } from './company-details/company-details.entity';
-import { CompanyDetailsModule } from './company-details/company-details.module';
+import { FacilityDetails } from './facility-details/facility-details.entity';
+import { FacilityDetailsModule } from './facility-details/facility-details.module';
 import { ProductType } from './product-type/product-type.entity';
 import { ProductTypeModule } from './product-type/product-type.module';
 import { Products } from './products/products.entity';
@@ -27,7 +27,7 @@ import { UserModule } from './user/user.module';
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, Token, Products, CompanyDetails, ProductType],
+        entities: [User, Token, Products, FacilityDetails, ProductType],
         synchronize: true,
         options: {
           encrypt: false,
@@ -38,8 +38,8 @@ import { UserModule } from './user/user.module';
     TokenModule,
     AuthModule,
     UserModule,
-    CompanyDetailsModule,
     ProductsModule,
+    FacilityDetailsModule,
     ProductTypeModule,
   ],
 })

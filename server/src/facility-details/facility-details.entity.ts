@@ -1,5 +1,13 @@
 import { ProductType } from 'src/product-type/product-type.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Products } from 'src/products/products.entity';
+import { User } from 'src/user/user.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class FacilityDetails {
@@ -15,6 +23,16 @@ export class FacilityDetails {
   @Column()
   code: string;
 
-  @OneToMany(() => ProductType, (productTypes) => productTypes.facilityDetails)
+  @OneToMany(
+    () => ProductType,
+    (productTypes) => productTypes.facilityDetails,
+    { cascade: true },
+  )
   productTypes: ProductType[];
+
+  @ManyToOne(() => User, (user) => user.facilityDetails)
+  user: User;
+
+  @OneToMany(() => Products, (products) => products.facility)
+  products: Products[];
 }

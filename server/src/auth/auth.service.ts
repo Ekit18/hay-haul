@@ -6,10 +6,12 @@ import {
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
+import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
+import { ProductTypeService } from 'src/product-type/product-type.service';
 import { TokenTypeEnum } from 'src/token/token-type.enum';
 import { TokenService } from 'src/token/token.service';
 import { TokenData } from 'src/token/token.type';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { AuthErrorMessage } from './auth-error-message.enum';
@@ -21,6 +23,8 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private tokenService: TokenService,
+    private facilityDetailsService: FacilityDetailsService,
+    private productTypeService: ProductTypeService,
   ) {}
 
   async login(userDto: Login, response: Response) {
@@ -79,11 +83,13 @@ export class AuthService {
   }
 
   async registration(
-    userDto: CreateUserDto,
+    registerUserDto: RegisterUserDto,
     response: Response,
   ): Promise<RegistrationResponseDto> {
     try {
-      const candidate = await this.userService.getUserByEmail(userDto.email);
+      const candidate = await this.userService.getUserByEmail(
+        registerUserDto.email,
+      );
 
       if (candidate) {
         throw new HttpException(
@@ -92,12 +98,33 @@ export class AuthService {
         );
       }
 
-      const hashPassword = await hash(userDto.password, 5);
+      const hashPassword = await hash(registerUserDto.password, 5);
 
       const user = await this.userService.create({
-        ...userDto,
+        email: registerUserDto.email,
+        fullName: registerUserDto.fullName,
+        role: registerUserDto.role,
         password: hashPassword,
       });
+
+      //TODO:
+      // Create facilityDetails
+      const facilityDetails = await this.facilityDetailsService.create(
+        {
+          facilityAddress: registerUserDto.facilityAddress,
+          facilityName: registerUserDto.facilityName,
+          facilityOfficialCode: registerUserDto.facilityOfficialCode,
+        },
+        user,
+      );
+      // Create farm products
+      const productTypes = await this.productTypeService.createMany(
+        registerUserDto.farmProductTypes,
+        facilityDetails,
+      );
+
+      console.log('productTypes', productTypes);
+      console.log('facilityDetails', facilityDetails);
 
       const { refreshToken, accessToken } =
         await this.tokenService.generateTokens(user);

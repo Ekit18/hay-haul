@@ -1,7 +1,19 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import { api } from './api';
+import tokenReducer from './reducers/token/tokenSlice';
+
+const persistTokenConfig = {
+  key: 'token',
+  storage,
+  whitelist: ['token']
+};
+
+const persistedTokenReducer = persistReducer(persistTokenConfig, tokenReducer);
 
 export const rootReducer = combineReducers({
+  token: persistedTokenReducer
   // teacherReducer,
   // productReducer,
   // cartReducer,

@@ -1,4 +1,4 @@
-import { Farm } from 'src/farm/farm.entity';
+import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { ProductType } from 'src/product-type/product-type.entity';
 import {
   Column,
@@ -20,8 +20,8 @@ export class Products {
   @Column()
   quantity: number;
 
-  @ManyToOne(() => Farm, (farm) => farm.products)
-  farm: Farm;
+  @ManyToOne(() => FacilityDetails, (facility) => facility.products)
+  facility: FacilityDetails;
 
   @OneToOne(() => ProductType, (productType) => productType.product)
   @JoinColumn()
