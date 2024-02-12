@@ -19,20 +19,20 @@ export function Stepper() {
           >
             <div
               className={cn(
-                'w-10 h-10 flex items-center justify-center z-10 relative bg-slate-700 rounded-full font-semibold text-white',
+                'w-6 h-6 flex text-xs items-center justify-center z-10 relative bg-slate-700 rounded-full font-semibold text-white',
                 currentStep === index + 1 && 'bg-sky-600',
                 (index + 1 < currentStep || complete) && 'bg-green-600 text-white'
               )}
             >
               {index + 1 < currentStep || complete ? <CheckCircle2 /> : index + 1}
             </div>
-            <p className="text-gray-500">{step}</p>
+            <p className="text-gray-500 text-base">{step}</p>
           </div>
         ))}
       </div>
-      <div className="text-white">{steps[currentStep - 1]}</div>
+      <div className="text-black">{steps[currentStep - 1]}</div>
       {!complete && (
-        <div>
+        <div className="flex w-full flex-row justify-center gap-1">
           <button
             type="button"
             disabled={currentStep === 1}

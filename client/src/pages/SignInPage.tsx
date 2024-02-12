@@ -14,7 +14,7 @@ export function SignInPage() {
               Forgot password?
             </a>
             <p>
-              No account?{' '}
+              No account?
               <a href={SIGN_UP} className="font-bold">
                 Create one
               </a>

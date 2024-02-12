@@ -70,9 +70,10 @@ export class TokenService {
           ? {
               id: user.token.id,
               userId: user.id,
+              role: user.role,
               refreshToken,
             }
-          : { userId: user.id, refreshToken },
+          : { userId: user.id, role: user.role, refreshToken },
       );
       return { refreshToken, accessToken };
     } catch (error) {
