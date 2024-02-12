@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-weight: 400;
+  font-family: Montserrat;
+  font-style: normal;
+  src: url('/fonts/Montserrat-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-weight: 500;
+  font-family: Montserrat;
+  font-style: normal;
+  src: url('/fonts/Montserrat-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-weight: 600;
+  font-family: Montserrat;
+  font-style: normal;
+  src: url('/fonts/Montserrat-Bold.ttf') format('truetype');
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat';
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -13,7 +39,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 192 41% 40%;
+    --primary: 179 92% 33%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 192 41% 40%;
