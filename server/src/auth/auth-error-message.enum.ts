@@ -4,5 +4,6 @@ export enum AuthErrorMessage {
   UserNotFound = 'User not found',
   UserNotAuthorized = 'User is not authorized',
   NoRefreshToken = 'No refresh token',
-  RefreshTokenExpired = 'Refresh token expired',
+  TokenExpired = 'Token expired',
+  InvalidRefreshToken = 'Invalid refresh token',
 }

@@ -9,17 +9,23 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/login')
-  login(@Body() userDto: Login, @Res() response: Response) {
-    return this.authService.login(userDto, response);
+  async login(@Body() userDto: Login, @Res() response: Response) {
+    const data = await this.authService.login(userDto, response);
+    response.json(data);
   }
 
   @Post('/registration')
-  registration(@Body() userDto: CreateUserDto, @Res() response: Response) {
-    return this.authService.registration(userDto, response);
+  async registration(
+    @Body() userDto: CreateUserDto,
+    @Res() response: Response,
+  ) {
+    const data = await this.authService.registration(userDto, response);
+    response.json(data);
   }
 
   @Post('/refresh')
-  refresh(@Req() request: Request) {
-    return this.authService.refresh(request);
+  async refresh(@Req() request: Request, @Res() response: Response) {
+    const data = await this.authService.refresh(request, response);
+    response.json(data);
   }
 }

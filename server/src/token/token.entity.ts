@@ -12,10 +12,9 @@ export class Token {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => User, (user) => user.id, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn()
-  @Column({ type: 'uuid' })
-  userId: string;
+  user: User;
 
   @Column()
   refreshToken: string;

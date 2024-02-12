@@ -14,7 +14,7 @@ export class UserService {
 
   async create(dto: CreateUserDto) {
     try {
-      const user = await this.userRepository.create(dto);
+      const user = await this.userRepository.save(dto);
       return user;
     } catch (error) {
       throw new HttpException(
@@ -29,6 +29,7 @@ export class UserService {
       const user = await this.userRepository
         .createQueryBuilder('user')
         .where('user.id = :id', { id })
+        .leftJoinAndSelect('user.token', 'token')
         .getOne();
       return user;
     } catch (error) {

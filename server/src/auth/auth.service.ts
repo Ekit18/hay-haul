@@ -4,10 +4,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
+import { TokenTypeEnum } from 'src/token/token-type.enum';
 import { TokenService } from 'src/token/token.service';
 import { TokenData } from 'src/token/token.type';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
@@ -19,16 +18,8 @@ import { RegistrationResponseDto } from './dto/registration-response.dto';
 
 @Injectable()
 export class AuthService {
-  private readonly jwtRefreshTokenSecret = this.configService.get<string>(
-    'JWT_REFRESH_TOKEN_SECRET',
-  );
-  private readonly jwtAccessTokenSecret = this.configService.get<string>(
-    'JWT_ACCESS_TOKEN_SECRET',
-  );
   constructor(
     private userService: UserService,
-    private jwtService: JwtService,
-    private configService: ConfigService,
     private tokenService: TokenService,
   ) {}
 
@@ -47,52 +38,43 @@ export class AuthService {
     }
   }
 
-  async refresh(request: Request) {
+  async refresh(request: Request, response: Response) {
     try {
       const refreshToken = request.cookies['refreshToken'];
+
       if (!refreshToken) {
         throw new UnauthorizedException({
           message: AuthErrorMessage.NoRefreshToken,
         });
       }
-      const userData: TokenData | null = this.checkRefreshToken(refreshToken);
+
+      const userData: TokenData | null = this.tokenService.checkToken(
+        refreshToken,
+        TokenTypeEnum.REFRESH,
+      );
+
       const tokenFromDb = await this.tokenService.getRefreshTokenByUserId(
         userData.id,
       );
+
       if (tokenFromDb !== refreshToken) {
         throw new UnauthorizedException({
           message: AuthErrorMessage.InvalidRefreshToken,
         });
       }
+
+      const user = await this.userService.getUserById(userData.id);
+
+      const { accessToken, refreshToken: newRefreshToken } =
+        await this.tokenService.generateTokens(user);
+
+      response.cookie('refreshToken', newRefreshToken);
+      return { accessToken };
     } catch (error) {
       throw new HttpException(
         { message: error.message },
         HttpStatus.BAD_REQUEST,
       );
-    }
-  }
-
-  checkRefreshToken(refreshToken: string): TokenData {
-    try {
-      return this.jwtService.verify<TokenData>(refreshToken, {
-        secret: this.jwtRefreshTokenSecret,
-      });
-    } catch (error) {
-      throw new UnauthorizedException({
-        message: AuthErrorMessage.RefreshTokenExpired,
-      });
-    }
-  }
-
-  checkAccessToken(accessToken: string): TokenData {
-    try {
-      return this.jwtService.verify<TokenData>(accessToken, {
-        secret: this.jwtAccessTokenSecret,
-      });
-    } catch (error) {
-      throw new UnauthorizedException({
-        message: AuthErrorMessage.RefreshTokenExpired,
-      });
     }
   }
 
