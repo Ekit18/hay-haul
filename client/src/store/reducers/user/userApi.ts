@@ -2,7 +2,7 @@ import { User } from '@/lib/types/User/User.type';
 import { api } from '@/store/api';
 
 export interface TokenResponse {
-  token: string;
+  accessToken: string;
 }
 
 export type SignRequest = Pick<User, 'email'> & {
@@ -36,7 +36,7 @@ export const userApi = api.injectEndpoints({
         method: 'POST'
       })
     }),
-    validateResetPasswordToken: builder.query<string, TokenResponse>({
+    validateResetPasswordToken: builder.query<string, { token: string }>({
       query: ({ token }) => ({
         url: `/auth/reset-password?token=${token}`
       })

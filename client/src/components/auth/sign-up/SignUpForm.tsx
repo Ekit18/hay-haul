@@ -1,23 +1,37 @@
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Stepper } from '@/components/stepper/stepper';
+import { Form } from '@/components/ui/form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { SignInFormValues, useSignInFormSchema } from './validation';
+import { ChoseRole } from './chose-role/ChoseRole';
+import { FarmerForm } from './farmer-form/FarmerForm';
+import { MainInfo } from './main-info/MainInfo';
+import { SignUpFormValues, defaultSignUpFormValues, useSignUpFormSchema } from './validation';
 
-export function SignInForm() {
-  const signInFormSchema = useSignInFormSchema();
+export function SignUpForm() {
+  const signUpFormSchema = useSignUpFormSchema();
 
-  const form = useForm<SignInFormValues>({
-    resolver: yupResolver(signInFormSchema),
-    mode: 'onBlur',
-    defaultValues: {
-      email: '',
-      password: ''
+  const steps = [
+    {
+      stepName: 'Chose role',
+      stepComponent: <ChoseRole />
+    },
+    {
+      stepName: 'Enter your data',
+      stepComponent: <MainInfo />
+    },
+    {
+      stepName: 'Farm info',
+      stepComponent: <FarmerForm />
     }
+  ];
+
+  const form = useForm<SignUpFormValues>({
+    resolver: yupResolver(signUpFormSchema),
+    mode: 'onBlur',
+    defaultValues: defaultSignUpFormValues
   });
 
-  const onSubmit: SubmitHandler<SignInFormValues> = (data) => {
+  const onSubmit: SubmitHandler<SignUpFormValues> = (data) => {
     console.log(data);
   };
 
@@ -25,35 +39,7 @@ export function SignInForm() {
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="gap-6 mt-6 flex flex-col">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel htmlFor="email">Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel htmlFor="password">Password</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter you password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full hover:bg-secondary" disabled={!form.formState.isValid}>
-            Sign in
-          </Button>
+          <Stepper steps={steps} />
         </form>
       </Form>
     </>

@@ -1,21 +1,21 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-const tokenSlice = createSlice({
+const accessTokenSlice = createSlice({
   name: 'token',
   initialState: {
-    token: ''
+    accessToken: ''
   },
   reducers: {
-    setToken(state, action: PayloadAction<string>) {
-      state.token = action.payload;
+    setAccessToken(state, action: PayloadAction<string>) {
+      state.accessToken = action.payload;
     },
-    removeToken(state) {
-      state.token = '';
+    removeAccessToken(state) {
+      state.accessToken = '';
     }
   }
 });
 
-export const { setToken, removeToken } = tokenSlice.actions;
+export const { setAccessToken, removeAccessToken } = accessTokenSlice.actions;
 
-export default tokenSlice.reducer;
+export default accessTokenSlice.reducer;

@@ -19,7 +19,6 @@ export class AuthController {
     @Body() userDto: RegisterUserDto,
     @Res() response: Response,
   ) {
-    console.log('REGISTRATION CONTROLLER');
     const data = await this.authService.registration(userDto, response);
     response.json(data);
   }

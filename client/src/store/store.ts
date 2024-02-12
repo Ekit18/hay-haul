@@ -6,16 +6,16 @@ import tokenReducer from './reducers/token/tokenSlice';
 import { userApi } from './reducers/user/userApi';
 import userReducer from './reducers/user/userSlice';
 
-const persistTokenConfig = {
-  key: 'token',
+const persistAccessTokenConfig = {
+  key: 'accessToken',
   storage,
-  whitelist: ['token']
+  whitelist: ['accessToken']
 };
 
-const persistedTokenReducer = persistReducer(persistTokenConfig, tokenReducer);
+const persistedAccessTokenReducer = persistReducer(persistAccessTokenConfig, tokenReducer);
 
 export const rootReducer = combineReducers({
-  token: persistedTokenReducer,
+  accessToken: persistedAccessTokenReducer,
   // teacherReducer,
   // productReducer,
   // cartReducer,

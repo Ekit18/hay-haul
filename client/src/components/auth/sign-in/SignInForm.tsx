@@ -1,48 +1,47 @@
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { MAIN_ROUTE } from '@/lib/constants/routes';
+import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppDispatch } from '@/lib/hooks/redux';
+import { User } from '@/lib/types/User/User.type';
+import { cn } from '@/lib/utils';
+import { setAccessToken } from '@/store/reducers/token/tokenSlice';
 import { userApi } from '@/store/reducers/user/userApi';
+import { setUser } from '@/store/reducers/user/userSlice';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { SignInFormValues, useSignInFormSchema } from './validation';
+import { SignInFormValues, defaultSignInFormValues, useSignInFormSchema } from './validation';
+// eslint-disable-next-line camelcase
+import jwt_decode from 'jwt-decode';
+import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function SignInForm() {
   const dispatch = useAppDispatch();
   const signInFormSchema = useSignInFormSchema();
+  const navigate = useNavigate();
+
   const [login, { isLoading: loginIsLoading }] = userApi.useLoginMutation();
 
   const form = useForm<SignInFormValues>({
     resolver: yupResolver(signInFormSchema),
     mode: 'onBlur',
-    defaultValues: {
-      email: '',
-      password: ''
-    }
+    defaultValues: defaultSignInFormValues
   });
 
   const onSubmit: SubmitHandler<SignInFormValues> = async (data) => {
     await login(data)
       .unwrap()
-      .then((data) => {
-        dispatch(userSlice.setUser(data));
+      .then(({ accessToken }) => {
+        const user = jwt_decode<User>(accessToken);
+
+        dispatch(setUser(user));
+
+        dispatch(setAccessToken(accessToken));
       })
-      .catch((error) => {
-        if (isErrorWithMessage(error)) {
-          toast({
-            variant: 'destructive',
-            title: 'Щось пішло не так',
-            description: error.message
-          });
-        } else if (isFetchBaseQueryError(error)) {
-          const errMsg = 'error' in error ? error.error : (error as FetchError).data.message;
-          toast({
-            variant: 'destructive',
-            title: 'Щось пішло не так',
-            description: errMsg
-          });
-        }
-      });
+      .catch(handleRtkError)
+      .then(() => navigate(MAIN_ROUTE));
   };
 
   return (
@@ -75,7 +74,12 @@ export function SignInForm() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full hover:bg-secondary" disabled={!form.formState.isValid}>
+          <Button
+            type="submit"
+            className="w-full hover:bg-secondary"
+            disabled={!form.formState.isValid || loginIsLoading}
+          >
+            <Loader2 className={cn('mr-2 hidden h-4 w-4 animate-spin', loginIsLoading && 'block')} />
             Sign in
           </Button>
         </form>

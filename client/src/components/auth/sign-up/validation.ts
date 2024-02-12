@@ -1,7 +1,7 @@
 import { UserRole } from '@/lib/enums/user-role.enum';
-import { AnyObject, ObjectSchema, object, string } from 'yup';
+import { AnyObject, ObjectSchema, array, object, string } from 'yup';
 
-export type SignInFormValues = {
+export type SignUpFormValues = {
   email: string;
   password: string;
   fullName: string;
@@ -12,15 +12,15 @@ export type SignInFormValues = {
   facilityOfficialCode: string;
 };
 
-export const useSignInFormSchema = (): ObjectSchema<
-  SignInFormValues,
+export const useSignUpFormSchema = (): ObjectSchema<
+  SignUpFormValues,
   AnyObject,
   {
     email: undefined;
     password: undefined;
     fullName: undefined;
     role: undefined;
-    farmProductTypes: undefined;
+    farmProductTypes: '';
     facilityName: undefined;
     facilityAddress: undefined;
     facilityOfficialCode: undefined;
@@ -34,8 +34,25 @@ export const useSignInFormSchema = (): ObjectSchema<
     role: string()
       .oneOf(Object.values(UserRole), `Role must be one of: ${Object.values(UserRole).join(',')}`)
       .required('Role is required'),
-    farmProductTypes: string().test('farmProductTypes', 'Farm product types is required', (value, context) => {
-      return context.parent.role === UserRole.FARMER && value?.length > 0;
-    })
+    farmProductTypes: array()
+      .of(string().required())
+      .required()
+      .test('farmProductTypes', 'Farm product types is required', (value, context) => {
+        return context.parent.role === UserRole.Farmer && value?.length > 0;
+      }),
+    facilityName: string().required('Facility name is required'),
+    facilityAddress: string().required('Facility address is required'),
+    facilityOfficialCode: string().required('Facility official code is required')
   });
+};
+
+export const defaultSignUpFormValues: SignUpFormValues = {
+  email: '',
+  password: '',
+  fullName: '',
+  role: UserRole.Farmer,
+  farmProductTypes: [],
+  facilityName: '',
+  facilityAddress: '',
+  facilityOfficialCode: ''
 };

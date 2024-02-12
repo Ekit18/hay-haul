@@ -16,3 +16,8 @@ export const useSignInFormSchema = (): ObjectSchema<
     password: string().required('Password is required').min(8, 'Password must be at least 8 characters long')
   });
 };
+
+export const defaultSignInFormValues: SignInFormValues = {
+  email: '',
+  password: ''
+};
