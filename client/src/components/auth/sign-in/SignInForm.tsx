@@ -40,8 +40,8 @@ export function SignInForm() {
 
         dispatch(setAccessToken(accessToken));
       })
-      .catch(handleRtkError)
-      .then(() => navigate(MAIN_ROUTE));
+      .then(() => navigate(MAIN_ROUTE))
+      .catch(handleRtkError);
   };
 
   return (

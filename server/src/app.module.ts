@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { Otp } from './auth/otp.entity';
+import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
 import { FacilityDetailsModule } from './facility-details/facility-details.module';
 import { ProductType } from './product-type/product-type.entity';
@@ -27,7 +29,7 @@ import { UserModule } from './user/user.module';
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, Token, Products, FacilityDetails, ProductType],
+        entities: [User, Token, Products, FacilityDetails, ProductType, Otp],
         synchronize: true,
         options: {
           encrypt: false,
@@ -38,9 +40,11 @@ import { UserModule } from './user/user.module';
     TokenModule,
     AuthModule,
     UserModule,
+    EmailModule,
     ProductsModule,
     FacilityDetailsModule,
     ProductTypeModule,
   ],
+  providers: [],
 })
 export class AppModule {}

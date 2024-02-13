@@ -4,13 +4,21 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 import { AuthErrorMessage } from './auth-error-message.enum';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  private readonly jwtAccessTokenSecret = this.configService.get<string>(
+    'JWT_ACCESS_TOKEN_SECRET',
+  );
+
+  constructor(
+    private jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
@@ -28,7 +36,9 @@ export class JwtAuthGuard implements CanActivate {
         });
       }
 
-      const user = this.jwtService.verify(token);
+      const user = this.jwtService.verify(token, {
+        secret: this.jwtAccessTokenSecret,
+      });
       req.user = user;
 
       return true;

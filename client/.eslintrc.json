@@ -4,21 +4,13 @@
     "es2021": true,
     "jest": true
   },
-  "extends": [
-    "airbnb",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended",
-    "prettier"
-  ],
+  "extends": ["airbnb", "plugin:@typescript-eslint/recommended", "plugin:prettier/recommended", "prettier"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "prettier"
-  ],
+  "plugins": ["@typescript-eslint", "prettier", "require-explicit-generics"],
   "rules": {
     "import/no-extraneous-dependencies": "off",
     "react/require-default-props": "off",
@@ -29,10 +21,7 @@
     "react/jsx-filename-extension": [
       1,
       {
-        "extensions": [
-          ".ts",
-          ".tsx"
-        ]
+        "extensions": [".ts", ".tsx"]
       }
     ],
     "no-shadow": "off",
@@ -58,6 +47,7 @@
     "no-param-reassign": "off",
     "import/order": "off",
     "react/jsx-no-useless-fragment": "off",
-    "react/jsx-props-no-spreading": "off"
+    "react/jsx-props-no-spreading": "off",
+    "require-explicit-generics/require-explicit-generics": ["error", ["useState ", "React.useState"]]
   }
 }

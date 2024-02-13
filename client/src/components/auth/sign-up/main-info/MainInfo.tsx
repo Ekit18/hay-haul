@@ -1,5 +1,6 @@
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { useFormContext } from 'react-hook-form';
 import { SignUpFormValues } from '../validation';
 
@@ -7,7 +8,7 @@ export function MainInfo() {
   const { control } = useFormContext<SignUpFormValues>();
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full gap-4 flex flex-col">
       <FormField
         control={control}
         name="fullName"
@@ -15,7 +16,7 @@ export function MainInfo() {
           <FormItem className="w-full">
             <FormLabel htmlFor="fullname">Full name</FormLabel>
             <FormControl>
-              <Input placeholder="Please write your full name" {...field} />
+              <Input placeholder="Enter your full name" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -41,7 +42,7 @@ export function MainInfo() {
           <FormItem className="w-full">
             <FormLabel htmlFor="password">Password</FormLabel>
             <FormControl>
-              <Input placeholder="Enter you password" {...field} />
+              <PasswordInput {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

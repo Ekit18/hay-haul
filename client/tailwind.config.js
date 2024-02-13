@@ -13,7 +13,7 @@ module.exports = {
     },
     extend: {
       boxShadow: {
-        'custom': '0px 4px 8px -2px hsla(192, 41%, 40%, 0.15)'
+        'custom': '0px 4px 8px -2px hsla(192, 41%, 40%, 0.60)'
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -71,5 +71,6 @@ module.exports = {
       }
     }
   },
+  // eslint-disable-next-line global-require
   plugins: [require('tailwindcss-animate')]
 };

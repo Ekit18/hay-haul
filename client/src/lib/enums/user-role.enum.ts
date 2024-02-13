@@ -4,3 +4,5 @@ export enum UserRole {
   Driver = 'Driver',
   Farmer = 'Farmer'
 }
+
+export type RegisterableRoles = UserRole.Farmer | UserRole.Carrier | UserRole.Businessman;

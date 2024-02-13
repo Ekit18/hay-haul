@@ -1,3 +1,4 @@
+import { Otp } from 'src/auth/otp.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Token } from 'src/token/token.entity';
 import {
@@ -40,9 +41,15 @@ export class User {
   })
   role: UserRole;
 
+  @Column()
+  isVerified: boolean;
+
   @OneToMany(() => FacilityDetails, (facilityDetail) => facilityDetail.user)
   facilityDetails: FacilityDetails;
 
   @OneToOne(() => Token, (token) => token.user)
   token: Token;
+
+  @OneToMany(() => Otp, (otp) => otp.user)
+  otp: Otp;
 }

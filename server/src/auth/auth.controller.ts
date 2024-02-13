@@ -1,8 +1,12 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { SendOtpDto } from 'src/auth/dto/send-otp.dto';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { AuthService } from './auth.service';
 import { Login } from './dto/login.dto';
+import { NewOtpDto } from './dto/new-otp.dto';
+import { ResetUserDto } from './dto/reset-user.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -27,5 +31,21 @@ export class AuthController {
   async refresh(@Req() request: Request, @Res() response: Response) {
     const data = await this.authService.refresh(request, response);
     response.json(data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/verify-otp')
+  async verifyOtp(@Body() otpDto: SendOtpDto) {
+    return await this.authService.verifyOtp(otpDto);
+  }
+
+  @Post('/reset-password')
+  async resetPassword(@Body() resetUserDto: ResetUserDto) {
+    return await this.authService.resetPassword(resetUserDto);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post('/new-otp')
+  async getNewOtp(@Body() newOtpDto: NewOtpDto) {
+    return await this.authService.getNewOtp(newOtpDto);
   }
 }

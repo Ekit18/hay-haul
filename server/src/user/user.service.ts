@@ -14,7 +14,10 @@ export class UserService {
 
   async create(dto: CreateUserDto) {
     try {
-      const user = await this.userRepository.save(dto);
+      const user = await this.userRepository.save({
+        ...dto,
+        isVerified: false,
+      });
       return user;
     } catch (error) {
       throw new HttpException(

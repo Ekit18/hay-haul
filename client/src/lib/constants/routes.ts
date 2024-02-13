@@ -6,3 +6,4 @@ export const SEARCH_ROUTE = '/search';
 export const ORDER_ROUTE = '/order';
 export const ORDERS_ROUTE = '/orders';
 export const RESET_PASSWORD = '/reset-password';
+export const OTP_CONFIRM = '/otp-confirm';
