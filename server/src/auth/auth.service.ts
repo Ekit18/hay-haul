@@ -11,6 +11,7 @@ import { Request, Response } from 'express';
 import { SendOtpDto } from 'src/auth/dto/send-otp.dto';
 import { EmailService } from 'src/email/services/email.service';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
+import { OtpDataType, OtpType } from 'src/lib/enums/enums';
 import { ProductTypeService } from 'src/product-type/product-type.service';
 import { TokenTypeEnum } from 'src/token/token-type.enum';
 import { TokenService } from 'src/token/token.service';
@@ -21,11 +22,11 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { AuthErrorMessage } from './auth-error-message.enum';
 import { Login } from './dto/login.dto';
-import { NewOtpDataType, NewOtpDto } from './dto/new-otp.dto';
+import { NewOtpDto } from './dto/new-otp.dto';
 import { RegistrationResponseDto } from './dto/registration-response.dto';
 import { ResetUserDto } from './dto/reset-user.dto';
 import { generateOtpCode } from './helpers/generate-otp-code.helper';
-import { Otp, OtpType } from './otp.entity';
+import { Otp } from './otp.entity';
 
 @Injectable()
 export class AuthService {
@@ -210,7 +211,7 @@ export class AuthService {
   async verifyOtp(otp: SendOtpDto) {
     try {
       const userId = await this.getUserIdFromDto(otp);
-
+      console.log('userId', userId);
       const otpFromDb = await this.otpRepository
         .createQueryBuilder('otp')
         .where('otp.userId = :userId', { userId })
@@ -238,8 +239,6 @@ export class AuthService {
       if (otpFromDb.type === OtpType.REGISTER) {
         await this.userService.update(otpFromDb.userId, { isVerified: true });
       }
-
-      return { message: 'OTP verified' };
     } catch (error) {
       throw new HttpException(
         { message: error.message },
@@ -250,7 +249,7 @@ export class AuthService {
 
   async getUserIdFromDto(newOtpDto: Pick<NewOtpDto, 'userData' | 'dataType'>) {
     let userId = newOtpDto.userData;
-    if (newOtpDto.dataType === NewOtpDataType.EMAIL) {
+    if (newOtpDto.dataType === OtpDataType.EMAIL) {
       const candidate = await this.userService.getUserByEmail(
         newOtpDto.userData,
       );
@@ -268,6 +267,14 @@ export class AuthService {
   async getNewOtp(newOtpDto: NewOtpDto) {
     try {
       const userId = await this.getUserIdFromDto(newOtpDto);
+
+      const user = await this.userService.getUserById(userId);
+      if (user.isVerified) {
+        throw new HttpException(
+          { message: AuthErrorMessage.UserAlreadyVerified },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
       const otp = await this.otpRepository.findOne({
         where: { userId, type: newOtpDto.type },
@@ -290,8 +297,6 @@ export class AuthService {
         isVerified: false,
         type: newOtpDto.type,
       });
-
-      const user = await this.userService.getUserById(userId);
 
       await this.emailService.sendEmail({
         to: user.email,

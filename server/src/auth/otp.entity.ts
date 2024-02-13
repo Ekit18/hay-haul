@@ -1,3 +1,4 @@
+import { OtpType } from 'src/lib/enums/enums';
 import { ValueOf } from 'src/lib/types/types';
 import { User } from 'src/user/user.entity';
 import {
@@ -9,10 +10,6 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-export enum OtpType {
-  REGISTER = 'REGISTER',
-  FORGOT_PASSWORD = 'FORGOT_PASSWORD',
-}
 
 const types = Object.values(OtpType)
   .map((role) => `'${role}'`)

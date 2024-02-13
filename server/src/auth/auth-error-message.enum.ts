@@ -8,4 +8,5 @@ export enum AuthErrorMessage {
   InvalidRefreshToken = 'Invalid refresh token',
   InvalidOtp = 'Invalid OTP',
   OtpNotFound = 'OTP not found',
+  UserAlreadyVerified = 'User already verified',
 }

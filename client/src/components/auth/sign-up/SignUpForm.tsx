@@ -1,6 +1,6 @@
 import { StepItem, Stepper } from '@/components/stepper/stepper';
 import { Form } from '@/components/ui/form';
-import { MAIN_ROUTE } from '@/lib/constants/routes';
+import { OTP_CONFIRM } from '@/lib/constants/routes';
 import { RegisterableRoles, UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppDispatch } from '@/lib/hooks/redux';
@@ -75,7 +75,7 @@ export function SignUpForm() {
 
         dispatch(setAccessToken(accessToken));
       })
-      .then(() => navigate(MAIN_ROUTE))
+      .then(() => navigate(OTP_CONFIRM))
       .catch(handleRtkError);
   };
 

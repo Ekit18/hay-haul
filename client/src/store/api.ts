@@ -1,4 +1,5 @@
 import { FetchBaseQueryError, createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { RootState } from './store';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -14,10 +15,12 @@ export const api = createApi({
   tagTypes: ['UserFlights'],
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
-    prepareHeaders: async (headers) => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
+    prepareHeaders: (headers, { getState }) => {
+      const { accessToken } = getState() as RootState;
+      const currentToken = accessToken.accessToken;
+
+      if (currentToken) {
+        headers.set('Authorization', `Bearer ${currentToken}`);
       }
 
       return headers;
