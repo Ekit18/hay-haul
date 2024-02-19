@@ -269,7 +269,8 @@ export class AuthService {
       const userId = await this.getUserIdFromDto(newOtpDto);
 
       const user = await this.userService.getUserById(userId);
-      if (user.isVerified) {
+
+      if (user.isVerified && newOtpDto.type === OtpType.REGISTER) {
         throw new HttpException(
           { message: AuthErrorMessage.UserAlreadyVerified },
           HttpStatus.BAD_REQUEST,

@@ -25,8 +25,9 @@ export function Stepper<T extends FieldValues>({ steps, form, onSubmit }: Steppe
 
   const validateStep = async (step?: number): Promise<boolean> => {
     const stepToCheck = step ? steps[step - 2] : currentStepItem;
-
+    console.log(stepToCheck.fieldsToValidate);
     form.clearErrors();
+
     await form.trigger(stepToCheck.fieldsToValidate.map((item) => item) as Path<T>[]);
 
     return Object.keys(form.formState.errors).length > 0;

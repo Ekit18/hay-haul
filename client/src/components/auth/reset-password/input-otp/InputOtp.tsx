@@ -7,10 +7,10 @@ export function InputOtp() {
   const { control } = useFormContext<ResetPasswordFormValues>();
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full flex justify-center">
       <FormField
         control={control}
-        name="email"
+        name="otpValue"
         render={({ field }) => (
           <OTPInput
             value={field.value}

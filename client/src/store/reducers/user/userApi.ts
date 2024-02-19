@@ -32,7 +32,8 @@ export const userApi = api.injectEndpoints({
         method: 'POST'
       })
     }),
-    resetPassword: builder.mutation<string, ResetPasswordRequestDto>({
+    // GOVNOCODE
+    resetPassword: builder.mutation<string, any>({
       query: (body) => ({
         body,
         url: '/auth/reset-password',
@@ -51,7 +52,7 @@ export const userApi = api.injectEndpoints({
         method: 'POST'
       })
     }),
-    verifyOtp: builder.mutation<string, { otp: string; userData: string; dataType: string }>({
+    verifyOtp: builder.mutation<string, VerifyOtpRequestDto>({
       query: (body) => ({
         body,
         url: '/auth/verify-otp',
@@ -77,5 +78,3 @@ export type NewOtpRequestDto = {
 export type VerifyOtpRequestDto = Pick<NewOtpRequestDto, 'userData' | 'dataType'> & {
   otp: string;
 };
-
-export const { useNewOtpMutation } = userApi;
