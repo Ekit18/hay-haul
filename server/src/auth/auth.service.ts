@@ -138,7 +138,7 @@ export class AuthService {
           name: registerUserDto.facilityName,
           code: registerUserDto.facilityOfficialCode,
         },
-        user,
+        user.id,
       );
 
       const productTypes = await this.productTypeService.createMany(

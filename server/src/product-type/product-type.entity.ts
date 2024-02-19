@@ -1,5 +1,6 @@
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
-import { Products } from 'src/products/products.entity';
+import { Timestamps } from 'src/lib/classes/timestamps.class';
+import { Product } from 'src/product/product.entity';
 import {
   Column,
   Entity,
@@ -10,18 +11,21 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class ProductType {
+export class ProductType extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToMany(() => Products, (products) => products.productType)
-  product: Products;
+  @OneToMany(() => Product, (products) => products.productType)
+  product: Product;
+
+  @Column()
+  facilityDetailsId: string;
 
   @ManyToOne(
     () => FacilityDetails,
     (facilityDetails) => facilityDetails.productTypes,
   )
-  @JoinColumn()
+  @JoinColumn({ name: 'facilityDetailsId' })
   facilityDetails: FacilityDetails;
 
   @Column()

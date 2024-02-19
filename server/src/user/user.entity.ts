@@ -1,5 +1,6 @@
 import { Otp } from 'src/auth/otp.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
+import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { Token } from 'src/token/token.entity';
 import {
   Check,
@@ -23,7 +24,7 @@ const roles = Object.values(UserRole)
 
 @Entity()
 @Check(`"role" IN (${roles})`)
-export class User {
+export class User extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

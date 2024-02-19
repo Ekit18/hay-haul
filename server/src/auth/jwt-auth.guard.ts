@@ -5,8 +5,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
+import { ALLOWED_ROLES_KEY } from 'src/lib/decorators/roles-auth.decorator';
+import { UserRole } from 'src/user/user.entity';
 import { AuthErrorMessage } from './auth-error-message.enum';
 
 @Injectable()
@@ -18,13 +21,14 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private readonly configService: ConfigService,
+    private reflector: Reflector,
   ) {}
 
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
-    console.log('GUARD');
+
     try {
       const authHeader = req.headers.authorization;
       const bearer = authHeader.split(' ')[0];
@@ -39,7 +43,17 @@ export class JwtAuthGuard implements CanActivate {
       const user = this.jwtService.verify(token, {
         secret: this.jwtAccessTokenSecret,
       });
+
       req.user = user;
+
+      const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
+        ALLOWED_ROLES_KEY,
+        [context.getHandler(), context.getClass()],
+      );
+
+      if (requiredRoles) {
+        return requiredRoles.includes(user.role);
+      }
 
       return true;
     } catch (e) {

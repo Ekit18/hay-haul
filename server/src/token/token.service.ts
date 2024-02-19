@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
+import { TokenPayload } from 'src/lib/types/token-payload.type';
 import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { TokenErrorMessage } from './token-error-message.enum';
@@ -54,7 +55,7 @@ export class TokenService {
 
   public async generateTokens(user: User): Promise<Tokens> {
     try {
-      const payload = {
+      const payload: TokenPayload = {
         email: user.email,
         id: user.id,
         isVerified: user.isVerified,

@@ -1,5 +1,6 @@
+import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { ProductType } from 'src/product-type/product-type.entity';
-import { Products } from 'src/products/products.entity';
+import { Product } from 'src/product/product.entity';
 import { User } from 'src/user/user.entity';
 import {
   Column,
@@ -10,7 +11,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class FacilityDetails {
+export class FacilityDetails extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -33,6 +34,6 @@ export class FacilityDetails {
   )
   productTypes: ProductType[];
 
-  @OneToMany(() => Products, (products) => products.facility)
-  products: Products[];
+  @OneToMany(() => Product, (product) => product.facilityDetails)
+  products: Product[];
 }

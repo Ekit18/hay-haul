@@ -14,6 +14,7 @@ export class RegisterUserDto {
   @IsNotEmpty()
   @IsEmail()
   readonly email: string;
+
   @IsString()
   @IsNotEmpty()
   @Length(4, 16)
