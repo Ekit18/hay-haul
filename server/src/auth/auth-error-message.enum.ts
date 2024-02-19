@@ -6,6 +6,7 @@ export enum AuthErrorMessage {
   NoRefreshToken = 'No refresh token',
   TokenExpired = 'Token expired',
   InvalidRefreshToken = 'Invalid refresh token',
+  InvalidOtpType = 'Invalid request OTP type',
   InvalidOtp = 'Invalid OTP',
   OtpNotFound = 'OTP not found',
   UserAlreadyVerified = 'User already verified',

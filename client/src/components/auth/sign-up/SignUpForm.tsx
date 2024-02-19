@@ -1,4 +1,4 @@
-import { StepItem, Stepper } from '@/components/stepper/stepper';
+import { StepItem, Stepper, validateStepFields } from '@/components/stepper/stepper';
 import { Form } from '@/components/ui/form';
 import { OTP_CONFIRM } from '@/lib/constants/routes';
 import { RegisterableRoles, UserRole } from '@/lib/enums/user-role.enum';
@@ -42,26 +42,35 @@ export function SignUpForm() {
 
   const selectedRole = form.watch('role');
 
-  const steps: StepItem<keyof SignUpFormValues>[] = [
+  const steps: StepItem[] = [
     {
       stepName: 'Chose role',
       stepComponent: <ChoseRole />,
-      fieldsToValidate: ['role']
+      onNextClick: async (): Promise<boolean> => {
+        const result = await validateStepFields(form, ['role']);
+        return result;
+      }
     },
     {
       stepName: 'Your data',
       stepComponent: <MainInfo />,
-      fieldsToValidate: ['email', 'password', 'fullName', 'role']
+      onNextClick: async (): Promise<boolean> => {
+        const result = await validateStepFields(form, ['email', 'password', 'fullName', 'role']);
+        return result;
+      }
     },
     {
       stepName: `${roleDetails[selectedRole as RegisterableRoles].name as string} info`,
       stepComponent: <FacilityForm />,
-      fieldsToValidate: [
-        'facilityName',
-        'facilityAddress',
-        'facilityOfficialCode',
-        ...(selectedRole === UserRole.Farmer ? (['farmProductTypes'] as (keyof SignUpFormValues)[]) : [])
-      ]
+      onNextClick: async (): Promise<boolean> => {
+        const result = await validateStepFields(form, [
+          'facilityName',
+          'facilityAddress',
+          'facilityOfficialCode',
+          ...(selectedRole === UserRole.Farmer ? (['farmProductTypes'] as (keyof SignUpFormValues)[]) : [])
+        ]);
+        return result;
+      }
     }
   ];
 
@@ -83,7 +92,7 @@ export function SignUpForm() {
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="gap-6 mt-6 flex flex-col">
-          <Stepper steps={steps} form={form} onSubmit={onSubmit} />
+          <Stepper steps={steps} form={form} onSubmit={onSubmit} submitButtonText="Register" />
         </form>
       </Form>
     </>

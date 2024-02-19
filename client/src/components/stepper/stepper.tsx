@@ -5,40 +5,42 @@ import { FieldValues, Path, SubmitHandler, UseFormReturn } from 'react-hook-form
 import { Button } from '../ui/button';
 import './stepper.css';
 
-export type StepItem<T> = {
+export type StepItem = {
   stepName: string;
   stepComponent: React.ReactNode;
-  fieldsToValidate: T[];
+  onNextClick: () => Promise<boolean>;
 };
 
 interface StepperProps<T extends FieldValues> {
-  steps: StepItem<keyof T>[];
+  steps: StepItem[];
   form: UseFormReturn<T, unknown, T>;
   onSubmit: SubmitHandler<T>;
+  submitButtonText: string;
 }
 
-export function Stepper<T extends FieldValues>({ steps, form, onSubmit }: StepperProps<T>) {
+export const validateStepFields = async <T extends FieldValues>(
+  form: UseFormReturn<T, unknown, T>,
+  fields: (keyof T)[]
+): Promise<boolean> => {
+  form.clearErrors();
+
+  await form.trigger(fields.map((item) => item) as Path<T>[]);
+
+  return !(Object.keys(form.formState.errors).length > 0);
+};
+
+export function Stepper<T extends FieldValues>({ steps, form, onSubmit, submitButtonText }: StepperProps<T>) {
   const [currentStep, setCurrentStep] = useState(1);
   const [complete, setComplete] = useState(false);
 
   const currentStepItem = steps[currentStep - 1];
-
-  const validateStep = async (step?: number): Promise<boolean> => {
-    const stepToCheck = step ? steps[step - 2] : currentStepItem;
-    console.log(stepToCheck.fieldsToValidate);
-    form.clearErrors();
-
-    await form.trigger(stepToCheck.fieldsToValidate.map((item) => item) as Path<T>[]);
-
-    return Object.keys(form.formState.errors).length > 0;
-  };
 
   const handleBackClick = () => {
     setCurrentStep((prev) => prev - 1);
   };
 
   const handleNextClick = async () => {
-    if (await validateStep()) return;
+    if (!(await currentStepItem.onNextClick())) return;
 
     if (currentStep === steps.length) {
       setComplete(true);
@@ -49,8 +51,10 @@ export function Stepper<T extends FieldValues>({ steps, form, onSubmit }: Steppe
 
   const handleChoseStep = async (step: number) => {
     if (step < currentStep) setCurrentStep(step);
-    if (currentStep > step) return;
-    if (await validateStep(step)) return;
+
+    const chosenStepItem = steps[step - 2];
+
+    if (chosenStepItem && !(await chosenStepItem.onNextClick())) return;
 
     setCurrentStep(step);
   };
@@ -98,7 +102,7 @@ export function Stepper<T extends FieldValues>({ steps, form, onSubmit }: Steppe
             className="w-full mt-4"
             onClick={currentStep === steps.length ? form.handleSubmit(onSubmit) : handleNextClick}
           >
-            {currentStep === steps.length ? 'Register' : 'Next'}
+            {currentStep === steps.length ? submitButtonText : 'Next'}
           </Button>
         </div>
       )}

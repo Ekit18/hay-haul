@@ -11,7 +11,7 @@ import { Request, Response } from 'express';
 import { SendOtpDto } from 'src/auth/dto/send-otp.dto';
 import { EmailService } from 'src/email/services/email.service';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
-import { OtpDataType, OtpType } from 'src/lib/enums/enums';
+import { OtpType } from 'src/lib/enums/enums';
 import { ProductTypeService } from 'src/product-type/product-type.service';
 import { TokenTypeEnum } from 'src/token/token-type.enum';
 import { TokenService } from 'src/token/token.service';
@@ -21,10 +21,11 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { AuthErrorMessage } from './auth-error-message.enum';
+import { CheckUserEmailDto } from './dto/check-user-email.dto';
+import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
 import { Login } from './dto/login.dto';
 import { NewOtpDto } from './dto/new-otp.dto';
 import { RegistrationResponseDto } from './dto/registration-response.dto';
-import { ResetUserDto } from './dto/reset-user.dto';
 import { generateOtpCode } from './helpers/generate-otp-code.helper';
 import { Otp } from './otp.entity';
 
@@ -158,13 +159,13 @@ export class AuthService {
         type: OtpType.REGISTER,
       });
 
-      await this.emailService.sendEmail({
-        to: user.email,
-        templateId: this.verifyAccountOtpTemplateId,
-        dynamicTemplateData: {
-          otpCode: otp,
-        },
-      });
+      // await this.emailService.sendEmail({
+      //   to: user.email,
+      //   templateId: this.verifyAccountOtpTemplateId,
+      //   dynamicTemplateData: {
+      //     otpCode: otp,
+      //   },
+      // });
       return { accessToken };
     } catch (error) {
       console.log(error);
@@ -175,46 +176,88 @@ export class AuthService {
     }
   }
 
-  public async resetPassword(resetUserDto: ResetUserDto) {
-    const user = await this.userService.getUserByEmail(resetUserDto.email);
-    if (!user) {
+  public async requestResetPassword(requestResetPasswordDto: NewOtpDto) {
+    if (requestResetPasswordDto.type !== OtpType.FORGOT_PASSWORD) {
       throw new HttpException(
-        { message: AuthErrorMessage.UserNotFound },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const otp = generateOtpCode();
-    console.log('otp', otp);
-    try {
-      await this.otpRepository.save({
-        otp,
-        user,
-        isVerified: false,
-        type: OtpType.FORGOT_PASSWORD,
-      });
-    } catch (error) {
-      throw new HttpException(
-        { message: error.message },
+        {
+          message: AuthErrorMessage.InvalidOtpType,
+        },
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    await this.emailService.sendEmail({
-      to: user.email,
-      templateId: this.updatePasswordOtpTemplateId,
-      dynamicTemplateData: {
-        otpCode: otp,
+    const userId = await this.getUserIdFromDto(requestResetPasswordDto);
+    const user = await this.userService.getUserById(userId);
+
+    const otp = generateOtpCode();
+
+    const newDbOtp = await this.otpRepository.save({
+      otp,
+      userId,
+      type: requestResetPasswordDto.type,
+    });
+
+    // await this.emailService.sendEmail({
+    //   to: user.email,
+    //   templateId: this.updatePasswordOtpTemplateId,
+    //   dynamicTemplateData: {
+    //     otpCode: otp,
+    //   },
+    // });
+  }
+
+  public async confirmResetPassword(
+    confirmResetPassword: ConfirmResetPasswordDto,
+  ) {
+    if (confirmResetPassword.type !== OtpType.FORGOT_PASSWORD) {
+      throw new HttpException(
+        {
+          message: AuthErrorMessage.InvalidOtpType,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const userId = await this.getUserIdFromDto(confirmResetPassword);
+
+    const otpFromDb = await this.otpRepository.exists({
+      where: {
+        userId: userId,
+        type: confirmResetPassword.type,
+        otp: confirmResetPassword.otp,
       },
+    });
+    if (!otpFromDb) {
+      throw new HttpException(
+        {
+          message: AuthErrorMessage.OtpNotFound,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const user = await this.userService.getUserById(userId);
+
+    const newHashedPassword = await hash(confirmResetPassword.password, 5);
+
+    await this.userService.update(userId, { password: newHashedPassword });
+
+    await this.otpRepository.delete({
+      userId,
+      type: confirmResetPassword.type,
     });
   }
 
-  async verifyOtp(otp: SendOtpDto) {
+  async verifyOtp(verifyOtpDto: SendOtpDto) {
     try {
-      const userId = await this.getUserIdFromDto(otp);
+      const userId = await this.getUserIdFromDto(verifyOtpDto);
       console.log('userId', userId);
+
       const otpFromDb = await this.otpRepository
         .createQueryBuilder('otp')
         .where('otp.userId = :userId', { userId })
+        .andWhere('otp.type = :type', { type: verifyOtpDto.type })
+        .andWhere('otp.otp = :otp', { otp: verifyOtpDto.otp })
         .getOne();
       console.log('otpFromDb', otpFromDb);
 
@@ -224,19 +267,22 @@ export class AuthService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      if (otpFromDb.otp !== otp.otp) {
+
+      if (otpFromDb.otp !== verifyOtpDto.otp) {
         throw new HttpException(
           { message: AuthErrorMessage.InvalidOtp },
           HttpStatus.BAD_REQUEST,
         );
       }
-      await this.otpRepository
-        .createQueryBuilder()
-        .delete()
-        .from(Otp)
-        .where('id = :id', { id: otpFromDb.id })
-        .execute();
+
       if (otpFromDb.type === OtpType.REGISTER) {
+        await this.otpRepository
+          .createQueryBuilder()
+          .delete()
+          .from(Otp)
+          .where('id = :id', { id: otpFromDb.id })
+          .execute();
+
         await this.userService.update(otpFromDb.userId, { isVerified: true });
       }
     } catch (error) {
@@ -247,25 +293,28 @@ export class AuthService {
     }
   }
 
-  async getUserIdFromDto(newOtpDto: Pick<NewOtpDto, 'userData' | 'dataType'>) {
-    let userId = newOtpDto.userData;
-    if (newOtpDto.dataType === OtpDataType.EMAIL) {
-      const candidate = await this.userService.getUserByEmail(
-        newOtpDto.userData,
-      );
+  async getUserIdFromDto(
+    newOtpDto: Pick<NewOtpDto, 'email' | 'userId' | 'type'>,
+  ) {
+    if (newOtpDto.type === OtpType.FORGOT_PASSWORD) {
+      const candidate = await this.userService.getUserByEmail(newOtpDto.email);
+
       if (!candidate) {
         throw new HttpException(
           { message: AuthErrorMessage.UserNotFound },
           HttpStatus.BAD_REQUEST,
         );
       }
-      userId = candidate.id;
+
+      return candidate.id;
     }
-    return userId;
+
+    return newOtpDto.userId;
   }
 
-  async getNewOtp(newOtpDto: NewOtpDto) {
+  async renewOtp(newOtpDto: NewOtpDto) {
     try {
+      console.log('newOtpDto', newOtpDto);
       const userId = await this.getUserIdFromDto(newOtpDto);
 
       const user = await this.userService.getUserById(userId);
@@ -280,15 +329,21 @@ export class AuthService {
       const otp = await this.otpRepository.findOne({
         where: { userId, type: newOtpDto.type },
       });
-      console.log('otp', otp);
-      if (otp) {
-        await this.otpRepository
-          .createQueryBuilder()
-          .delete()
-          .from(Otp)
-          .where('id = :id', { id: otp.id })
-          .execute();
+
+      if (!otp) {
+        throw new HttpException(
+          { message: AuthErrorMessage.OtpNotFound },
+          HttpStatus.BAD_REQUEST,
+        );
       }
+
+      console.log('otp', otp);
+      await this.otpRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Otp)
+        .where('id = :id', { id: otp.id })
+        .execute();
 
       const newOtp = generateOtpCode();
 
@@ -299,13 +354,13 @@ export class AuthService {
         type: newOtpDto.type,
       });
 
-      await this.emailService.sendEmail({
-        to: user.email,
-        templateId: this.verifyAccountOtpTemplateId,
-        dynamicTemplateData: {
-          otpCode: newOtp,
-        },
-      });
+      // await this.emailService.sendEmail({
+      //   to: user.email,
+      //   templateId: this.verifyAccountOtpTemplateId,
+      //   dynamicTemplateData: {
+      //     otpCode: newOtp,
+      //   },
+      // });
     } catch (error) {
       throw new HttpException(
         { message: error.message },
@@ -333,6 +388,19 @@ export class AuthService {
       throw new UnauthorizedException({
         message: AuthErrorMessage.WrongPassEmail,
       });
+    } catch (error) {
+      throw new HttpException(
+        { message: error.message },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async checkUserEmail(dto: CheckUserEmailDto) {
+    try {
+      const user = await this.userService.getUserByEmail(dto.email);
+
+      return { userExist: !!user };
     } catch (error) {
       throw new HttpException(
         { message: error.message },

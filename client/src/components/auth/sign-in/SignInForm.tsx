@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { MAIN_ROUTE } from '@/lib/constants/routes';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppDispatch } from '@/lib/hooks/redux';
@@ -68,7 +69,7 @@ export function SignInForm() {
               <FormItem className="w-full">
                 <FormLabel htmlFor="password">Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter you password" {...field} />
+                  <PasswordInput placeholder="Enter you password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

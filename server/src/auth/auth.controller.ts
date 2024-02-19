@@ -3,9 +3,10 @@ import { Request, Response } from 'express';
 import { SendOtpDto } from 'src/auth/dto/send-otp.dto';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { AuthService } from './auth.service';
+import { CheckUserEmailDto } from './dto/check-user-email.dto';
+import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
 import { Login } from './dto/login.dto';
 import { NewOtpDto } from './dto/new-otp.dto';
-import { ResetUserDto } from './dto/reset-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -31,21 +32,29 @@ export class AuthController {
     const data = await this.authService.refresh(request, response);
     response.json(data);
   }
-  //GOVNOKOD!!!!!!!!
-  //@UseGuards(JwtAuthGuard)
+
   @Post('/verify-otp')
   async verifyOtp(@Body() otpDto: SendOtpDto) {
     return await this.authService.verifyOtp(otpDto);
   }
 
-  @Post('/reset-password')
-  async resetPassword(@Body() resetUserDto: ResetUserDto) {
-    return await this.authService.resetPassword(resetUserDto);
+  @Post('/request-reset-password')
+  async requestResetPassword(@Body() dto: NewOtpDto) {
+    return await this.authService.requestResetPassword(dto);
   }
-  //GOVNOKOD!!!!!!!!
-  // @UseGuards(JwtAuthGuard)
-  @Post('/new-otp')
-  async getNewOtp(@Body() newOtpDto: NewOtpDto) {
-    return await this.authService.getNewOtp(newOtpDto);
+
+  @Post('/renew-otp')
+  async renewOtp(@Body() dto: NewOtpDto) {
+    return await this.authService.renewOtp(dto);
+  }
+
+  @Post('/check-email')
+  async checkUserEmail(@Body() dto: CheckUserEmailDto) {
+    return await this.authService.checkUserEmail(dto);
+  }
+
+  @Post('/confirm-reset-password')
+  async confirmResetPassword(@Body() dto: ConfirmResetPasswordDto) {
+    return await this.authService.confirmResetPassword(dto);
   }
 }

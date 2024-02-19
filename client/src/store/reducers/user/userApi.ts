@@ -1,4 +1,3 @@
-import { OtpDataType } from '@/lib/enums/otp-data-type.enum';
 import { OtpType } from '@/lib/enums/otp-type.enum';
 import { User } from '@/lib/types/User/User.type';
 import { ValueOf } from '@/lib/types/types';
@@ -12,7 +11,25 @@ export type SignRequest = Pick<User, 'email'> & {
   password: string;
 };
 
-type ResetPasswordConfirmRequest = TokenResponse & {
+export type NewOtpRequestDto = {
+  userId?: string;
+  email?: string;
+  type: ValueOf<OtpType>;
+};
+
+export type ConfirmResetPasswordDto = {
+  type: ValueOf<OtpType>;
+  email: string;
+  password: string;
+  otp: string;
+};
+
+export type VerifyOtpRequestDto = Pick<NewOtpRequestDto, 'userId' | 'email'> & {
+  otp: string;
+  type: ValueOf<OtpType>;
+};
+
+export type ResetPasswordDto = Pick<User, 'email'> & {
   password: string;
 };
 
@@ -32,24 +49,18 @@ export const userApi = api.injectEndpoints({
         method: 'POST'
       })
     }),
-    // GOVNOCODE
-    resetPassword: builder.mutation<string, any>({
+    resetPassword: builder.mutation<string, ResetPasswordDto>({
       query: (body) => ({
         body,
         url: '/auth/reset-password',
         method: 'POST'
       })
     }),
-    validateResetPasswordToken: builder.query<string, { token: string }>({
-      query: ({ token }) => ({
-        url: `/auth/reset-password?token=${token}`
-      })
-    }),
-    resetPasswordConfirm: builder.mutation<string, ResetPasswordConfirmRequest>({
+    validateResetPasswordToken: builder.mutation<string, { token: string }>({
       query: (body) => ({
+        method: 'POST',
         body,
-        url: `/auth/reset-password/confirm`,
-        method: 'POST'
+        url: `/auth/verify-otp`
       })
     }),
     verifyOtp: builder.mutation<string, VerifyOtpRequestDto>({
@@ -62,19 +73,30 @@ export const userApi = api.injectEndpoints({
     newOtp: builder.mutation<string, NewOtpRequestDto>({
       query: (body) => ({
         body,
-        url: '/auth/new-otp',
+        url: '/auth/renew-otp',
+        method: 'POST'
+      })
+    }),
+    requestResetPassword: builder.mutation<undefined, NewOtpRequestDto>({
+      query: (body) => ({
+        body,
+        url: '/auth/request-reset-password',
+        method: 'POST'
+      })
+    }),
+    checkUserEmail: builder.mutation<boolean, Pick<User, 'email'>>({
+      query: (body) => ({
+        body,
+        url: '/auth/check-email',
+        method: 'POST'
+      })
+    }),
+    confirmResetPassword: builder.mutation<undefined, ConfirmResetPasswordDto>({
+      query: (body) => ({
+        body,
+        url: '/auth/confirm-reset-password',
         method: 'POST'
       })
     })
   })
 });
-
-export type NewOtpRequestDto = {
-  userData: User['email'];
-  dataType: ValueOf<OtpDataType>;
-  type: ValueOf<OtpType>;
-};
-
-export type VerifyOtpRequestDto = Pick<NewOtpRequestDto, 'userData' | 'dataType'> & {
-  otp: string;
-};

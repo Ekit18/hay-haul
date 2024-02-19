@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { OtpType } from '@/lib/enums/otp-type.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { User } from '@/lib/types/User/User.type';
@@ -27,7 +28,7 @@ export function OtpForm({ onSetIsSuccess }: Properties) {
 
   const onSubmit: SubmitHandler<OtpFormValues> = async (data) => {
     console.log(user);
-    await verifyOtp({ otp: data.otpValue, dataType: 'userId', userData: user.id })
+    await verifyOtp({ otp: data.otpValue, userId: user.id, type: OtpType.REGISTER })
       .unwrap()
 
       .then(() => onSetIsSuccess(true))
@@ -35,7 +36,7 @@ export function OtpForm({ onSetIsSuccess }: Properties) {
   };
 
   const handleNewOtp = async () => {
-    await newOtp({ userData: user.id, dataType: 'userId', type: 'REGISTER' }).unwrap().catch(handleRtkError);
+    await newOtp({ userId: user.id, type: OtpType.REGISTER }).unwrap().catch(handleRtkError);
   };
 
   return (
