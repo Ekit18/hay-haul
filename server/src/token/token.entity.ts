@@ -12,10 +12,13 @@ export class Token {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  userId: string;
+
   @OneToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn()
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
+  @Column({ type: 'varchar', length: 1000 })
   refreshToken: string;
 }

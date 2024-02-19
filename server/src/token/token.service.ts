@@ -54,7 +54,11 @@ export class TokenService {
 
   public async generateTokens(user: User): Promise<Tokens> {
     try {
-      const payload = { email: user.email, id: user.id };
+      const payload = {
+        email: user.email,
+        id: user.id,
+        isVerified: user.isVerified,
+      };
 
       const accessToken = this.jwtService.sign(payload, {
         expiresIn: this.jwtAccessTokenExpire,
@@ -64,6 +68,17 @@ export class TokenService {
         expiresIn: this.jwtRefreshTokenExpire,
         secret: this.jwtRefreshTokenSecret,
       });
+
+      console.log(
+        user.token?.id
+          ? {
+              id: user.token.id,
+              userId: user.id,
+              role: user.role,
+              refreshToken,
+            }
+          : { userId: user.id, role: user.role, refreshToken },
+      );
 
       await this.tokenRepository.save(
         user.token?.id
@@ -77,6 +92,7 @@ export class TokenService {
       );
       return { refreshToken, accessToken };
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         TokenErrorMessage.FailedToGenerateTokens,
         HttpStatus.BAD_REQUEST,

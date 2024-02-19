@@ -1,6 +1,6 @@
 import { StepItem, Stepper, validateStepFields } from '@/components/stepper/stepper';
 import { Form } from '@/components/ui/form';
-import { OTP_CONFIRM } from '@/lib/constants/routes';
+import { OTP_CONFIRM, SIGN_IN } from '@/lib/constants/routes';
 import { RegisterableRoles, UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppDispatch } from '@/lib/hooks/redux';
@@ -88,11 +88,21 @@ export function SignUpForm() {
       .catch(handleRtkError);
   };
 
+  const onBackClick = () => {
+    navigate(SIGN_IN);
+  };
+
   return (
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="gap-6 mt-6 flex flex-col">
-          <Stepper steps={steps} form={form} onSubmit={onSubmit} submitButtonText="Register" />
+          <Stepper
+            steps={steps}
+            form={form}
+            onSubmit={onSubmit}
+            submitButtonText="Register"
+            onBackClick={onBackClick}
+          />
         </form>
       </Form>
     </>

@@ -34,8 +34,9 @@ export class AuthController {
   }
 
   @Post('/verify-otp')
-  async verifyOtp(@Body() otpDto: SendOtpDto) {
-    return await this.authService.verifyOtp(otpDto);
+  async verifyOtp(@Body() otpDto: SendOtpDto, @Res() response: Response) {
+    const data = await this.authService.verifyOtp(otpDto, response);
+    response.json(data);
   }
 
   @Post('/request-reset-password')

@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FacilityDetailsController } from './facility-details.controller';
 import { FacilityDetails } from './facility-details.entity';
 import { FacilityDetailsService } from './facility-details.service';
+import { FacilityDetailsController } from './facility-details.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([FacilityDetails])],

@@ -111,11 +111,21 @@ export function ResetPasswordForm() {
       .catch(handleRtkError);
   };
 
+  const onBackClick = () => {
+    navigate(SIGN_IN);
+  };
+
   return (
     <>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="gap-6 mt-6 flex flex-col">
-          <Stepper steps={steps} form={form} onSubmit={onSubmit} submitButtonText="Reset password" />
+          <Stepper
+            steps={steps}
+            form={form}
+            onSubmit={onSubmit}
+            submitButtonText="Reset password"
+            onBackClick={onBackClick}
+          />
         </form>
       </Form>
     </>

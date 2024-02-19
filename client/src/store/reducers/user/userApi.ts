@@ -63,7 +63,7 @@ export const userApi = api.injectEndpoints({
         url: `/auth/verify-otp`
       })
     }),
-    verifyOtp: builder.mutation<string, VerifyOtpRequestDto>({
+    verifyOtp: builder.mutation<TokenResponse | undefined, VerifyOtpRequestDto>({
       query: (body) => ({
         body,
         url: '/auth/verify-otp',

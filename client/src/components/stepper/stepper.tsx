@@ -16,6 +16,7 @@ interface StepperProps<T extends FieldValues> {
   form: UseFormReturn<T, unknown, T>;
   onSubmit: SubmitHandler<T>;
   submitButtonText: string;
+  onBackClick: () => void;
 }
 
 export const validateStepFields = async <T extends FieldValues>(
@@ -29,13 +30,20 @@ export const validateStepFields = async <T extends FieldValues>(
   return !(Object.keys(form.formState.errors).length > 0);
 };
 
-export function Stepper<T extends FieldValues>({ steps, form, onSubmit, submitButtonText }: StepperProps<T>) {
+export function Stepper<T extends FieldValues>({
+  steps,
+  form,
+  onSubmit,
+  submitButtonText,
+  onBackClick
+}: StepperProps<T>) {
   const [currentStep, setCurrentStep] = useState(1);
   const [complete, setComplete] = useState(false);
 
   const currentStepItem = steps[currentStep - 1];
 
   const handleBackClick = () => {
+    if (currentStep === 1) return onBackClick();
     setCurrentStep((prev) => prev - 1);
   };
 
@@ -87,13 +95,7 @@ export function Stepper<T extends FieldValues>({ steps, form, onSubmit, submitBu
       <div className="mt-4 w-full h-full">{currentStepItem.stepComponent}</div>
       {!complete && (
         <div className="flex w-full flex-row justify-center gap-4">
-          <Button
-            type="button"
-            size="sm"
-            className={cn('w-full mt-4', currentStep === 1 && 'bg-gray-500')}
-            disabled={currentStep === 1}
-            onClick={handleBackClick}
-          >
+          <Button type="button" size="sm" className="w-full mt-4" onClick={handleBackClick}>
             Back
           </Button>
           <Button

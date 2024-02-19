@@ -2,10 +2,14 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { OtpType } from '@/lib/enums/otp-type.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
-import { useAppSelector } from '@/lib/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/lib/hooks/redux';
 import { User } from '@/lib/types/User/User.type';
+import { setAccessToken } from '@/store/reducers/token/tokenSlice';
 import { userApi } from '@/store/reducers/user/userApi';
+import { setUser } from '@/store/reducers/user/userSlice';
 import { yupResolver } from '@hookform/resolvers/yup';
+// eslint-disable-next-line camelcase
+import jwt_decode from 'jwt-decode';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import OtpInput from 'react-otp-input';
 import { OtpFormValues, otpDefaultValues, useOtpFormSchema } from './validation';
@@ -15,7 +19,13 @@ type Properties = {
 };
 
 export function OtpForm({ onSetIsSuccess }: Properties) {
+  const dispatch = useAppDispatch();
+
   const user = useAppSelector((state) => state.userReducer.user as User);
+
+  const [verifyOtp] = userApi.useVerifyOtpMutation();
+  const [newOtp] = userApi.useNewOtpMutation();
+
   const otpFormSchema = useOtpFormSchema();
   const form = useForm<OtpFormValues>({
     mode: 'onBlur',
@@ -23,15 +33,19 @@ export function OtpForm({ onSetIsSuccess }: Properties) {
     resolver: yupResolver(otpFormSchema)
   });
 
-  const [verifyOtp] = userApi.useVerifyOtpMutation();
-  const [newOtp] = userApi.useNewOtpMutation();
-
   const onSubmit: SubmitHandler<OtpFormValues> = async (data) => {
-    console.log(user);
     await verifyOtp({ otp: data.otpValue, userId: user.id, type: OtpType.REGISTER })
       .unwrap()
+      .then((data) => {
+        if (!data) return;
+        const { accessToken } = data;
+        const user = jwt_decode<User>(accessToken);
 
-      .then(() => onSetIsSuccess(true))
+        dispatch(setUser(user));
+
+        dispatch(setAccessToken(accessToken));
+        onSetIsSuccess(true);
+      })
       .catch(handleRtkError);
   };
 

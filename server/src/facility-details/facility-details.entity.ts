@@ -23,15 +23,15 @@ export class FacilityDetails {
   @Column()
   code: string;
 
+  @ManyToOne(() => User, (user) => user.facilityDetails)
+  user: User;
+
   @OneToMany(
     () => ProductType,
     (productTypes) => productTypes.facilityDetails,
     { cascade: true },
   )
   productTypes: ProductType[];
-
-  @ManyToOne(() => User, (user) => user.facilityDetails)
-  user: User;
 
   @OneToMany(() => Products, (products) => products.facility)
   products: Products[];

@@ -52,9 +52,12 @@ export class AuthService {
   async login(userDto: Login, response: Response) {
     try {
       const user = await this.validateRegularUser(userDto);
+
       const { refreshToken, accessToken } =
         await this.tokenService.generateTokens(user);
+
       response.cookie('refreshToken', refreshToken);
+
       return { accessToken };
     } catch (error) {
       throw new HttpException(
@@ -131,9 +134,9 @@ export class AuthService {
 
       const facilityDetails = await this.facilityDetailsService.create(
         {
-          facilityAddress: registerUserDto.facilityAddress,
-          facilityName: registerUserDto.facilityName,
-          facilityOfficialCode: registerUserDto.facilityOfficialCode,
+          address: registerUserDto.facilityAddress,
+          name: registerUserDto.facilityName,
+          code: registerUserDto.facilityOfficialCode,
         },
         user,
       );
@@ -248,7 +251,7 @@ export class AuthService {
     });
   }
 
-  async verifyOtp(verifyOtpDto: SendOtpDto) {
+  async verifyOtp(verifyOtpDto: SendOtpDto, response: Response) {
     try {
       const userId = await this.getUserIdFromDto(verifyOtpDto);
       console.log('userId', userId);
@@ -284,6 +287,12 @@ export class AuthService {
           .execute();
 
         await this.userService.update(otpFromDb.userId, { isVerified: true });
+
+        const user = await this.userService.getUserById(otpFromDb.userId);
+
+        const newTokens = await this.tokenService.generateTokens(user);
+        response.cookie('refreshToken', newTokens.refreshToken);
+        return { accessToken: newTokens.accessToken };
       }
     } catch (error) {
       throw new HttpException(
