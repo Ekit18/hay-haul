@@ -13,7 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "mocha --delay --exit --require ts-node/register --require tsconfig-paths/register src/test/test.entrypoint.ts",
+    "test": "mocha --reporter mocha-junit-reporter --delay --exit --require ts-node/register --require tsconfig-paths/register src/test/test.entrypoint.ts",
     "test:watch": "mocha --delay --exit --require ts-node/register --watch --watch-files src/*.ts --require tsconfig-paths/register src/test/test.entrypoint.ts",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
