@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="0.025" tests="1" failures="0">
+  <testsuite name="Root Suite" timestamp="2024-02-20T19:47:03" tests="0" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="TokenService" timestamp="2024-02-20T19:47:03" tests="1" file="C:\cod\hay-haul\server\src\test\test.entrypoint.ts" time="0.004" failures="0">
+    <testcase name="TokenService Get Test WORKDSDSADASDAS" time="0.001" classname="Get Test WORKDSDSADASDAS">
+    </testcase>
+  </testsuite>
+</testsuites>

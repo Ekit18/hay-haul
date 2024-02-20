@@ -9,7 +9,7 @@ import { FacilityDetailsModule } from './facility-details/facility-details.modul
 import { ProductType } from './product-type/product-type.entity';
 import { ProductTypeModule } from './product-type/product-type.module';
 import { Product } from './product/product.entity';
-import { ProductsModule } from './product/product.module';
+import { ProductModule } from './product/product.module';
 import { Token } from './token/token.entity';
 import { TokenModule } from './token/token.module';
 import { User } from './user/user.entity';
@@ -41,7 +41,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     UserModule,
     EmailModule,
-    ProductsModule,
+    ProductModule,
     FacilityDetailsModule,
     ProductTypeModule,
   ],
