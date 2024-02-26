@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
-import { MAIN_ROUTE } from '@/lib/constants/routes';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppDispatch } from '@/lib/hooks/redux';
 import { User } from '@/lib/types/User/User.type';
@@ -14,6 +13,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { SignInFormValues, defaultSignInFormValues, useSignInFormSchema } from './validation';
 // eslint-disable-next-line camelcase
+import { AppRoute } from '@/lib/constants/routes';
 import jwt_decode from 'jwt-decode';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +41,7 @@ export function SignInForm() {
 
         dispatch(setAccessToken(accessToken));
       })
-      .then(() => navigate(MAIN_ROUTE))
+      .then(() => navigate(AppRoute.General.Main))
       .catch(handleRtkError);
   };
 

@@ -80,6 +80,7 @@ export class UserService {
       const user = await this.userRepository
         .createQueryBuilder('user')
         .where('user.email = :email', { email })
+        .leftJoinAndSelect('user.token', 'token')
         .getOne();
 
       return user;

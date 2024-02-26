@@ -292,6 +292,7 @@ export class AuthService {
 
         const newTokens = await this.tokenService.generateTokens(user);
         response.cookie('refreshToken', newTokens.refreshToken);
+
         return { accessToken: newTokens.accessToken };
       }
     } catch (error) {

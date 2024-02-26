@@ -1,6 +1,6 @@
 import { StepItem, Stepper, validateStepFields } from '@/components/stepper/stepper';
 import { Form } from '@/components/ui/form';
-import { OTP_CONFIRM, SIGN_IN } from '@/lib/constants/routes';
+import { AppRoute } from '@/lib/constants/routes';
 import { RegisterableRoles, UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppDispatch } from '@/lib/hooks/redux';
@@ -84,12 +84,12 @@ export function SignUpForm() {
 
         dispatch(setAccessToken(accessToken));
       })
-      .then(() => navigate(OTP_CONFIRM))
+      .then(() => navigate(AppRoute.General.OtpConfirm))
       .catch(handleRtkError);
   };
 
   const onBackClick = () => {
-    navigate(SIGN_IN);
+    navigate(AppRoute.General.SignIn);
   };
 
   return (

@@ -1,6 +1,6 @@
 import { StepItem, Stepper, validateStepFields } from '@/components/stepper/stepper';
 import { Form } from '@/components/ui/form';
-import { SIGN_IN } from '@/lib/constants/routes';
+import { AppRoute } from '@/lib/constants/routes';
 import { OtpType } from '@/lib/enums/otp-type.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { userApi } from '@/store/reducers/user/userApi';
@@ -106,13 +106,13 @@ export function ResetPasswordForm() {
     })
       .unwrap()
       .then(() => {
-        navigate(SIGN_IN);
+        navigate(AppRoute.General.SignIn);
       })
       .catch(handleRtkError);
   };
 
   const onBackClick = () => {
-    navigate(SIGN_IN);
+    navigate(AppRoute.General.SignIn);
   };
 
   return (

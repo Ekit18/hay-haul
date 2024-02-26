@@ -59,6 +59,8 @@ export class TokenService {
         email: user.email,
         id: user.id,
         isVerified: user.isVerified,
+        name: user.fullName,
+        role: user.role,
       };
 
       const accessToken = this.jwtService.sign(payload, {
@@ -70,30 +72,18 @@ export class TokenService {
         secret: this.jwtRefreshTokenSecret,
       });
 
-      console.log(
-        user.token?.id
-          ? {
-              id: user.token.id,
-              userId: user.id,
-              role: user.role,
-              refreshToken,
-            }
-          : { userId: user.id, role: user.role, refreshToken },
-      );
-
       await this.tokenRepository.save(
         user.token?.id
           ? {
               id: user.token.id,
               userId: user.id,
-              role: user.role,
               refreshToken,
             }
-          : { userId: user.id, role: user.role, refreshToken },
+          : { userId: user.id, refreshToken },
       );
+
       return { refreshToken, accessToken };
     } catch (error) {
-      console.log(error);
       throw new HttpException(
         TokenErrorMessage.FailedToGenerateTokens,
         HttpStatus.BAD_REQUEST,

@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { MAIN_ROUTE } from '@/lib/constants/routes';
+import { AppRoute } from '@/lib/constants/routes';
 import { useNavigate } from 'react-router-dom';
 
 export function OtpSuccess() {
   const navigate = useNavigate();
   const handleNavigateToProfile = () => {
-    navigate(MAIN_ROUTE);
+    navigate(AppRoute.General.Main);
   };
 
   return (
