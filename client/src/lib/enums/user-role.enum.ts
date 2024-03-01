@@ -1,5 +1,3 @@
-import { ValueOf } from '../types/types';
-
 export enum UserRole {
   Businessman = 'Businessman',
   Carrier = 'Carrier',
@@ -7,4 +5,4 @@ export enum UserRole {
   Farmer = 'Farmer'
 }
 
-export type RegisterableRoles = Exclude<ValueOf<UserRole>, UserRole.Driver>;
+export type RegisterableRoles = Exclude<UserRole, UserRole.Driver>;

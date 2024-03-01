@@ -5,7 +5,7 @@ export type FacilityDetails = {
   name: string;
   address: string;
   code: string;
-  productTypes: ProductType[];
   createdAt: string;
   updatedAt: string;
+  productTypes?: ProductType[];
 };

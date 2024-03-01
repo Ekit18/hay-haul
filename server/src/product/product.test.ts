@@ -32,27 +32,6 @@ export class ProductServiceTest {
     chai.spy.restore();
   }
 
-  @Test('should throw an error if facilityId is not provided')
-  async throwFacilityIdError() {
-    try {
-      await this.productService.findAllByFacility({}, null);
-    } catch (err) {
-      chai.expect(err).to.exist;
-    }
-  }
-
-  @Test('should handle error from createQueryBuilder')
-  async createError() {
-    this.productRepository.createQueryBuilder = () => {
-      throw new Error('Error');
-    };
-    try {
-      await this.productService.findAllByFacility({}, 'facilityId');
-    } catch (err) {
-      chai.expect(err).to.exist;
-    }
-  }
-
   @Test('should call findOne with correct parameters')
   async findOne() {
     chai.spy.on(this.productRepository, 'findOne', () => Promise.resolve({}));

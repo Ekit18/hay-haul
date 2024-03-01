@@ -4,7 +4,7 @@ import storage from 'redux-persist/lib/storage';
 import { api } from './api';
 import tokenReducer from './reducers/token/tokenSlice';
 import { userApi } from './reducers/user/userApi';
-import userReducer from './reducers/user/userSlice';
+import { userSlice } from './reducers/user/userSlice';
 
 const persistAccessTokenConfig = {
   key: 'accessToken',
@@ -19,7 +19,7 @@ export const rootReducer = combineReducers({
   // teacherReducer,
   // productReducer,
   // cartReducer,
-  userReducer,
+  [userSlice.reducerPath]: userSlice.reducer,
   // productReducer
   // checkOutReducer,
   // eslint-disable-next-line no-use-before-define

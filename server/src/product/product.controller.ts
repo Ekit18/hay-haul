@@ -16,9 +16,9 @@ import { AllowedRoles } from 'src/lib/decorators/roles-auth.decorator';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { UserRole } from 'src/user/user.entity';
 import { CreateProductDto } from './dto/create-product.dto';
+import { ProductQueryDto } from './dto/product-query.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductService } from './product.service';
-import { ProductQuery } from './types/product-query.type';
 
 @UseGuards(JwtAuthGuard)
 @AllowedRoles(UserRole.Farmer)
@@ -26,12 +26,12 @@ import { ProductQuery } from './types/product-query.type';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Get('/facility/:facilityId')
-  async findAll(
-    @Query() query: ProductQuery,
-    @Param('facilityId', ParseUUIDPipe) facilityId: string,
+  @Get('/filter')
+  async filter(
+    @Query() query: ProductQueryDto,
+    @Req() request: AuthenticatedRequest,
   ) {
-    return this.productService.findAllByFacility(query, facilityId);
+    return this.productService.filterAll(query, request);
   }
 
   @Get(':id')

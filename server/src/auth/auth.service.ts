@@ -21,6 +21,7 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { AuthErrorMessage } from './auth-error-message.enum';
+import { ONE_DAY_IN_MILLISECONDS } from './constants/cookie.constants';
 import { CheckUserEmailDto } from './dto/check-user-email.dto';
 import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
 import { Login } from './dto/login.dto';
@@ -37,6 +38,10 @@ export class AuthService {
 
   private readonly updatePasswordOtpTemplateId = this.configService.get<string>(
     'SENDGRID_UPDATE_USER_PASSWORD_OTP_TEMPLATE_ID',
+  );
+
+  private readonly jwtRefreshTokenExpire = this.configService.get<string>(
+    'JWT_REFRESH_TOKEN_EXPIRE',
   );
 
   constructor(
@@ -56,7 +61,23 @@ export class AuthService {
       const { refreshToken, accessToken } =
         await this.tokenService.generateTokens(user);
 
-      response.cookie('refreshToken', refreshToken);
+      response.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        expires: new Date(
+          Date.now() +
+            Number(
+              this.jwtRefreshTokenExpire.replace(
+                this.jwtRefreshTokenExpire[
+                  this.jwtRefreshTokenExpire.length - 1
+                ],
+                '',
+              ),
+            ) *
+              ONE_DAY_IN_MILLISECONDS,
+        ),
+      });
 
       return { accessToken };
     } catch (error) {
@@ -69,7 +90,7 @@ export class AuthService {
 
   async refresh(request: Request, response: Response) {
     try {
-      const refreshToken = request.cookies['refreshToken'];
+      const refreshToken: string = request.cookies['refreshToken'];
 
       if (!refreshToken) {
         throw new UnauthorizedException({
@@ -86,7 +107,7 @@ export class AuthService {
         userData.id,
       );
 
-      if (tokenFromDb !== refreshToken) {
+      if (tokenFromDb.refreshToken !== refreshToken) {
         throw new UnauthorizedException({
           message: AuthErrorMessage.InvalidRefreshToken,
         });
@@ -97,7 +118,25 @@ export class AuthService {
       const { accessToken, refreshToken: newRefreshToken } =
         await this.tokenService.generateTokens(user);
 
-      response.cookie('refreshToken', newRefreshToken);
+      // GOVNOCODE
+      response.cookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        expires: new Date(
+          Date.now() +
+            Number(
+              this.jwtRefreshTokenExpire.replace(
+                this.jwtRefreshTokenExpire[
+                  this.jwtRefreshTokenExpire.length - 1
+                ],
+                '',
+              ),
+            ) *
+              ONE_DAY_IN_MILLISECONDS,
+        ),
+      });
+
       return { accessToken };
     } catch (error) {
       throw new HttpException(
@@ -152,7 +191,24 @@ export class AuthService {
       const { refreshToken, accessToken } =
         await this.tokenService.generateTokens(user);
 
-      response.cookie('refreshToken', refreshToken);
+      response.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        expires: new Date(
+          Date.now() +
+            Number(
+              this.jwtRefreshTokenExpire.replace(
+                this.jwtRefreshTokenExpire[
+                  this.jwtRefreshTokenExpire.length - 1
+                ],
+                '',
+              ),
+            ) *
+              ONE_DAY_IN_MILLISECONDS,
+        ),
+      });
+
       const otp = generateOtpCode();
       console.log('otp', otp);
       await this.otpRepository.save({
@@ -200,13 +256,13 @@ export class AuthService {
       type: requestResetPasswordDto.type,
     });
 
-    // await this.emailService.sendEmail({
-    //   to: user.email,
-    //   templateId: this.updatePasswordOtpTemplateId,
-    //   dynamicTemplateData: {
-    //     otpCode: otp,
-    //   },
-    // });
+    await this.emailService.sendEmail({
+      to: user.email,
+      templateId: this.updatePasswordOtpTemplateId,
+      dynamicTemplateData: {
+        otpCode: otp,
+      },
+    });
   }
 
   public async confirmResetPassword(
@@ -291,7 +347,24 @@ export class AuthService {
         const user = await this.userService.getUserById(otpFromDb.userId);
 
         const newTokens = await this.tokenService.generateTokens(user);
-        response.cookie('refreshToken', newTokens.refreshToken);
+
+        response.cookie('refreshToken', newTokens.refreshToken, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+          expires: new Date(
+            Date.now() +
+              Number(
+                this.jwtRefreshTokenExpire.replace(
+                  this.jwtRefreshTokenExpire[
+                    this.jwtRefreshTokenExpire.length - 1
+                  ],
+                  '',
+                ),
+              ) *
+                ONE_DAY_IN_MILLISECONDS,
+          ),
+        });
 
         return { accessToken: newTokens.accessToken };
       }

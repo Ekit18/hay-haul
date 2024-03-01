@@ -5,4 +5,5 @@ export type User = {
   email: string;
   name: string;
   role: UserRole;
+  isVerified: boolean;
 };

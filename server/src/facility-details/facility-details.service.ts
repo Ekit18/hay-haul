@@ -48,22 +48,28 @@ export class FacilityDetailsService {
     }
   }
 
-  public getAllByUserId(userId: string): Promise<FacilityDetails> {
+  public getAllByUserId(userId: string): Promise<FacilityDetails[]> {
     try {
-      return this.facilityDetailsRepository
-        .createQueryBuilder('facilityDetails')
-        .select()
-        .leftJoinAndSelect('facilityDetails.user', 'user')
-        .where('facilityDetails.user.id = :userId', { userId })
-        .getOne();
+      return (
+        this.facilityDetailsRepository
+          .createQueryBuilder('facilityDetails')
+          .select()
+          // .leftJoinAndSelect('facilityDetails.user', 'user')
+          .where('facilityDetails.user.id = :userId', { userId })
+          .leftJoinAndSelect('facilityDetails.productTypes', 'productTypes')
+          .getMany()
+      );
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
-  public getOneById(id: string): Promise<FacilityDetails> {
+  public async getOneById(id: string): Promise<FacilityDetails> {
     try {
-      return this.facilityDetailsRepository.findOneBy({ id });
+      return this.facilityDetailsRepository.findOne({
+        where: { id },
+        relations: { productTypes: true },
+      });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

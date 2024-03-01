@@ -21,7 +21,7 @@ type Properties = {
 export function OtpForm({ onSetIsSuccess }: Properties) {
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector((state) => state.userReducer.user as User);
+  const user = useAppSelector((state) => state.user.user as User);
 
   const [verifyOtp] = userApi.useVerifyOtpMutation();
   const [newOtp] = userApi.useNewOtpMutation();

@@ -1,3 +1,3 @@
-export function Auction() {
+export function FarmerAuction() {
   return <div>Auction</div>;
 }

@@ -13,7 +13,10 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/login')
-  async login(@Body() userDto: Login, @Res() response: Response) {
+  async login(
+    @Body() userDto: Login,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const data = await this.authService.login(userDto, response);
     response.json(data);
   }
@@ -21,20 +24,26 @@ export class AuthController {
   @Post('/registration')
   async registration(
     @Body() userDto: RegisterUserDto,
-    @Res() response: Response,
+    @Res({ passthrough: true }) response: Response,
   ) {
     const data = await this.authService.registration(userDto, response);
     response.json(data);
   }
 
   @Post('/refresh')
-  async refresh(@Req() request: Request, @Res() response: Response) {
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const data = await this.authService.refresh(request, response);
     response.json(data);
   }
 
   @Post('/verify-otp')
-  async verifyOtp(@Body() otpDto: SendOtpDto, @Res() response: Response) {
+  async verifyOtp(
+    @Body() otpDto: SendOtpDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const data = await this.authService.verifyOtp(otpDto, response);
     response.json(data);
   }

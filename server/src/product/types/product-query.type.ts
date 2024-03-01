@@ -3,6 +3,10 @@ import { SortOrder } from 'src/lib/enums/enums';
 export type ProductQuery = {
   limit?: number;
   offset?: number;
-  search?: string;
   sort?: SortOrder;
+  searchQuery?: string;
+  farmId?: string;
+  productTypeId?: string[];
+  minQuantity?: number;
+  maxQuantity?: number;
 };
