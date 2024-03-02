@@ -18,10 +18,6 @@ export function ProductsFilter() {
     setFilterOpen((prev) => !prev);
   };
 
-  const handleCreateProductClick = () => {
-    console.log('create product');
-  };
-
   return (
     <>
       <div className="flex flex-row justify-between">
@@ -42,12 +38,14 @@ export function ProductsFilter() {
         <Button onClick={handleFilterOpenToggle} className="flex gap-1 ml-4" type="button">
           <Filter size={20} /> Filter <ChevronDown className={cn('h-4 w-4 shrink-0 ', filterOpen && 'rotate-180')} />
         </Button>
-        {/* <Button onClick={handleCreateProductClick} className="flex gap-1 ml-auto" type="submit">
-          <Plus size={20} /> Create Product
-        </Button> */}
         <CreateProductModal />
       </div>
       <div className="">{filterOpen && <ProductFilterForm />}</div>
+      <div className="flex justify-end mt-6">
+        <Button className="px-16" type="submit">
+          Search
+        </Button>
+      </div>
     </>
   );
 }

@@ -14,7 +14,15 @@ export function FacilityForm() {
   return (
     <div className="w-full h-full gap-4 flex flex-col">
       {selectedRole === UserRole.Farmer && (
-        <TagInput name="farmProductTypes" control={control} suggestions={farmProductTypesSuggestions} />
+        <TagInput
+          name="farmProductTypes"
+          control={control}
+          suggestions={farmProductTypesSuggestions}
+          labelText="Select farm products"
+          noOptionsText="No matching products"
+          allowNew
+          selectedFn={(item) => ({ value: item, label: item })}
+        />
       )}
 
       <FormField

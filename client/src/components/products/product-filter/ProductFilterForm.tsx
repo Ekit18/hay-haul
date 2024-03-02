@@ -1,11 +1,10 @@
+import { TagInput } from '@/components/tag-input/TagInput';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppSelector } from '@/lib/hooks/redux';
-import { cn } from '@/lib/utils';
 import { facilityDetailsApi } from '@/store/reducers/facility-details/facilityDetailsApi';
 import { useFormContext } from 'react-hook-form';
-import { ReactTags } from 'react-tag-autocomplete';
 import { ProductFilterFormValues } from './validation';
 
 export function ProductFilterForm() {
@@ -54,7 +53,23 @@ export function ProductFilterForm() {
           )}
         />
 
-        <FormField
+        <TagInput
+          labelText="Select farm products"
+          control={control}
+          noOptionsText="No matching products"
+          name="productTypeId"
+          disabled={!farms?.length || !farmId}
+          suggestions={productTypesByFarmId.map((productType) => ({
+            label: productType.name,
+            value: productType.id
+          }))}
+          selectedFn={(item: string) => ({
+            label: productTypesByFarmId.find((product) => product.id === item)?.name as string,
+            value: item
+          })}
+        />
+
+        {/* <FormField
           control={control}
           name="productTypeId"
           render={({ field, fieldState }) => (
@@ -115,7 +130,7 @@ export function ProductFilterForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <div className="flex flex-col w-full">
           <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">

@@ -29,7 +29,7 @@ export class ProductQueryDto {
   @IsArray()
   @IsString({ each: true })
   @Type(() => String)
-  @Transform(({ value }) => value.split(','))
+  @Transform(({ value }) => (value ? value.split(',') : []))
   productTypeId?: string[];
 
   @IsNumber()

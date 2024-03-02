@@ -39,7 +39,7 @@ export function DeleteModal({ open, handleOpenChange, name, deleteCallback, enti
   const deleteFormSchema = useDeleteFormSchema();
 
   const form = useForm<DeleteFormValues>({
-    mode: 'onBlur',
+    mode: 'onSubmit',
     defaultValues: deleteDefaultValues,
     values: { confirmName: '', originalName: name },
     resolver: yupResolver(deleteFormSchema)
@@ -48,9 +48,6 @@ export function DeleteModal({ open, handleOpenChange, name, deleteCallback, enti
   const onSubmit: SubmitHandler<DeleteFormValues> = async () => deleteCallback();
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      {/* <DialogTrigger asChild>
-        <DropdownMenuItem>Delete {entityTitle.toLocaleLowerCase()}</DropdownMenuItem>
-      </DialogTrigger> */}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Delete {entityTitle.toLocaleLowerCase()}</DialogTitle>
@@ -80,8 +77,8 @@ export function DeleteModal({ open, handleOpenChange, name, deleteCallback, enti
               </div>
             </div>
             <DialogFooter className="flex justify-end w-full">
-              <Button type="button" onClick={form.handleSubmit(onSubmit)} className="px-10">
-                Confirm
+              <Button type="button" onClick={form.handleSubmit(onSubmit)} variant="destructive" className="px-10">
+                Delete
               </Button>
             </DialogFooter>
           </div>

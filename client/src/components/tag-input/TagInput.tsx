@@ -2,7 +2,7 @@ import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/f
 import { ArrayFields } from '@/lib/types/types';
 import { cn } from '@/lib/utils';
 import { Control, FieldValues, Path } from 'react-hook-form';
-import { ReactTags, TagSuggestion } from 'react-tag-autocomplete';
+import { ReactTags, Tag, TagSuggestion } from 'react-tag-autocomplete';
 import style from './styles.module.css';
 
 interface TagInputProps<T extends FieldValues> {
@@ -11,16 +11,20 @@ interface TagInputProps<T extends FieldValues> {
   control: Control<T, unknown, T>;
   noOptionsText: string;
   labelText: string;
-  allowNew: boolean;
+  allowNew?: boolean;
+  disabled?: boolean;
+  selectedFn: (item: string) => Tag;
 }
 
 export function TagInput<T extends FieldValues>({
   suggestions,
   name,
   control,
-  allowNew,
+  allowNew = false,
+  disabled = false,
   labelText,
-  noOptionsText
+  noOptionsText,
+  selectedFn
 }: TagInputProps<T>) {
   return (
     <>
@@ -31,6 +35,7 @@ export function TagInput<T extends FieldValues>({
           <FormItem className="w-full">
             <FormControl>
               <ReactTags
+                isDisabled={disabled}
                 classNames={{
                   root: 'relative mt-8 min-h-10 cursor-text flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ',
                   rootIsActive: 'outline-none ring-2 ring-ring ring-offset-2',
@@ -58,7 +63,7 @@ export function TagInput<T extends FieldValues>({
                 }}
                 labelText={labelText}
                 isInvalid={fieldState.invalid}
-                selected={(field.value as string[]).map((item) => ({ label: item, value: item })) || []}
+                selected={(field.value as string[]).map(selectedFn) || []}
                 suggestions={suggestions}
                 onAdd={(tag) => {
                   const value = field.value || [];

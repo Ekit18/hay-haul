@@ -15,8 +15,11 @@ export interface ProductsTableProps {
 export function ProductsTable({ data }: ProductsTableProps) {
   const { handleDeleteModalOpenChange, isDeleteModalOpen, deleteCallback, deleteModalConfirmName } =
     useDeleteModalCurrentProduct();
+
   const { handleUpdateModalOpenChange, isUpdateModalOpen, updateCallback } = useUpdateModalCurrentProduct();
+
   const { currentProduct } = useCurrentProductContext();
+
   return (
     <>
       <DataTable columns={columns} data={data?.data || []} pageCount={data?.count} />

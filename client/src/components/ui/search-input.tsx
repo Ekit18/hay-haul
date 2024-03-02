@@ -38,9 +38,9 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({ className,
         value={value}
       />
       <Button
-        type="button"
+        type="submit"
         size="sm"
-        className="absolute right-0 top-0 rounded-l-none h-full px-3 py-2 hover:bg-transparent"
+        className="absolute right-0 top-0 rounded-l-none h-full px-3 py-2 "
         disabled={disabled}
       >
         <Search />

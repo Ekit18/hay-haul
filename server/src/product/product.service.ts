@@ -40,17 +40,19 @@ export class ProductService {
     try {
       const userId = request.user.id;
 
+      console.log();
+
       const queryBuilder = this.productRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .leftJoinAndSelect('product.productType', 'productType');
 
       if (farmId) {
-        queryBuilder.andWhere('product.facilityDetailsId', {
+        queryBuilder.where('product.facilityDetailsId = :facilityDetailsId', {
           facilityDetailsId: farmId,
         });
       } else {
-        queryBuilder.andWhere('facilityDetails.userId = :userId', {
+        queryBuilder.where('facilityDetails.userId = :userId', {
           userId,
         });
       }
@@ -61,10 +63,14 @@ export class ProductService {
         });
       }
 
-      if (productTypeId) {
-        queryBuilder.andWhere('product.productType.id = :productTypeId', {
-          productTypeId,
-        });
+      if (productTypeId && productTypeId.length > 0) {
+        console.log(productTypeId);
+        queryBuilder.andWhere(
+          'product.productType.id IN (:...productTypeIds)',
+          {
+            productTypeIds: productTypeId,
+          },
+        );
       }
 
       if (maxQuantity) {
@@ -78,16 +84,20 @@ export class ProductService {
         });
       }
 
+      console.log('limit', limit);
+      console.log('offset', offset);
       const [result, total] = await queryBuilder
         .take(limit)
         .skip(offset)
         .getManyAndCount();
+      const pageCount = Math.ceil(total / limit);
 
       return {
         data: result,
-        count: total,
+        count: pageCount,
       };
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         ProductErrorMessage.FailedFetchProducts,
         HttpStatus.INTERNAL_SERVER_ERROR,
