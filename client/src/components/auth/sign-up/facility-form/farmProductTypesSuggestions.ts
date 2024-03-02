@@ -1,4 +1,6 @@
-export const farmProductTypesSuggestions = [
+import { TagSuggestion } from 'react-tag-autocomplete';
+
+export const farmProductTypesSuggestions: TagSuggestion[] = [
   { label: 'Wheat', value: 'Wheat' },
   { label: 'Rice', value: 'Rice' },
   { label: 'Corn', value: 'Corn' },

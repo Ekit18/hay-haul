@@ -1,15 +1,42 @@
 import { Button } from '@/components/ui/button';
 import { Input, InputProps } from '@/components/ui/input';
+import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
 import { cn } from '@/lib/utils';
+import libraryDebounce from 'debounce';
 import { Search } from 'lucide-react';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 
-const SearchInput = forwardRef<HTMLInputElement, InputProps>(({ className, ...props }, ref) => {
+interface SearchInputProps extends Omit<InputProps, 'onChange'> {
+  onChange: (value: string) => void;
+}
+
+const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({ className, onChange, ...props }, ref) => {
   const disabled = props.value === '' || props.value === undefined || props.disabled;
+
+  const [value, setValue] = useState<string>('');
+
+  useEffect(() => {
+    const debouncedOnValueChange = libraryDebounce(() => {
+      onChange(value);
+    }, DEBOUNCE_DELAY);
+
+    debouncedOnValueChange();
+
+    return () => {
+      debouncedOnValueChange.clear();
+    };
+  }, [value, onChange]);
 
   return (
     <div className="relative">
-      <Input type="text" className={cn('hide-password-toggle pr-10', className)} ref={ref} {...props} />
+      <Input
+        type="text"
+        className={cn('hide-password-toggle pr-10', className)}
+        ref={ref}
+        {...props}
+        onChange={(e) => setValue(e.target.value)}
+        value={value}
+      />
       <Button
         type="button"
         size="sm"

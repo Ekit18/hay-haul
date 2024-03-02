@@ -146,6 +146,7 @@ export class ProductService {
         productType,
       });
     } catch (error) {
+      console.error(error);
       throw new HttpException(
         ProductErrorMessage.FailedCreateProduct,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -171,9 +172,11 @@ export class ProductService {
 
     try {
       return await this.productRepository.save({
+        id,
         ...updateProductDto,
       });
     } catch (error) {
+      console.error(error.message);
       throw new HttpException(
         ProductErrorMessage.FailedUpdateProduct,
         HttpStatus.INTERNAL_SERVER_ERROR,

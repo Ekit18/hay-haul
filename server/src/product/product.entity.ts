@@ -6,7 +6,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -31,7 +30,7 @@ export class Product extends Timestamps {
   @JoinColumn({ name: 'facilityDetailsId' })
   facilityDetails: FacilityDetails;
 
-  @OneToOne(() => ProductType, (productType) => productType.product)
+  @ManyToOne(() => ProductType, (productType) => productType.product)
   @JoinColumn()
   productType: ProductType;
 }

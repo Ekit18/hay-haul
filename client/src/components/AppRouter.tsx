@@ -9,7 +9,6 @@ import { SidebarLayout } from './layouts/SidebarLayout';
 
 export function AppRouter() {
   const user = useAppSelector((state) => state.user.user);
-  // GOVNOKOD
   return (
     <Routes>
       {!user && authRoutes.map(({ path, Component }) => <Route key={path} path={path} element={<Component />} />)}

@@ -1,4 +1,11 @@
-import { BaseQueryApi, FetchBaseQueryError, createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+  FetchBaseQueryMeta,
+  createApi,
+  fetchBaseQuery
+} from '@reduxjs/toolkit/query/react';
 import { setAccessToken } from './reducers/token/tokenSlice';
 import { TokenResponse } from './reducers/user/userApi';
 import { logOut } from './reducers/user/userSlice';
@@ -29,17 +36,18 @@ export const baseQuery = fetchBaseQuery({
   credentials: 'include'
 });
 
-export const baseQueryWithReAuth = async (
-  args: { url: string; method: string; body: unknown } | string,
-  api: BaseQueryApi,
-  extraOptions: NonNullable<unknown>
-) => {
+export const baseQueryWithReAuth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError,
+  NonNullable<unknown>,
+  FetchBaseQueryMeta
+> = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
   if (result?.error?.status === 401) {
     const refreshResult = await baseQuery({ url: '/auth/refresh', method: 'POST' }, api, extraOptions);
 
-    console.log('CHANGE');
     if (refreshResult?.data) {
       const { accessToken } = refreshResult.data as TokenResponse;
 
@@ -55,8 +63,12 @@ export const baseQueryWithReAuth = async (
   return result;
 };
 
+export const TagType = {
+  Product: 'Product'
+} as const;
+
 export const api = createApi({
-  tagTypes: ['UserFlights'],
+  tagTypes: [TagType.Product],
   baseQuery: baseQueryWithReAuth,
   endpoints: () => ({})
 });

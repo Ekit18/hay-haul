@@ -48,7 +48,7 @@ export class ProductController {
     return this.productService.create({ dto, facilityId, productTypeId });
   }
 
-  @Put('/product/:id')
+  @Put('/:id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,

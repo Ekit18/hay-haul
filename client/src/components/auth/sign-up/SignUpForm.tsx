@@ -1,5 +1,6 @@
-import { StepItem, Stepper, validateStepFields } from '@/components/stepper/stepper';
+import { StepItem, Stepper, validateStepFields } from '@/components/stepper/Stepper';
 import { Form } from '@/components/ui/form';
+import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { RegisterableRoles, UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
@@ -31,6 +32,7 @@ export function SignUpForm() {
   const navigate = useNavigate();
 
   const [registration] = userApi.useRegistrationMutation();
+  const [checkUserEmail] = userApi.useCheckUserEmailMutation();
 
   const signUpFormSchema = useSignUpFormSchema();
 
@@ -55,8 +57,29 @@ export function SignUpForm() {
       stepName: 'Your data',
       stepComponent: <MainInfo />,
       onNextClick: async (): Promise<boolean> => {
-        const result = await validateStepFields(form, ['email', 'password', 'fullName', 'role']);
-        return result;
+        const validationResult = await validateStepFields(form, ['email', 'password', 'fullName', 'role']);
+
+        if (!validationResult) return false;
+
+        const checkResult = await checkUserEmail({ email: form.getValues('email') })
+          .unwrap()
+          .then(({ userExist }) => {
+            if (!userExist) return true;
+
+            toast({
+              variant: 'destructive',
+              title: 'Something went wrong',
+              description: 'User with this email already exists. Please, try another email.'
+            });
+
+            return false;
+          })
+          .catch((error) => {
+            handleRtkError(error);
+            return false;
+          });
+
+        return validationResult && checkResult;
       }
     },
     {

@@ -1,38 +1,40 @@
 import { Product } from '@/lib/types/Product/Product.type';
-import { useMemo } from 'react';
-import { ProductColumn, columns } from './data-table/columns';
+import { DataWithCount } from '@/lib/types/types';
+import { useCurrentProductContext } from '@/pages/farmer-pages/contexts/currentProductContext';
+import { DeleteModal, EntityTitle } from '../delete-modal/delete-modal';
+import { columns } from './data-table/columns';
 import { DataTable } from './data-table/data-table';
+import { useDeleteModalCurrentProduct } from './hooks/delete-modal-current-product';
+import { useUpdateModalCurrentProduct } from './hooks/update-modal-current-product copy';
+import { UpdateProductModal } from './modals/update-product-modal/update-product-modal';
 
-interface ProductsTableProps {
-  data?: { data: Product[] };
+export interface ProductsTableProps {
+  data: DataWithCount<Product> | undefined;
 }
 
-// const testdata = [
-//   {
-//     id: 'asdasdsad',
-//     name: 'Top rice',
-//     quantity: 10022,
-//     farmName: 'Farm',
-//     farmAddress: 'Mykolaiv',
-//     productType: 'Rice'
-//   }
-// ];
-
 export function ProductsTable({ data }: ProductsTableProps) {
-  console.log(data);
-  const columnData = useMemo<ProductColumn[]>(
-    () =>
-      !data
-        ? []
-        : data.data.map((product) => ({
-            id: product.id,
-            name: product.name,
-            quantity: product.quantity,
-            farmName: product.facilityDetails.name,
-            farmAddress: product.facilityDetails.address,
-            productType: product.productType.name
-          })),
-    [data]
+  const { handleDeleteModalOpenChange, isDeleteModalOpen, deleteCallback, deleteModalConfirmName } =
+    useDeleteModalCurrentProduct();
+  const { handleUpdateModalOpenChange, isUpdateModalOpen, updateCallback } = useUpdateModalCurrentProduct();
+  const { currentProduct } = useCurrentProductContext();
+  return (
+    <>
+      <DataTable columns={columns} data={data?.data || []} pageCount={data?.count} />
+      <DeleteModal
+        handleOpenChange={handleDeleteModalOpenChange}
+        open={isDeleteModalOpen}
+        name={deleteModalConfirmName}
+        entityTitle={EntityTitle.Product}
+        deleteCallback={deleteCallback}
+      />
+      {currentProduct && (
+        <UpdateProductModal
+          product={currentProduct}
+          handleOpenChange={handleUpdateModalOpenChange}
+          open={isUpdateModalOpen}
+          updateCallback={updateCallback}
+        />
+      )}
+    </>
   );
-  return <DataTable columns={columns} data={columnData} />;
 }

@@ -7,6 +7,10 @@ export interface TokenResponse {
   accessToken: string;
 }
 
+export interface CheckUserEmailResponse {
+  userExist: boolean;
+}
+
 export type SignRequest = Pick<User, 'email'> & {
   password: string;
 };
@@ -84,7 +88,7 @@ export const userApi = api.injectEndpoints({
         method: 'POST'
       })
     }),
-    checkUserEmail: builder.mutation<boolean, Pick<User, 'email'>>({
+    checkUserEmail: builder.mutation<CheckUserEmailResponse, Pick<User, 'email'>>({
       query: (body) => ({
         body,
         url: '/auth/check-email',

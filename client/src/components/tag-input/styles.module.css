@@ -16,7 +16,7 @@
 }
 
 .option:not([aria-disabled='true']).is-active {
-  background: #4f46e5;
+  background: #000000;
   color: #ffffff;
 }
 
@@ -27,10 +27,12 @@
 }
 
 .option[aria-selected='true']::after {
-  content: '✓';
+  content: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZWNrIj48cGF0aCBkPSJNMjAgNiA5IDE3bC01LTUiLz48L3N2Zz4=);
   margin-left: 0.5rem;
+  height: 8px;
+  margin-bottom: 10px;
 }
 
 .option[aria-selected='true']:not(.is-active)::after {
-  color: #4f46e5;
+  color: hsl(var(--primary));
 }

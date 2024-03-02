@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Filter, Plus } from 'lucide-react';
+import { ChevronDown, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { SearchInput } from '../../ui/search-input';
+import { CreateProductModal } from '../modals/create-product-modal/create-product-modal';
 import { ProductFilterForm } from './ProductFilterForm';
-import './styles.css';
+import './styles.module.css';
 import { ProductFilterFormValues } from './validation';
 
 export function ProductsFilter() {
@@ -31,7 +32,7 @@ export function ProductsFilter() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <SearchInput placeholder="Name, quantity, type" {...field} />
+                  <SearchInput placeholder="Enter product name..." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -41,9 +42,10 @@ export function ProductsFilter() {
         <Button onClick={handleFilterOpenToggle} className="flex gap-1 ml-4" type="button">
           <Filter size={20} /> Filter <ChevronDown className={cn('h-4 w-4 shrink-0 ', filterOpen && 'rotate-180')} />
         </Button>
-        <Button onClick={handleCreateProductClick} className="flex gap-1 ml-auto" type="button">
+        {/* <Button onClick={handleCreateProductClick} className="flex gap-1 ml-auto" type="submit">
           <Plus size={20} /> Create Product
-        </Button>
+        </Button> */}
+        <CreateProductModal />
       </div>
       <div className="">{filterOpen && <ProductFilterForm />}</div>
     </>

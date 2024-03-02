@@ -21,13 +21,13 @@ import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { AuthErrorMessage } from './auth-error-message.enum';
-import { ONE_DAY_IN_MILLISECONDS } from './constants/cookie.constants';
 import { CheckUserEmailDto } from './dto/check-user-email.dto';
 import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
 import { Login } from './dto/login.dto';
 import { NewOtpDto } from './dto/new-otp.dto';
 import { RegistrationResponseDto } from './dto/registration-response.dto';
 import { generateOtpCode } from './helpers/generate-otp-code.helper';
+import { getCookieExpireDate } from './helpers/get-cookie-expire-date';
 import { Otp } from './otp.entity';
 
 @Injectable()
@@ -65,18 +65,7 @@ export class AuthService {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        expires: new Date(
-          Date.now() +
-            Number(
-              this.jwtRefreshTokenExpire.replace(
-                this.jwtRefreshTokenExpire[
-                  this.jwtRefreshTokenExpire.length - 1
-                ],
-                '',
-              ),
-            ) *
-              ONE_DAY_IN_MILLISECONDS,
-        ),
+        expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
       });
 
       return { accessToken };
@@ -118,23 +107,11 @@ export class AuthService {
       const { accessToken, refreshToken: newRefreshToken } =
         await this.tokenService.generateTokens(user);
 
-      // GOVNOCODE
       response.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        expires: new Date(
-          Date.now() +
-            Number(
-              this.jwtRefreshTokenExpire.replace(
-                this.jwtRefreshTokenExpire[
-                  this.jwtRefreshTokenExpire.length - 1
-                ],
-                '',
-              ),
-            ) *
-              ONE_DAY_IN_MILLISECONDS,
-        ),
+        expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
       });
 
       return { accessToken };
@@ -195,18 +172,7 @@ export class AuthService {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        expires: new Date(
-          Date.now() +
-            Number(
-              this.jwtRefreshTokenExpire.replace(
-                this.jwtRefreshTokenExpire[
-                  this.jwtRefreshTokenExpire.length - 1
-                ],
-                '',
-              ),
-            ) *
-              ONE_DAY_IN_MILLISECONDS,
-        ),
+        expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
       });
 
       const otp = generateOtpCode();
@@ -352,18 +318,7 @@ export class AuthService {
           httpOnly: true,
           secure: true,
           sameSite: 'none',
-          expires: new Date(
-            Date.now() +
-              Number(
-                this.jwtRefreshTokenExpire.replace(
-                  this.jwtRefreshTokenExpire[
-                    this.jwtRefreshTokenExpire.length - 1
-                  ],
-                  '',
-                ),
-              ) *
-                ONE_DAY_IN_MILLISECONDS,
-          ),
+          expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
         });
 
         return { accessToken: newTokens.accessToken };

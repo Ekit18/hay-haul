@@ -118,8 +118,10 @@ export function ProductFilterForm() {
         />
 
         <div className="flex flex-col w-full">
-          <p>Quantity</p>
-          <div className="flex">
+          <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Quantity
+          </p>
+          <div className="flex mt-3">
             <FormField
               control={control}
               name="minQuantity"
@@ -129,10 +131,10 @@ export function ProductFilterForm() {
                     <Input
                       placeholder="Min"
                       {...field}
-                      value={field.value ?? 0}
-                      onChange={(e) => {
-                        if (e.target.value === '') return field.onChange(0);
-                        field.onChange(Number(e.target.value));
+                      onBlur={(e) => {
+                        if (e.target.value === '') {
+                          field.onChange(0);
+                        }
                       }}
                       type="number"
                     />
@@ -151,10 +153,10 @@ export function ProductFilterForm() {
                     <Input
                       placeholder="Max"
                       {...field}
-                      value={field.value ?? 0}
-                      onChange={(e) => {
-                        if (e.target.value === '') return field.onChange(0);
-                        field.onChange(Number(e.target.value));
+                      onBlur={(e) => {
+                        if (e.target.value === '') {
+                          field.onChange(0);
+                        }
                       }}
                       type="number"
                     />

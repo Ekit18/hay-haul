@@ -1,5 +1,6 @@
-import { StepItem, Stepper, validateStepFields } from '@/components/stepper/stepper';
+import { StepItem, Stepper, validateStepFields } from '@/components/stepper/Stepper';
 import { Form } from '@/components/ui/form';
+import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { OtpType } from '@/lib/enums/otp-type.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
@@ -38,8 +39,16 @@ export function ResetPasswordForm() {
 
         const checkResult = await checkUserEmail({ email: form.getValues('email') })
           .unwrap()
-          .then(() => {
-            return true;
+          .then(({ userExist }) => {
+            if (!userExist) {
+              toast({
+                variant: 'destructive',
+                title: 'Something went wrong',
+                description: 'User with this email does not exist. Please, check your email and try again.'
+              });
+            }
+
+            return userExist;
           })
           .catch((error) => {
             handleRtkError(error);
