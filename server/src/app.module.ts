@@ -14,6 +14,7 @@ import { Token } from './token/token.entity';
 import { TokenModule } from './token/token.module';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
+import { FarmModule } from './farm/farm.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { UserModule } from './user/user.module';
     ProductModule,
     FacilityDetailsModule,
     ProductTypeModule,
+    FarmModule,
   ],
   providers: [],
 })

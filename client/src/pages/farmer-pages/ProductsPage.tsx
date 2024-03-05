@@ -26,22 +26,6 @@ export function ProductsPage() {
     defaultValues: productFilterFormDefaultValues
   });
 
-  // useEffect(() => {
-  //   (async () => {
-  //     await filterProducts(
-  //       new URLSearchParams({
-  //         nameSort: SortOrder.DESC,
-  //         quantitySort: SortOrder.DESC,
-  //         productTypeSort: SortOrder.DESC,
-  //         limit: String(10),
-  //         offset: String(0)
-  //       })
-  //     )
-  //       .unwrap()
-  //       .catch(handleRtkError);
-  //   })();
-  // }, []);
-
   const watchedFields = form.watch();
 
   const onSubmit: SubmitHandler<ProductFilterFormValues> = async (data) => {
@@ -49,8 +33,6 @@ export function ProductsPage() {
 
     const searchParams = new URLSearchParams();
     const { productTypeId, ...body } = data;
-
-    console.log({ productTypeId, body });
 
     Object.entries({ ...body })
       .filter(([_key, value]) => Boolean(value))
