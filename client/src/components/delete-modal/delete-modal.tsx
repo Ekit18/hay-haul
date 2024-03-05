@@ -10,7 +10,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useAppSelector } from '@/lib/hooks/redux';
-import { EmptyCallback, ValueOf } from '@/lib/types/types';
+import { EmptyCallback, EntityTitleValues } from '@/lib/types/types';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { DeleteFormValues, deleteDefaultValues, useDeleteFormSchema } from './validation';
@@ -19,8 +19,6 @@ export const EntityTitle = {
   Product: 'Product',
   Farm: 'Farm'
 } as const;
-
-export type EntityTitleValues = ValueOf<typeof EntityTitle>;
 
 export type DeleteModalProps = {
   name: string;
@@ -53,7 +51,7 @@ export function DeleteModal({ open, handleOpenChange, name, deleteCallback, enti
           <DialogTitle>Delete {entityTitle.toLocaleLowerCase()}</DialogTitle>
           <DialogDescription>
             Type {entityTitle.toLocaleLowerCase()} name
-            <span className="pointer-events-none select-none font-bold"> {name} </span>
+            <span className="font-bold"> {name} </span>
             to confirm.
           </DialogDescription>
         </DialogHeader>

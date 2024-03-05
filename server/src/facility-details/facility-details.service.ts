@@ -1,6 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
+import { ProductTypeService } from 'src/product-type/product-type.service';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { CreateFacilityDetailsDto } from './dto/create-facility-details.dto';
@@ -13,6 +20,8 @@ export class FacilityDetailsService {
     @InjectRepository(FacilityDetails)
     private readonly facilityDetailsRepository: Repository<FacilityDetails>,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => ProductTypeService))
+    private readonly productTypeService: ProductTypeService,
   ) {}
 
   public async create(
@@ -29,12 +38,19 @@ export class FacilityDetailsService {
         );
       }
 
-      return this.facilityDetailsRepository.save({
+      const facilityDetails = await this.facilityDetailsRepository.save({
         address: facilityDetailsDto.address,
         name: facilityDetailsDto.name,
         code: facilityDetailsDto.code,
         user,
       });
+
+      const productTypes = await this.productTypeService.createMany(
+        facilityDetailsDto.farmProductTypes,
+        facilityDetails,
+      );
+
+      return facilityDetails;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

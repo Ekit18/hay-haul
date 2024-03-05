@@ -64,11 +64,12 @@ export const baseQueryWithReAuth: BaseQueryFn<
 };
 
 export const TagType = {
-  Product: 'Product'
+  Product: 'Product',
+  Facility: 'Facility'
 } as const;
 
 export const api = createApi({
-  tagTypes: [TagType.Product],
+  tagTypes: [TagType.Product, TagType.Facility],
   baseQuery: baseQueryWithReAuth,
   endpoints: () => ({})
 });

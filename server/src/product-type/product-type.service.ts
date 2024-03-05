@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FacilityDetailsErrorMessage } from 'src/facility-details/facility-details-error-message.enum';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
@@ -12,6 +18,7 @@ export class ProductTypeService {
   public constructor(
     @InjectRepository(ProductType)
     private readonly productTypeRepository: Repository<ProductType>,
+    @Inject(forwardRef(() => FacilityDetailsService))
     private readonly facilityDetailsService: FacilityDetailsService,
   ) {}
 

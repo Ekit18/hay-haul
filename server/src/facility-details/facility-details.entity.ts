@@ -30,10 +30,13 @@ export class FacilityDetails extends Timestamps {
   @OneToMany(
     () => ProductType,
     (productTypes) => productTypes.facilityDetails,
-    { cascade: true },
+    { cascade: true, onDelete: 'CASCADE' },
   )
   productTypes: ProductType[];
 
-  @OneToMany(() => Product, (product) => product.facilityDetails)
+  @OneToMany(() => Product, (product) => product.facilityDetails, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   products: Product[];
 }

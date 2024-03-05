@@ -15,7 +15,10 @@ export class ProductType extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToMany(() => Product, (products) => products.productType)
+  @OneToMany(() => Product, (products) => products.productType, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   product: Product;
 
   @Column()
@@ -23,7 +26,11 @@ export class ProductType extends Timestamps {
 
   @ManyToOne(
     () => FacilityDetails,
+
     (facilityDetails) => facilityDetails.productTypes,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   @JoinColumn({ name: 'facilityDetailsId' })
   facilityDetails: FacilityDetails;

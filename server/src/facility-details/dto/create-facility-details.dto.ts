@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateFacilityDetailsDto {
   @IsString()
@@ -12,4 +12,8 @@ export class CreateFacilityDetailsDto {
   @IsString()
   @IsNotEmpty()
   readonly code: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  readonly farmProductTypes?: string[];
 }
