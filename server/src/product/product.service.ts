@@ -6,6 +6,7 @@ import {
   DEFAULT_OFFSET,
   DEFAULT_PAGINATION_LIMIT,
 } from 'src/lib/constants/constants';
+import { SortOrder } from 'src/lib/enums/enums';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductTypeErrorMessage } from 'src/product-type/product-type-error-message.enum';
 import { ProductTypeService } from 'src/product-type/product-type.service';
@@ -34,6 +35,9 @@ export class ProductService {
       maxQuantity,
       minQuantity,
       productTypeId,
+      nameSort,
+      productTypeSort,
+      quantitySort,
     }: ProductQueryDto,
     request: AuthenticatedRequest,
   ) {
@@ -46,6 +50,19 @@ export class ProductService {
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .leftJoinAndSelect('product.productType', 'productType');
+
+      if (nameSort) {
+        queryBuilder.addOrderBy('product.name', nameSort);
+      }
+      if (quantitySort) {
+        queryBuilder.addOrderBy('product.quantity', quantitySort);
+      }
+      if (productTypeSort) {
+        queryBuilder.addOrderBy('productType.name', productTypeSort);
+      }
+      if (!nameSort && !quantitySort && !productTypeSort) {
+        queryBuilder.addOrderBy('product.createdAt', SortOrder.DESC);
+      }
 
       if (farmId) {
         queryBuilder.where('product.facilityDetailsId = :facilityDetailsId', {

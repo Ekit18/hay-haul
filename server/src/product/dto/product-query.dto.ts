@@ -41,11 +41,14 @@ export class ProductQueryDto {
   maxQuantity?: number;
 
   @IsEnum(SortOrder)
-  nameSort: SortOrder;
+  @IsOptional()
+  nameSort?: SortOrder;
 
   @IsEnum(SortOrder)
-  quantitySort: SortOrder;
+  @IsOptional()
+  quantitySort?: SortOrder;
 
   @IsEnum(SortOrder)
-  productTypeSort: SortOrder;
+  @IsOptional()
+  productTypeSort?: SortOrder;
 }

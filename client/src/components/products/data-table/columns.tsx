@@ -10,41 +10,51 @@ import {
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
 import { SortOrder } from '@/lib/enums/sort-order.enum';
 import { Product } from '@/lib/types/Product/Product.type';
+import { SortOrderValues } from '@/lib/types/types';
 import {
   CurrentProductUsageContext,
   useCurrentProductContext
 } from '@/pages/farmer-pages/contexts/currentProductContext';
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, MoveDown, MoveUp } from 'lucide-react';
+import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ProductFilterFormValues } from '../product-filter/validation';
+
+const sortOrderToUI = {
+  [SortOrder.DESC.toLowerCase()]: <MoveDown className="ml-2 h-4 w-4" />,
+  [SortOrder.ASC.toLowerCase()]: <MoveUp className="ml-2 h-4 w-4" />
+} as const;
 
 export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: 'name',
     header: ({ column }) => {
-      const { control } = useFormContext<ProductFilterFormValues>();
-      const sort = column.getIsSorted() === 'asc';
+      const { control, setValue } = useFormContext<ProductFilterFormValues>();
+
+      const sort = column.getIsSorted();
+
+      useEffect(() => {
+        setValue('nameSort', sort ? (sort.toUpperCase() as SortOrderValues) : undefined);
+      }, [sort]);
+
       return (
         <div className="w-full flex justify-center">
           <FormField
             control={control}
             name="nameSort"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormControl>
                   <Button
                     variant="ghost"
                     type="button"
                     onClick={() => {
-                      console.log(column.getIsSorted());
-                      const sort = column.getIsSorted() === 'asc';
-                      field.onChange(sort ? SortOrder.DESC : SortOrder.ASC);
-                      column.toggleSorting(sort);
+                      column.toggleSorting(undefined, true);
                     }}
                   >
                     Name
-                    {sort ? <MoveUp className="ml-2 h-4 w-4" /> : <MoveDown className="ml-2 h-4 w-4" />}
+                    <div className="w-4 h-4">{sort && sortOrderToUI[sort]}</div>
                   </Button>
                 </FormControl>
               </FormItem>
@@ -61,28 +71,31 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: 'quantity',
     header: ({ column }) => {
-      const { control } = useFormContext<ProductFilterFormValues>();
+      const { control, setValue } = useFormContext<ProductFilterFormValues>();
 
-      const sort = column.getIsSorted() === 'asc';
+      const sort = column.getIsSorted();
+
+      useEffect(() => {
+        setValue('quantitySort', sort ? (sort.toUpperCase() as SortOrderValues) : undefined);
+      }, [sort]);
 
       return (
         <div className="w-full flex justify-center">
           <FormField
             control={control}
             name="quantitySort"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormControl>
                   <Button
                     variant="ghost"
                     type="button"
                     onClick={() => {
-                      field.onChange(sort ? SortOrder.DESC : SortOrder.ASC);
-                      column.toggleSorting(sort, true);
+                      column.toggleSorting(undefined, true);
                     }}
                   >
                     Quantity
-                    {sort ? <MoveUp className="ml-2 h-4 w-4" /> : <MoveDown className="ml-2 h-4 w-4" />}
+                    <div className="w-4 h-4">{sort && sortOrderToUI[sort]}</div>
                   </Button>
                 </FormControl>
               </FormItem>
@@ -122,28 +135,31 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: 'productType.name',
     id: 'productType',
     header: ({ column }) => {
-      const { control } = useFormContext<ProductFilterFormValues>();
+      const { control, setValue } = useFormContext<ProductFilterFormValues>();
 
-      const sort = column.getIsSorted() === 'asc';
+      const sort = column.getIsSorted();
+
+      useEffect(() => {
+        setValue('productTypeSort', sort ? (sort.toUpperCase() as SortOrderValues) : undefined);
+      }, [sort]);
 
       return (
         <div className="w-full flex justify-center">
           <FormField
             control={control}
             name="productTypeSort"
-            render={({ field }) => (
+            render={() => (
               <FormItem>
                 <FormControl>
                   <Button
                     variant="ghost"
                     type="button"
                     onClick={() => {
-                      field.onChange(sort ? SortOrder.DESC : SortOrder.ASC);
-                      column.toggleSorting(sort);
+                      column.toggleSorting(undefined, true);
                     }}
                   >
                     Product type
-                    {sort ? <MoveUp className="ml-2 h-4 w-4" /> : <MoveDown className="ml-2 h-4 w-4" />}
+                    <div className="w-4 h-4">{sort && sortOrderToUI[sort]}</div>
                   </Button>
                 </FormControl>
               </FormItem>

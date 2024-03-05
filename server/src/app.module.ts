@@ -31,6 +31,7 @@ import { UserModule } from './user/user.module';
         database: configService.get<string>('DATABASE_NAME'),
         entities: [User, Token, Product, FacilityDetails, ProductType, Otp],
         synchronize: true,
+        logging: true,
         options: {
           encrypt: false,
         },

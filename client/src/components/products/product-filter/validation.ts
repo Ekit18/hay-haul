@@ -10,6 +10,8 @@ export type ProductFilterFormValues = {
   nameSort?: SortOrderValues;
   quantitySort?: SortOrderValues;
   productTypeSort?: SortOrderValues;
+  offset: number;
+  limit?: number;
 };
 
 export const productFilterFormDefaultValues: ProductFilterFormValues = {
@@ -18,9 +20,11 @@ export const productFilterFormDefaultValues: ProductFilterFormValues = {
   farmId: '',
   minQuantity: 0,
   maxQuantity: 0,
-  nameSort: 'DESC',
-  quantitySort: 'DESC',
-  productTypeSort: 'DESC'
+  nameSort: undefined,
+  quantitySort: undefined,
+  productTypeSort: undefined,
+  offset: 0,
+  limit: 10
 };
 
 export const useProductFilterFormSchema = (): ObjectSchema<
@@ -35,6 +39,8 @@ export const useProductFilterFormSchema = (): ObjectSchema<
     nameSort: undefined;
     productTypeSort: undefined;
     quantitySort: undefined;
+    offset: undefined;
+    limit: undefined;
   },
   ''
 > => {
@@ -48,6 +54,8 @@ export const useProductFilterFormSchema = (): ObjectSchema<
     maxQuantity: number().min(ref('minQuantity'), 'Max quantity must be greater than min quantity'),
     nameSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     productTypeSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
-    quantitySort: string().oneOf<SortOrderValues>(['ASC', 'DESC'])
+    quantitySort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
+    offset: number().required(),
+    limit: number()
   });
 };

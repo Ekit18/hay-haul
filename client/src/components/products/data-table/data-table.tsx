@@ -1,7 +1,11 @@
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table';
 
 import { Button } from '@/components/ui/button';
+import { FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { ProductFilterFormValues } from '../product-filter/validation';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -10,13 +14,16 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({ columns, data, pageCount }: DataTableProps<TData, TValue>) {
+  const [page, setPage] = useState(0);
+
   const table = useReactTable({
     data,
     columns,
-    pageCount,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel()
   });
+
+  const { control } = useFormContext<ProductFilterFormValues>();
 
   return (
     <div>
@@ -56,26 +63,56 @@ export function DataTable<TData, TValue>({ columns, data, pageCount }: DataTable
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div>
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          Page {page + 1} of {pageCount || 0}
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+        <FormField
+          control={control}
+          name="offset"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormControl>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setPage((prev) => prev - 1);
+                      field.onChange((page - 1) * 10);
+                    }}
+                    disabled={page === 0}
+                  >
+                    Previous
+                  </Button>
+                </FormControl>
+              </FormItem>
+            );
+          }}
+        />
+        <FormField
+          control={control}
+          name="offset"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormControl>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setPage((prev) => prev + 1);
+                      field.onChange((page + 1) * 10);
+                    }}
+                    disabled={page + 1 === pageCount}
+                  >
+                    Next
+                  </Button>
+                </FormControl>
+              </FormItem>
+            );
+          }}
+        />
       </div>
     </div>
   );
