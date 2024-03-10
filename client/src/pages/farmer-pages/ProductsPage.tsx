@@ -18,7 +18,7 @@ import { CurrentProductContextProvider } from './contexts/currentProductContext'
 export function ProductsPage() {
   const productFilterFormSchema = useProductFilterFormSchema();
 
-  const [filterProducts, { data, isLoading, isFetching }] = productsApi.useLazyFilterProductsQuery();
+  const [filterProducts, { data, isLoading, isFetching, isUninitialized }] = productsApi.useLazyFilterProductsQuery();
 
   const form = useForm<ProductFilterFormValues>({
     resolver: yupResolver(productFilterFormSchema),
@@ -66,7 +66,7 @@ export function ProductsPage() {
                 <ProductsFilter />
               </div>
               <div className="px-4">
-                <ProductsTable data={data} />
+                <ProductsTable data={data} isLoading={isLoading || isFetching || isUninitialized} />
               </div>
             </form>
           </Form>

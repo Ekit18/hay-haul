@@ -30,7 +30,9 @@ export class Product extends Timestamps {
   @JoinColumn({ name: 'facilityDetailsId' })
   facilityDetails: FacilityDetails;
 
-  @ManyToOne(() => ProductType, (productType) => productType.product)
+  @ManyToOne(() => ProductType, (productType) => productType.product, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   productType: ProductType;
 }

@@ -19,11 +19,17 @@ export const AppRoute = {
     SignUp: '/sign-up',
     OtpConfirm: '/otp-confirm',
     ResetPassword: '/reset-password',
-    Auction: '/auction'
+    Auctions: '/auctions'
   },
   Farmer: {
     Products: '/products',
-    Farms: '/farms',
-    Orders: '/orders'
+    Farms: '/farms'
+    // MyAuctions: '/my-auctions'
+  },
+  Businessman: {
+    Warehouses: '/warehouses',
+    Products: '/products',
+    Bids: '/bids',
+    Delivery: '/delivery'
   }
 } as const;

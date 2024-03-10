@@ -15,11 +15,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { DeleteFormValues, deleteDefaultValues, useDeleteFormSchema } from './validation';
 
-export const EntityTitle = {
-  Product: 'Product',
-  Farm: 'Farm'
-} as const;
-
 export type DeleteModalProps = {
   name: string;
   open: boolean;

@@ -128,9 +128,12 @@ export class AuthService {
     response: Response,
   ): Promise<RegistrationResponseDto> {
     try {
+      console.log('registration');
       const candidate = await this.userService.getUserByEmail(
         registerUserDto.email,
       );
+
+      console.log('before candidate');
 
       if (candidate) {
         throw new HttpException(
@@ -138,15 +141,17 @@ export class AuthService {
           HttpStatus.BAD_REQUEST,
         );
       }
-
+      console.log('before hashing');
       const hashPassword = await hash(registerUserDto.password, 5);
-
+      console.log('before user creation');
       const user = await this.userService.create({
         email: registerUserDto.email,
         fullName: registerUserDto.fullName,
         role: registerUserDto.role,
         password: hashPassword,
       });
+
+      console.log('before fac det creation');
 
       const facilityDetails = await this.facilityDetailsService.create(
         {
@@ -156,6 +161,8 @@ export class AuthService {
         },
         user.id,
       );
+
+      console.log('before prod types creation');
 
       const productTypes = await this.productTypeService.createMany(
         registerUserDto.farmProductTypes,

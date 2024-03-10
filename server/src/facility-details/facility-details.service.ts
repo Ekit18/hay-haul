@@ -44,12 +44,12 @@ export class FacilityDetailsService {
         code: facilityDetailsDto.code,
         user,
       });
-
-      const productTypes = await this.productTypeService.createMany(
-        facilityDetailsDto.farmProductTypes,
-        facilityDetails,
-      );
-
+      if (facilityDetailsDto.farmProductTypes) {
+        await this.productTypeService.createMany(
+          facilityDetailsDto.farmProductTypes,
+          facilityDetails,
+        );
+      }
       return facilityDetails;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -104,11 +104,9 @@ export class FacilityDetailsService {
     facilityDetailsDto: UpdateFacilityDetailsDto,
   ): Promise<FacilityDetails> {
     try {
-      const result = await this.facilityDetailsRepository.update(
-        id,
-        facilityDetailsDto,
-      );
-      return this.facilityDetailsRepository.findOneById(id);
+      await this.facilityDetailsRepository.update(id, facilityDetailsDto);
+
+      return this.facilityDetailsRepository.findOne({ where: { id } });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

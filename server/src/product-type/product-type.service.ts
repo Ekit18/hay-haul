@@ -62,13 +62,15 @@ export class ProductTypeService {
   ): Promise<ProductType> {
     const facilityDetails =
       await this.facilityDetailsService.getOneById(facilityId);
+
     if (!facilityDetails) {
       throw new HttpException(
         { message: FacilityDetailsErrorMessage.FacilityDetailsNotFound },
         HttpStatus.BAD_REQUEST,
       );
     }
-    return this.productTypeRepository.save(productType);
+
+    return this.productTypeRepository.save({ ...productType, facilityDetails });
   }
 
   public async update({
@@ -80,6 +82,7 @@ export class ProductTypeService {
   }): Promise<ProductType> {
     try {
       await this.productTypeRepository.update(id, productType);
+
       return this.productTypeRepository.findOneBy({ id });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -88,7 +91,11 @@ export class ProductTypeService {
 
   public async delete(id: string): Promise<void> {
     try {
-      await this.productTypeRepository.delete(id);
+      const res = await this.productTypeRepository.query(
+        'execute [dbo].[delete_product_type_procedure] @0',
+        [id],
+      );
+      console.log('delete response', res);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

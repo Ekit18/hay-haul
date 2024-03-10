@@ -15,5 +15,5 @@ export class CreateFacilityDetailsDto {
 
   @IsArray()
   @IsString({ each: true })
-  readonly farmProductTypes?: string[];
+  readonly farmProductTypes?: string[] = [];
 }

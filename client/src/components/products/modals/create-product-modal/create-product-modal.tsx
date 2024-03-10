@@ -17,7 +17,7 @@ import { facilityDetailsApi } from '@/store/reducers/facility-details/facilityDe
 import { productsApi } from '@/store/reducers/products/productsApi';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { CreateProductFormValues, createProductDefaultValues, useProductCreateFormSchema } from './validation';
 
@@ -38,7 +38,12 @@ export function CreateProductModal() {
     resolver: yupResolver(createProductFormSchema)
   });
 
-  const farmId = form.getValues('farmId');
+  const farmId = form.watch('farmId');
+
+  useEffect(() => {
+    form.setValue('productTypeId', '');
+  }, [farmId]);
+
   const [open, setOpen] = useState(false);
 
   const { data: farms } = facilityDetailsApi.useGetAllByUserIdQuery(userId);
@@ -54,9 +59,6 @@ export function CreateProductModal() {
   const onSubmit: SubmitHandler<CreateProductFormValues> = async (data) => {
     await createProduct(data)
       .unwrap()
-      .then((data) => {
-        console.log(data);
-      })
       .finally(() => setOpen(false))
       .catch(handleRtkError);
   };
@@ -64,7 +66,7 @@ export function CreateProductModal() {
   return (
     <Dialog open={open} onOpenChange={handleDeleteModalOpenChange}>
       <DialogTrigger asChild>
-        <Button className="flex gap-1 ml-auto" type="button" onClick={() => setOpen(true)}>
+        <Button className="flex gap-1 md:ml-auto" type="button" onClick={() => setOpen(true)}>
           <Plus size={20} /> Create Product
         </Button>
       </DialogTrigger>
@@ -83,7 +85,7 @@ export function CreateProductModal() {
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel>Farm</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!farms?.length}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!farms?.length}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a farm" />
@@ -111,11 +113,7 @@ export function CreateProductModal() {
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel>Product type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={!farms?.length || !farmId}
-                      >
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!farms?.length || !farmId}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select type of the product" />

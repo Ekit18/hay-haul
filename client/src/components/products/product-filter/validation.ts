@@ -1,5 +1,5 @@
 import { SortOrderValues } from '@/lib/types/types';
-import { AnyObject, ObjectSchema, array, number, object, ref, string } from 'yup';
+import { AnyObject, ObjectSchema, array, number, object, string } from 'yup';
 
 export type ProductFilterFormValues = {
   searchQuery?: string;
@@ -48,10 +48,14 @@ export const useProductFilterFormSchema = (): ObjectSchema<
     searchQuery: string(),
     productTypeId: array().of(string().nonNullable().defined()),
     farmId: string(),
-    minQuantity: number()
-      .min(0, 'Min quantity must be greater than or equal to 0')
-      .max(ref('maxQuantity'), 'Min quantity must be less than max quantity'),
-    maxQuantity: number().min(ref('minQuantity'), 'Max quantity must be greater than min quantity'),
+    minQuantity: number().test('minQuantity', 'Min quantity must be less than max quantity', function (value = 0) {
+      const { maxQuantity } = this.parent;
+      return value > 0 ? value <= maxQuantity : true;
+    }),
+    maxQuantity: number().test('maxQuantity', 'Max quantity must be greater than min quantity', function (value = 0) {
+      const { minQuantity } = this.parent;
+      return value > 0 ? value >= minQuantity : true;
+    }),
     nameSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     productTypeSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     quantitySort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),

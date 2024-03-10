@@ -28,7 +28,9 @@ export const useFacilityUpdateFormSchema = (): ObjectSchema<
   return object({
     name: string().min(3, 'Name must be at least 3 characters'),
     address: string().min(3, 'Address must be at least 3 characters'),
-    code: string().matches(/^\d{8}$/, 'Must be valid EDRPOU'),
+    code: string()
+      .required('Must be valid EDRPOU is required')
+      .matches(/^\d{8}$/, 'Must contain only numbers and be 8 characters long'),
     farmProductTypes: array().of(string().required()).required()
   });
 };

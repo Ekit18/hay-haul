@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -12,6 +12,7 @@ import { Product } from './product/product.entity';
 import { ProductModule } from './product/product.module';
 import { Token } from './token/token.entity';
 import { TokenModule } from './token/token.module';
+import { TriggerService } from './trigger/trigger.service';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 
@@ -31,7 +32,6 @@ import { UserModule } from './user/user.module';
         database: configService.get<string>('DATABASE_NAME'),
         entities: [User, Token, Product, FacilityDetails, ProductType, Otp],
         synchronize: true,
-        logging: true,
         options: {
           encrypt: false,
         },
@@ -46,6 +46,12 @@ import { UserModule } from './user/user.module';
     FacilityDetailsModule,
     ProductTypeModule,
   ],
-  providers: [],
+  providers: [TriggerService],
 })
-export class AppModule {}
+export class AppModule implements OnApplicationBootstrap {
+  constructor(private readonly seedingService: TriggerService) {}
+
+  async onApplicationBootstrap(): Promise<void> {
+    await this.seedingService.seed();
+  }
+}

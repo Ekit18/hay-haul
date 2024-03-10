@@ -9,11 +9,11 @@ export function AuthLayout({ allowedRoles }: { allowedRoles: UserRole[] }) {
 
   if (!user) return <Navigate to={AppRoute.General.SignIn} state={{ from: location }} replace />;
 
-  // if (!user.isVerified) return <Navigate to={AppRoute.General.OtpConfirm} state={{ from: location }} replace />;
+  if (!user.isVerified) return <Navigate to={AppRoute.General.OtpConfirm} state={{ from: location }} replace />;
 
   if (allowedRoles.includes(user.role)) {
     return <Outlet />;
   }
 
-  return <Navigate to={AppRoute.General.Main} state={{ from: location }} replace />;
+  return null;
 }

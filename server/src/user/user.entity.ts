@@ -45,7 +45,10 @@ export class User extends Timestamps {
   @Column()
   isVerified: boolean;
 
-  @OneToMany(() => FacilityDetails, (facilityDetail) => facilityDetail.user)
+  @OneToMany(() => FacilityDetails, (facilityDetail) => facilityDetail.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   facilityDetails: FacilityDetails;
 
   @OneToOne(() => Token, (token) => token.user)

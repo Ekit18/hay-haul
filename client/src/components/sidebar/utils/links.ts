@@ -1,6 +1,6 @@
 import { AppRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
-import { BadgeDollarSign, Home, LucideIcon, PackageSearch, SendToBack, Tractor } from 'lucide-react';
+import { BadgeDollarSign, HandCoins, Home, LucideIcon, PackageSearch, Tractor, Truck, Warehouse } from 'lucide-react';
 
 type Link = {
   title: string;
@@ -30,17 +30,43 @@ export const links: Links = {
       icon: PackageSearch
     },
     {
-      title: 'Auction',
-      url: AppRoute.General.Auction,
+      title: 'Auctions',
+      url: AppRoute.General.Auctions,
       icon: BadgeDollarSign
+    }
+    // {
+    //   title: 'My auctions',
+    //   url: AppRoute.Farmer.MyAuctions,
+    //   icon: SendToBack
+    // }
+  ],
+  [UserRole.Businessman]: [
+    {
+      title: 'Home',
+      url: AppRoute.General.Main,
+      icon: Home
     },
     {
-      title: 'Orders',
-      url: AppRoute.Farmer.Orders,
-      icon: SendToBack
+      title: 'Warehouses',
+      url: AppRoute.Businessman.Warehouses,
+      icon: Warehouse
+    },
+    {
+      title: 'Products',
+      url: AppRoute.Businessman.Products,
+      icon: PackageSearch
+    },
+    {
+      title: 'Bids',
+      url: AppRoute.Businessman.Bids,
+      icon: HandCoins
+    },
+    {
+      title: 'Delivery',
+      url: AppRoute.Businessman.Delivery,
+      icon: Truck
     }
   ],
-  [UserRole.Businessman]: [],
   [UserRole.Carrier]: [],
   [UserRole.Driver]: []
 };

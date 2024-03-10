@@ -26,6 +26,7 @@ export class AuthController {
     @Body() userDto: RegisterUserDto,
     @Res({ passthrough: true }) response: Response,
   ) {
+    console.log('registration');
     const data = await this.authService.registration(userDto, response);
     response.json(data);
   }

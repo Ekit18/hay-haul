@@ -1,4 +1,5 @@
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { ArrayFields } from '@/lib/types/types';
 import { cn } from '@/lib/utils';
 import { Control, FieldValues, Path } from 'react-hook-form';
@@ -13,6 +14,8 @@ interface TagInputProps<T extends FieldValues> {
   labelText: string;
   allowNew?: boolean;
   disabled?: boolean;
+  onDelete?: (i: number) => Promise<void>;
+  onAdd?: (tag: string) => Promise<void>;
   selectedFn: (item: string) => Tag;
 }
 
@@ -22,6 +25,8 @@ export function TagInput<T extends FieldValues>({
   control,
   allowNew = false,
   disabled = false,
+  onAdd,
+  onDelete,
   labelText,
   noOptionsText,
   selectedFn
@@ -65,14 +70,44 @@ export function TagInput<T extends FieldValues>({
                 isInvalid={fieldState.invalid}
                 selected={(field.value as string[]).map(selectedFn) || []}
                 suggestions={suggestions}
-                onAdd={(tag) => {
-                  const value = field.value || [];
+                onAdd={async (tag) => {
+                  const value: string[] = field.value || [];
+
+                  if (value.includes(tag.value as string)) {
+                    control.setError(name, { type: 'manual', message: 'Invalid tag' });
+                    return;
+                  }
+
+                  if (onAdd) {
+                    try {
+                      await onAdd(tag.value as string);
+                    } catch (error) {
+                      handleRtkError(error);
+                      return;
+                    }
+                  }
+
                   field.onChange([...value, tag.value]);
                 }}
-                onDelete={(i) => {
+                onDelete={async (i) => {
                   const value = field.value || [];
                   const newTags = [...value];
                   newTags.splice(i, 1);
+
+                  if (onDelete) {
+                    try {
+                      await onDelete(i)
+                        .then(() => {
+                          field.onChange(newTags);
+                        })
+                        .catch(handleRtkError);
+                    } catch (error) {
+                      handleRtkError(error);
+                    }
+
+                    return;
+                  }
+
                   field.onChange(newTags);
                 }}
                 allowNew={allowNew}

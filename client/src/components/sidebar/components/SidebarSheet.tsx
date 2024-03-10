@@ -26,7 +26,7 @@ export function SidebarSheet() {
           {links[userRole].map((link) => (
             <Button
               variant="link"
-              className="w-full text-left hover:rounded-none justify-start text-white font-medium text-lg flex flex-row items-center gap-5 decoration-2"
+              className="w-full text-left hover:rounded-none mx-0 justify-start text-white font-medium text-lg flex flex-row items-center gap-5 decoration-2"
               onClick={() => navigate(link.url)}
               key={link.title}
             >

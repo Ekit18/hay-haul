@@ -2,25 +2,31 @@ import { AppRoute } from './lib/constants/routes';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { MainPage as BusinessmanMainPage } from './pages/businessman-pages/MainPage';
+import { Warehouses } from './pages/businessman-pages/Warehouses';
 import { FarmerAuction } from './pages/farmer-pages/Auction';
 import { Farms } from './pages/farmer-pages/Farms';
 import { MainPage } from './pages/farmer-pages/MainPage';
-import { Orders } from './pages/farmer-pages/Orders';
 import { ProductsPage } from './pages/farmer-pages/ProductsPage';
 
-// export const businessRoutes = [
-//   {
-//     path: AppRoute.General.Auction,
-//     Component: BusinessAuction
-//   }
-// ];
+export const businessRoutes = [
+  {
+    path: AppRoute.General.Main,
+    Component: BusinessmanMainPage
+  },
+  {
+    path: AppRoute.Businessman.Warehouses,
+    Component: Warehouses
+  }
+];
+
 export const farmerRoutes = [
   {
     path: AppRoute.General.Main,
     Component: MainPage
   },
   {
-    path: AppRoute.General.Auction,
+    path: AppRoute.General.Auctions,
     Component: FarmerAuction
   },
   {
@@ -28,19 +34,16 @@ export const farmerRoutes = [
     Component: ProductsPage
   },
   {
-    path: AppRoute.Farmer.Orders,
-    Component: Orders
-  },
-  {
     path: AppRoute.Farmer.Farms,
     Component: Farms
   }
-];
-export const authRoutes = [
   // {
-  //   path: AppRoute.General.OtpConfirm,
-  //   Component: OtpConfirmPage
-  // },
+  //   path: AppRoute.Farmer.Farms,
+  //   Component: Farms
+  // }
+];
+
+export const authRoutes = [
   {
     path: AppRoute.General.ResetPassword,
     Component: ResetPasswordPage

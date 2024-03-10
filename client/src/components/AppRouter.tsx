@@ -3,7 +3,7 @@ import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { OtpConfirmPage } from '@/pages/OtpConfirmPage';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { authRoutes, farmerRoutes } from '../routes';
+import { authRoutes, businessRoutes, farmerRoutes } from '../routes';
 import { AuthLayout } from './layouts/AuthLayout';
 import { SidebarLayout } from './layouts/SidebarLayout';
 
@@ -22,7 +22,12 @@ export function AppRouter() {
         <Route element={<SidebarLayout />}>
           <Route element={<AuthLayout allowedRoles={[UserRole.Farmer]} />}>
             {farmerRoutes.map(({ path, Component }) => (
-              <Route key={path} path={path} element={<Component />} />
+              <Route key={path + UserRole.Farmer} path={path} element={<Component />} />
+            ))}
+          </Route>
+          <Route element={<AuthLayout allowedRoles={[UserRole.Businessman]} />}>
+            {businessRoutes.map(({ path, Component }) => (
+              <Route key={path + UserRole.Businessman} path={path} element={<Component />} />
             ))}
           </Route>
           <Route path="*" element={<Navigate to={AppRoute.General.Main} replace />} />

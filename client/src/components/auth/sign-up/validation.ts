@@ -36,9 +36,14 @@ export const useSignUpFormSchema = (): ObjectSchema<
       .required('Role is required'),
     farmProductTypes: array()
       .of(string().required())
-      .required()
       .test('farmProductTypes', 'Farm product types is required', (value, context) => {
-        return context.parent.role === UserRole.Farmer && value?.length > 0;
+        if (context.parent.role !== UserRole.Farmer) {
+          return true;
+        }
+        if (!value || !value.length) {
+          return false;
+        }
+        return true;
       }),
     facilityName: string().required('Facility name is required'),
     facilityAddress: string().required('Facility address is required'),
