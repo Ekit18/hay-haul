@@ -115,7 +115,7 @@ export function DataTable<TData, TValue>({ columns, data, pageCount, isLoading }
                       setPage((prev) => prev + 1);
                       field.onChange((page + 1) * 10);
                     }}
-                    disabled={page + 1 === pageCount}
+                    disabled={page + 1 === pageCount || !pageCount}
                   >
                     Next
                   </Button>

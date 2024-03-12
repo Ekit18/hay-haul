@@ -77,19 +77,6 @@ export class FacilityDetailsServiceTest {
     }
   }
 
-  @Test('should get all facility details')
-  async testGetAllFacilityDetails() {
-    const facilityDetails = [
-      { id: '1', name: 'Facility 1' },
-      { id: '2', name: 'Facility 2' },
-    ];
-    chai.spy.on(this.facilityDetailsRepository, 'find', () =>
-      Promise.resolve(facilityDetails),
-    );
-    const result = await this.facilityDetailsService.getAll();
-    chai.expect(result).to.deep.equal(facilityDetails);
-  }
-
   @Test('should get all facility details by user id')
   async testGetAllByUserId() {
     const userId = '1';

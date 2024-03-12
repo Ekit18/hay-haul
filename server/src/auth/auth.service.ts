@@ -55,157 +55,122 @@ export class AuthService {
   ) {}
 
   async login(userDto: Login, response: Response) {
-    try {
-      const user = await this.validateRegularUser(userDto);
+    const user = await this.validateRegularUser(userDto);
 
-      const { refreshToken, accessToken } =
-        await this.tokenService.generateTokens(user);
+    const { refreshToken, accessToken } =
+      await this.tokenService.generateTokens(user);
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
+    });
 
-      response.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
-      });
-
-      return { accessToken };
-    } catch (error) {
-      throw new HttpException(
-        { message: AuthErrorMessage.WrongPassEmail },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return { accessToken };
   }
 
   async refresh(request: Request, response: Response) {
-    try {
-      const refreshToken: string = request.cookies['refreshToken'];
+    const refreshToken: string = request.cookies['refreshToken'];
 
-      if (!refreshToken) {
-        throw new UnauthorizedException({
-          message: AuthErrorMessage.NoRefreshToken,
-        });
-      }
-
-      const userData: TokenData | null = this.tokenService.checkToken(
-        refreshToken,
-        TokenTypeEnum.REFRESH,
-      );
-
-      const tokenFromDb = await this.tokenService.getRefreshTokenByUserId(
-        userData.id,
-      );
-
-      if (tokenFromDb.refreshToken !== refreshToken) {
-        throw new UnauthorizedException({
-          message: AuthErrorMessage.InvalidRefreshToken,
-        });
-      }
-
-      const user = await this.userService.getUserById(userData.id);
-
-      const { accessToken, refreshToken: newRefreshToken } =
-        await this.tokenService.generateTokens(user);
-
-      response.cookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
+    if (!refreshToken) {
+      throw new UnauthorizedException({
+        message: AuthErrorMessage.NoRefreshToken,
       });
-
-      return { accessToken };
-    } catch (error) {
-      throw new HttpException(
-        { message: error.message },
-        HttpStatus.BAD_REQUEST,
-      );
     }
+
+    const userData: TokenData | null = this.tokenService.checkToken(
+      refreshToken,
+      TokenTypeEnum.REFRESH,
+    );
+
+    const tokenFromDb = await this.tokenService.getRefreshTokenByUserId(
+      userData.id,
+    );
+
+    if (tokenFromDb.refreshToken !== refreshToken) {
+      throw new UnauthorizedException({
+        message: AuthErrorMessage.InvalidRefreshToken,
+      });
+    }
+
+    const user = await this.userService.getUserById(userData.id);
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.tokenService.generateTokens(user);
+
+    response.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
+    });
+
+    return { accessToken };
   }
 
   async registration(
     registerUserDto: RegisterUserDto,
     response: Response,
   ): Promise<RegistrationResponseDto> {
-    try {
-      console.log('registration');
-      const candidate = await this.userService.getUserByEmail(
-        registerUserDto.email,
-      );
+    const candidate = await this.userService.getUserByEmail(
+      registerUserDto.email,
+    );
 
-      console.log('before candidate');
-
-      if (candidate) {
-        throw new HttpException(
-          { message: AuthErrorMessage.UserWithEmailAlreadyExists },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      console.log('before hashing');
-      const hashPassword = await hash(registerUserDto.password, 5);
-      console.log('before user creation');
-      const user = await this.userService.create({
-        email: registerUserDto.email,
-        fullName: registerUserDto.fullName,
-        role: registerUserDto.role,
-        password: hashPassword,
-      });
-
-      console.log('before fac det creation');
-
-      const facilityDetails = await this.facilityDetailsService.create(
-        {
-          address: registerUserDto.facilityAddress,
-          name: registerUserDto.facilityName,
-          code: registerUserDto.facilityOfficialCode,
-        },
-        user.id,
-      );
-
-      console.log('before prod types creation');
-
-      const productTypes = await this.productTypeService.createMany(
-        registerUserDto.farmProductTypes,
-        facilityDetails,
-      );
-      console.log('user', user);
-      console.log('productTypes', productTypes);
-      console.log('facilityDetails', facilityDetails);
-
-      const { refreshToken, accessToken } =
-        await this.tokenService.generateTokens(user);
-
-      response.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
-      });
-
-      const otp = generateOtpCode();
-      console.log('otp', otp);
-      await this.otpRepository.save({
-        otp,
-        user,
-        isVerified: false,
-        type: OtpType.REGISTER,
-      });
-
-      // await this.emailService.sendEmail({
-      //   to: user.email,
-      //   templateId: this.verifyAccountOtpTemplateId,
-      //   dynamicTemplateData: {
-      //     otpCode: otp,
-      //   },
-      // });
-      return { accessToken };
-    } catch (error) {
-      console.log(error);
+    if (candidate) {
       throw new HttpException(
-        { message: error.message },
+        { message: AuthErrorMessage.UserWithEmailAlreadyExists },
         HttpStatus.BAD_REQUEST,
       );
     }
+    const hashPassword = await hash(registerUserDto.password, 5);
+    const user = await this.userService.create({
+      email: registerUserDto.email,
+      fullName: registerUserDto.fullName,
+      role: registerUserDto.role,
+      password: hashPassword,
+    });
+
+    const facilityDetails = await this.facilityDetailsService.create(
+      {
+        address: registerUserDto.facilityAddress,
+        name: registerUserDto.facilityName,
+        code: registerUserDto.facilityOfficialCode,
+      },
+      user.id,
+    );
+
+    await this.productTypeService.createMany(
+      registerUserDto.farmProductTypes,
+      facilityDetails,
+    );
+
+    const { refreshToken, accessToken } =
+      await this.tokenService.generateTokens(user);
+
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
+    });
+
+    const otp = generateOtpCode();
+
+    await this.otpRepository.save({
+      otp,
+      user,
+      isVerified: false,
+      type: OtpType.REGISTER,
+    });
+
+    // await this.emailService.sendEmail({
+    //   to: user.email,
+    //   templateId: this.verifyAccountOtpTemplateId,
+    //   dynamicTemplateData: {
+    //     otpCode: otp,
+    //   },
+    // });
+    return { accessToken };
   }
 
   public async requestResetPassword(requestResetPasswordDto: NewOtpDto) {
@@ -281,60 +246,53 @@ export class AuthService {
   }
 
   async verifyOtp(verifyOtpDto: SendOtpDto, response: Response) {
-    try {
-      const userId = await this.getUserIdFromDto(verifyOtpDto);
-      console.log('userId', userId);
+    const userId = await this.getUserIdFromDto(verifyOtpDto);
+    console.log('userId', userId);
 
-      const otpFromDb = await this.otpRepository
-        .createQueryBuilder('otp')
-        .where('otp.userId = :userId', { userId })
-        .andWhere('otp.type = :type', { type: verifyOtpDto.type })
-        .andWhere('otp.otp = :otp', { otp: verifyOtpDto.otp })
-        .getOne();
-      console.log('otpFromDb', otpFromDb);
+    const otpFromDb = await this.otpRepository
+      .createQueryBuilder('otp')
+      .where('otp.userId = :userId', { userId })
+      .andWhere('otp.type = :type', { type: verifyOtpDto.type })
+      .andWhere('otp.otp = :otp', { otp: verifyOtpDto.otp })
+      .getOne();
+    console.log('otpFromDb', otpFromDb);
 
-      if (!otpFromDb) {
-        throw new HttpException(
-          { message: AuthErrorMessage.OtpNotFound },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      if (otpFromDb.otp !== verifyOtpDto.otp) {
-        throw new HttpException(
-          { message: AuthErrorMessage.InvalidOtp },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      if (otpFromDb.type === OtpType.REGISTER) {
-        await this.otpRepository
-          .createQueryBuilder()
-          .delete()
-          .from(Otp)
-          .where('id = :id', { id: otpFromDb.id })
-          .execute();
-
-        await this.userService.update(otpFromDb.userId, { isVerified: true });
-
-        const user = await this.userService.getUserById(otpFromDb.userId);
-
-        const newTokens = await this.tokenService.generateTokens(user);
-
-        response.cookie('refreshToken', newTokens.refreshToken, {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'none',
-          expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
-        });
-
-        return { accessToken: newTokens.accessToken };
-      }
-    } catch (error) {
+    if (!otpFromDb) {
       throw new HttpException(
-        { message: error.message },
+        { message: AuthErrorMessage.OtpNotFound },
         HttpStatus.BAD_REQUEST,
       );
+    }
+
+    if (otpFromDb.otp !== verifyOtpDto.otp) {
+      throw new HttpException(
+        { message: AuthErrorMessage.InvalidOtp },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (otpFromDb.type === OtpType.REGISTER) {
+      await this.otpRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Otp)
+        .where('id = :id', { id: otpFromDb.id })
+        .execute();
+
+      await this.userService.update(otpFromDb.userId, { isVerified: true });
+
+      const user = await this.userService.getUserById(otpFromDb.userId);
+
+      const newTokens = await this.tokenService.generateTokens(user);
+
+      response.cookie('refreshToken', newTokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
+      });
+
+      return { accessToken: newTokens.accessToken };
     }
   }
 
@@ -358,99 +316,78 @@ export class AuthService {
   }
 
   async renewOtp(newOtpDto: NewOtpDto) {
-    try {
-      console.log('newOtpDto', newOtpDto);
-      const userId = await this.getUserIdFromDto(newOtpDto);
+    console.log('newOtpDto', newOtpDto);
+    const userId = await this.getUserIdFromDto(newOtpDto);
 
-      const user = await this.userService.getUserById(userId);
+    const user = await this.userService.getUserById(userId);
 
-      if (user.isVerified && newOtpDto.type === OtpType.REGISTER) {
-        throw new HttpException(
-          { message: AuthErrorMessage.UserAlreadyVerified },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const otp = await this.otpRepository.findOne({
-        where: { userId, type: newOtpDto.type },
-      });
-
-      if (!otp) {
-        throw new HttpException(
-          { message: AuthErrorMessage.OtpNotFound },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      console.log('otp', otp);
-      await this.otpRepository
-        .createQueryBuilder()
-        .delete()
-        .from(Otp)
-        .where('id = :id', { id: otp.id })
-        .execute();
-
-      const newOtp = generateOtpCode();
-
-      const newDbOtp = await this.otpRepository.save({
-        otp: newOtp,
-        userId,
-        isVerified: false,
-        type: newOtpDto.type,
-      });
-
-      // await this.emailService.sendEmail({
-      //   to: user.email,
-      //   templateId: this.verifyAccountOtpTemplateId,
-      //   dynamicTemplateData: {
-      //     otpCode: newOtp,
-      //   },
-      // });
-    } catch (error) {
+    if (user.isVerified && newOtpDto.type === OtpType.REGISTER) {
       throw new HttpException(
-        { message: error.message },
+        { message: AuthErrorMessage.UserAlreadyVerified },
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    const otp = await this.otpRepository.findOne({
+      where: { userId, type: newOtpDto.type },
+    });
+
+    if (!otp) {
+      throw new HttpException(
+        { message: AuthErrorMessage.OtpNotFound },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    console.log('otp', otp);
+    await this.otpRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Otp)
+      .where('id = :id', { id: otp.id })
+      .execute();
+
+    const newOtp = generateOtpCode();
+
+    const newDbOtp = await this.otpRepository.save({
+      otp: newOtp,
+      userId,
+      isVerified: false,
+      type: newOtpDto.type,
+    });
+
+    // await this.emailService.sendEmail({
+    //   to: user.email,
+    //   templateId: this.verifyAccountOtpTemplateId,
+    //   dynamicTemplateData: {
+    //     otpCode: newOtp,
+    //   },
+    // });
   }
 
   private async validateRegularUser(userDto: Login): Promise<User> {
-    try {
-      const user = await this.userService.getUserByEmail(userDto.email);
+    const user = await this.userService.getUserByEmail(userDto.email);
 
-      if (!user) {
-        throw new UnauthorizedException({
-          message: AuthErrorMessage.UserNotFound,
-        });
-      }
-
-      const passwordEquals = await compare(userDto.password, user.password);
-
-      if (user && passwordEquals) {
-        return user;
-      }
-
+    if (!user) {
       throw new UnauthorizedException({
-        message: AuthErrorMessage.WrongPassEmail,
+        message: AuthErrorMessage.UserNotFound,
       });
-    } catch (error) {
-      throw new HttpException(
-        { message: error.message },
-        HttpStatus.BAD_REQUEST,
-      );
     }
+
+    const passwordEquals = await compare(userDto.password, user.password);
+
+    if (user && passwordEquals) {
+      return user;
+    }
+
+    throw new UnauthorizedException({
+      message: AuthErrorMessage.WrongPassEmail,
+    });
   }
 
   public async checkUserEmail(dto: CheckUserEmailDto) {
-    try {
-      const user = await this.userService.getUserByEmail(dto.email);
+    const user = await this.userService.getUserByEmail(dto.email);
 
-      return { userExist: !!user };
-    } catch (error) {
-      throw new HttpException(
-        { message: error.message },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return { userExist: !!user };
   }
 }

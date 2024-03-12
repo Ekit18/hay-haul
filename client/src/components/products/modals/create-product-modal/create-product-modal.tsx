@@ -66,7 +66,7 @@ export function CreateProductModal() {
   return (
     <Dialog open={open} onOpenChange={handleDeleteModalOpenChange}>
       <DialogTrigger asChild>
-        <Button className="flex gap-1 md:ml-auto" type="button" onClick={() => setOpen(true)}>
+        <Button className="flex gap-1 sm:ml-auto sm:w-60 md:w-auto" type="button" onClick={() => setOpen(true)}>
           <Plus size={20} /> Create Product
         </Button>
       </DialogTrigger>

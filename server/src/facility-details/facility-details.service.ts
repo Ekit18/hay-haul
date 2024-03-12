@@ -11,7 +11,7 @@ import { ProductTypeService } from 'src/product-type/product-type.service';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { CreateFacilityDetailsDto } from './dto/create-facility-details.dto';
-import { UpdateFacilityDetailsDto } from './dto/update-facility-details.dto copy';
+import { UpdateFacilityDetailsDto } from './dto/update-facility-details.dto';
 import { FacilityDetails } from './facility-details.entity';
 
 @Injectable()
@@ -56,25 +56,14 @@ export class FacilityDetailsService {
     }
   }
 
-  public async getAll(): Promise<FacilityDetails[]> {
-    try {
-      return this.facilityDetailsRepository.find();
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-  }
-
   public getAllByUserId(userId: string): Promise<FacilityDetails[]> {
     try {
-      return (
-        this.facilityDetailsRepository
-          .createQueryBuilder('facilityDetails')
-          .select()
-          // .leftJoinAndSelect('facilityDetails.user', 'user')
-          .where('facilityDetails.user.id = :userId', { userId })
-          .leftJoinAndSelect('facilityDetails.productTypes', 'productTypes')
-          .getMany()
-      );
+      return this.facilityDetailsRepository
+        .createQueryBuilder('facilityDetails')
+        .select()
+        .where('facilityDetails.user.id = :userId', { userId })
+        .leftJoinAndSelect('facilityDetails.productTypes', 'productTypes')
+        .getMany();
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
@@ -101,7 +90,7 @@ export class FacilityDetailsService {
 
   public async update(
     id: string,
-    facilityDetailsDto: UpdateFacilityDetailsDto,
+    { farmProductTypes, ...facilityDetailsDto }: UpdateFacilityDetailsDto,
   ): Promise<FacilityDetails> {
     try {
       await this.facilityDetailsRepository.update(id, facilityDetailsDto);

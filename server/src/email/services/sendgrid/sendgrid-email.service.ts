@@ -22,26 +22,18 @@ export class SendGridEmailService
   ) {}
 
   async sendEmail(mail: SendGridEmail): Promise<SendGridEmailResponse> {
-    try {
-      const transport = await this.mailService.send({
-        ...mail,
-        from: this.fromEmail,
-      });
+    const transport = await this.mailService.send({
+      ...mail,
+      from: this.fromEmail,
+    });
 
-      if (transport[0].statusCode !== HttpStatus.ACCEPTED) {
-        throw new HttpException(
-          EmailErrorMessage.FailedSendEmail,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      return transport;
-    } catch (error) {
-      console.log(error);
+    if (transport[0].statusCode !== HttpStatus.ACCEPTED) {
       throw new HttpException(
         EmailErrorMessage.FailedSendEmail,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    return transport;
   }
 }

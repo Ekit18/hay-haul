@@ -3,5 +3,6 @@ export enum ProductErrorMessage {
   FailedFetchProduct = 'Failed to fetch product',
   FailedCreateProduct = 'Failed to create product',
   FailedUpdateProduct = 'Failed to update product',
+  FailedDeleteProduct = 'Failed to delete product',
   UnauthorizedUpdateProduct = 'Unauthorized to update product',
 }

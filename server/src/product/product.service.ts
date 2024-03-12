@@ -215,7 +215,10 @@ export class ProductService {
     try {
       await this.productRepository.delete(id);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        ProductErrorMessage.FailedDeleteProduct,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

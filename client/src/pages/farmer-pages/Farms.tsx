@@ -45,7 +45,9 @@ export function Farms() {
   const updateCallback = (data: UpdateFacilityFormValues) => {
     if (!currentFacility) return;
 
-    updateFacility({ id: currentFacility.id, body: data })
+    const { farmProductTypes: _, ...body } = data;
+
+    updateFacility({ id: currentFacility.id, body })
       .unwrap()
       .finally(() => setIsUpdateModalOpen(false))
       .catch(handleRtkError);

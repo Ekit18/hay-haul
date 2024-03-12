@@ -50,7 +50,7 @@ export function ProductsFilter() {
           </Button>
           <Button
             variant="link"
-            className="underline decoration-wavy border-dashed hover:text-secondary"
+            className="underline decoration-wavy  border-dashed hover:text-secondary"
             onClick={handleClearFilter}
           >
             Clear filter
