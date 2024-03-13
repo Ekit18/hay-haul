@@ -10,7 +10,14 @@ export class TriggerService {
     await Promise.all([this.seedTrigger()]);
   }
 
+  private triggers: string[] = [
+    deleteProductTypeProcedure,
+    // productAuctionBidTrigger,
+  ];
+
   private async seedTrigger(): Promise<void> {
-    this.entityManager.query(deleteProductTypeProcedure);
+    this.triggers.map(async (trigger) => {
+      await this.entityManager.query(trigger);
+    });
   }
 }

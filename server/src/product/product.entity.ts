@@ -1,11 +1,13 @@
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
+import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { ProductType } from 'src/product-type/product-type.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -35,4 +37,7 @@ export class Product extends Timestamps {
   })
   @JoinColumn()
   productType: ProductType;
+
+  @OneToOne(() => ProductAuction, (auction) => auction.product)
+  productAuction: ProductAuction;
 }

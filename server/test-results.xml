@@ -1,9 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="Mocha Tests" time="0.025" tests="1" failures="0">
-  <testsuite name="Root Suite" timestamp="2024-02-20T19:47:03" tests="0" time="0.000" failures="0">
+<testsuites name="Mocha Tests" time="0.186" tests="22" failures="5">
+  <testsuite name="Root Suite" timestamp="2024-03-13T18:44:53" tests="0" time="0.000" failures="0">
   </testsuite>
-  <testsuite name="TokenService" timestamp="2024-02-20T19:47:03" tests="1" file="C:\cod\hay-haul\server\src\test\test.entrypoint.ts" time="0.004" failures="0">
-    <testcase name="TokenService Get Test WORKDSDSADASDAS" time="0.001" classname="Get Test WORKDSDSADASDAS">
+  <testsuite name="Facility Details Service" timestamp="2024-03-13T18:44:53" tests="6" file="C:\cod\hay-haul\server\src\test\test.entrypoint.ts" time="0.065" failures="3">
+    <testcase name="Facility Details Service should create a facility detail" time="0.001" classname="should create a facility detail">
+    </testcase>
+    <testcase name="Facility Details Service should throw an error if user not found when creating a facility detail" time="0.001" classname="should throw an error if user not found when creating a facility detail">
+    </testcase>
+    <testcase name="Facility Details Service should get all facility details by user id" time="0.001" classname="should get all facility details by user id">
+      <failure message="this.facilityDetailsRepository.createQueryBuilder(...).select(...).where is not a function" type="HttpException"><![CDATA[HttpException: this.facilityDetailsRepository.createQueryBuilder(...).select(...).where is not a function
+    at FacilityDetailsService.getAllByUserId (src\facility-details\facility-details.service.ts:68:13)
+    at FacilityDetailsServiceTest.testGetAllByUserId (src\facility-details\facility-details.test.ts:99:54)
+    at Context.<anonymous> (node_modules\nestjs-mocha-decorators\src\mochaTest.service.ts:47:41)
+    at processImmediate (node:internal/timers:478:21)]]></failure>
+    </testcase>
+    <testcase name="Facility Details Service should get one facility detail by id" time="0.024" classname="should get one facility detail by id">
+      <failure message="Error: Conversion failed when converting from a character string to uniqueidentifier." type="QueryFailedError"><![CDATA[QueryFailedError: Error: Conversion failed when converting from a character string to uniqueidentifier.
+    at C:\cod\hay-haul\server\node_modules\typeorm\src\driver\sqlserver\SqlServerQueryRunner.ts:282:30
+    at C:\cod\hay-haul\server\node_modules\mssql\lib\base\request.js:440:25
+    at Request.userCallback (node_modules\mssql\lib\tedious\request.js:492:15)
+    at Request.callback (node_modules\tedious\src\request.ts:379:14)
+    at Parser.onEndOfMessage (node_modules\tedious\src\connection.ts:3713:22)
+    at Object.onceWrapper (node:events:628:28)
+    at Parser.emit (node:events:514:28)
+    at Parser.emit (node:domain:488:12)
+    at Readable.<anonymous> (node_modules\tedious\src\token\token-stream-parser.ts:30:12)
+    at Readable.emit (node:events:514:28)
+    at Readable.emit (node:domain:488:12)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)]]></failure>
+    </testcase>
+    <testcase name="Facility Details Service should remove a facility detail" time="0.000" classname="should remove a facility detail">
+    </testcase>
+    <testcase name="Facility Details Service should update a facility detail" time="0.015" classname="should update a facility detail">
+      <failure message="Error: Conversion failed when converting from a character string to uniqueidentifier." type="QueryFailedError"><![CDATA[QueryFailedError: Error: Conversion failed when converting from a character string to uniqueidentifier.
+    at C:\cod\hay-haul\server\node_modules\typeorm\src\driver\sqlserver\SqlServerQueryRunner.ts:282:30
+    at C:\cod\hay-haul\server\node_modules\mssql\lib\base\request.js:440:25
+    at Request.userCallback (node_modules\mssql\lib\tedious\request.js:492:15)
+    at Request.callback (node_modules\tedious\src\request.ts:379:14)
+    at Parser.onEndOfMessage (node_modules\tedious\src\connection.ts:3713:22)
+    at Object.onceWrapper (node:events:628:28)
+    at Parser.emit (node:events:514:28)
+    at Parser.emit (node:domain:488:12)
+    at Readable.<anonymous> (node_modules\tedious\src\token\token-stream-parser.ts:30:12)
+    at Readable.emit (node:events:514:28)
+    at Readable.emit (node:domain:488:12)
+    at endReadableNT (node:internal/streams/readable:1589:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)]]></failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Product Type Service" timestamp="2024-03-13T18:44:53" tests="7" file="C:\cod\hay-haul\server\src\test\test.entrypoint.ts" time="0.050" failures="2">
+    <testcase name="Product Type Service should create many product types" time="0.001" classname="should create many product types">
+    </testcase>
+    <testcase name="Product Type Service should find all product types by facility" time="0.000" classname="should find all product types by facility">
+    </testcase>
+    <testcase name="Product Type Service should find one product type by id" time="0.001" classname="should find one product type by id">
+    </testcase>
+    <testcase name="Product Type Service should create a product type" time="0.001" classname="should create a product type">
+      <failure message="expected { Spy &apos;object.save&apos;, 1 call }
+() =&gt; Promise.resolve() to have been called with [ {} ]" type="AssertionError"><![CDATA[AssertionError: expected { Spy 'object.save', 1 call }
+() => Promise.resolve() to have been called with [ {} ]
+    at ProductTypeServiceTest.create (src\product-type\product-type.test.ts:108:50)
+    at async Context.<anonymous> (node_modules\nestjs-mocha-decorators\src\mochaTest.service.ts:47:17)
+
+      + expected - actual:  failed to generate Mocha diff
+]]></failure>
+    </testcase>
+    <testcase name="Product Type Service should update a product type" time="0.016" classname="should update a product type">
+    </testcase>
+    <testcase name="Product Type Service should delete a product type" time="0.029" classname="should delete a product type">
+      <failure message="Error: Product type with products is prohibited to delete" type="HttpException"><![CDATA[HttpException: Error: Product type with products is prohibited to delete
+    at ProductTypeService.delete (src\product-type\product-type.service.ts:100:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async ProductTypeServiceTest.deleteProductType (src\product-type\product-type.test.ts:135:5)
+    at async Context.<anonymous> (node_modules\nestjs-mocha-decorators\src\mochaTest.service.ts:47:17)]]></failure>
+    </testcase>
+    <testcase name="Product Type Service should throw an error when creating a product type with a non-existent facility" time="0.000" classname="should throw an error when creating a product type with a non-existent facility">
+    </testcase>
+  </testsuite>
+  <testsuite name="Product Service" timestamp="2024-03-13T18:44:53" tests="9" file="C:\cod\hay-haul\server\src\test\test.entrypoint.ts" time="0.040" failures="0">
+    <testcase name="Product Service should call findOne with correct parameters" time="0.000" classname="should call findOne with correct parameters">
+    </testcase>
+    <testcase name="Product Service should throw an error if id is not provided" time="0.024" classname="should throw an error if id is not provided">
+    </testcase>
+    <testcase name="Product Service should handle error from findOne" time="0.000" classname="should handle error from findOne">
+    </testcase>
+    <testcase name="Product Service should throw an error if facilityId is not provided" time="0.012" classname="should throw an error if facilityId is not provided">
+    </testcase>
+    <testcase name="Product Service should throw an error if productTypeId is not provided" time="0.003" classname="should throw an error if productTypeId is not provided">
+    </testcase>
+    <testcase name="Product Service should throw an error if id is not provided" time="0.001" classname="should throw an error if id is not provided">
+    </testcase>
+    <testcase name="Product Service should handle error from findOne" time="0.000" classname="should handle error from findOne">
+    </testcase>
+    <testcase name="Product Service should throw an error if id is not provided" time="0.000" classname="should throw an error if id is not provided">
+    </testcase>
+    <testcase name="Product Service should handle error from delete" time="0.000" classname="should handle error from delete">
     </testcase>
   </testsuite>
 </testsuites>

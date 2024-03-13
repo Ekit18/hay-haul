@@ -1,6 +1,7 @@
 import { Otp } from 'src/auth/otp.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
+import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
 import { Token } from 'src/token/token.entity';
 import {
   Check,
@@ -53,6 +54,12 @@ export class User extends Timestamps {
 
   @OneToOne(() => Token, (token) => token.user)
   token: Token;
+
+  @OneToMany(
+    () => ProductAuctionBid,
+    (productAuctionBid) => productAuctionBid.user,
+  )
+  productAuctionBids: ProductAuctionBid[];
 
   @OneToMany(() => Otp, (otp) => otp.user)
   otp: Otp;

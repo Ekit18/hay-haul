@@ -1,16 +1,4 @@
-// export const deleteProductTrigger = `
-// create or alter trigger product_type_del_trigger
-// on product_type
-// after delete
-// as
-// declare @productTypeId varchar(255);
-// select @productTypeId = id from deleted;
-// if exists (select * from product where productTypeId = @productTypeId)
-// begin
-//     rollback tran
-// end
-// `;
-
+// TODO rewrite to trigger
 export const deleteProductTypeProcedure = `
 create or alter procedure delete_product_type_procedure @productTypeId varchar(255) as
 begin

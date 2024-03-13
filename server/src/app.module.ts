@@ -6,6 +6,10 @@ import { Otp } from './auth/otp.entity';
 import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
 import { FacilityDetailsModule } from './facility-details/facility-details.module';
+import { ProductAuctionBid } from './product-auction-bid/product-auction-bid.entity';
+import { ProductAuctionBidModule } from './product-auction-bid/product-auction-bid.module';
+import { ProductAuction } from './product-auction/product-auction.entity';
+import { ProductAuctionModule } from './product-auction/product-auction.module';
 import { ProductType } from './product-type/product-type.entity';
 import { ProductTypeModule } from './product-type/product-type.module';
 import { Product } from './product/product.entity';
@@ -30,7 +34,16 @@ import { UserModule } from './user/user.module';
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        entities: [User, Token, Product, FacilityDetails, ProductType, Otp],
+        entities: [
+          User,
+          Token,
+          Product,
+          FacilityDetails,
+          ProductType,
+          Otp,
+          ProductAuctionBid,
+          ProductAuction,
+        ],
         synchronize: true,
         options: {
           encrypt: false,
@@ -45,6 +58,8 @@ import { UserModule } from './user/user.module';
     ProductModule,
     FacilityDetailsModule,
     ProductTypeModule,
+    ProductAuctionModule,
+    ProductAuctionBidModule,
   ],
   providers: [TriggerService],
 })
