@@ -54,8 +54,11 @@ export class ProductAuction {
 
   //todo: cascade delete
   @OneToOne(() => ProductAuctionBid)
-  @JoinColumn()
+  @JoinColumn({ name: 'currentMaxBidId' })
   currentMaxBid: ProductAuctionBid;
+
+  @Column({ nullable: true })
+  currentMaxBidId: string;
 
   //todo: cascade delete
   @OneToMany(

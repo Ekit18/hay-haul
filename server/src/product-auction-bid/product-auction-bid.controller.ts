@@ -13,7 +13,7 @@ export class ProductAuctionBidController {
     private readonly productAuctionBidService: ProductAuctionBidService,
   ) {}
 
-  @Post('/auctionId/:auctionId')
+  @Post('/auction/:auctionId')
   async create(
     @Param('auctionId') auctionId: string,
     @Req() request: AuthenticatedRequest,

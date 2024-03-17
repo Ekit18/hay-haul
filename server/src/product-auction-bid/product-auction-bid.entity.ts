@@ -10,7 +10,9 @@ import {
 } from 'typeorm';
 
 @Entity()
-@Unique(['auctionId', 'userId', 'price'])
+// @Unique(['auctionId', 'price'])
+// @Unique(['auctionId', 'userId'])
+@Unique('unique_auction_user', ['auctionId', 'userId', 'price'])
 export class ProductAuctionBid {
   @PrimaryGeneratedColumn('uuid')
   id: string;

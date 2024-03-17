@@ -6,6 +6,7 @@ import { Otp } from './auth/otp.entity';
 import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
 import { FacilityDetailsModule } from './facility-details/facility-details.module';
+import { FunctionService } from './function/function.service';
 import { ProductAuctionBid } from './product-auction-bid/product-auction-bid.entity';
 import { ProductAuctionBidModule } from './product-auction-bid/product-auction-bid.module';
 import { ProductAuction } from './product-auction/product-auction.entity';
@@ -44,6 +45,8 @@ import { UserModule } from './user/user.module';
           ProductAuctionBid,
           ProductAuction,
         ],
+        // logger: 'simple-console',
+        logging: true,
         synchronize: true,
         options: {
           encrypt: false,
@@ -61,12 +64,16 @@ import { UserModule } from './user/user.module';
     ProductAuctionModule,
     ProductAuctionBidModule,
   ],
-  providers: [TriggerService],
+  providers: [TriggerService, FunctionService],
 })
 export class AppModule implements OnApplicationBootstrap {
-  constructor(private readonly seedingService: TriggerService) {}
+  constructor(
+    private readonly seedingService: TriggerService,
+    private readonly functionService: FunctionService,
+  ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     await this.seedingService.seed();
+    await this.functionService.seed();
   }
 }

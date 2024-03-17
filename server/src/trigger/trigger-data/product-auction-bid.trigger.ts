@@ -1,19 +1,38 @@
+import { GET_AUCTION_MAX_BID_FUNCTION_NAME } from 'src/function/function-data/auction.function';
+
+export const PRODUCT_AUCTION_MAX_BID_TRIGGER_NAME =
+  'product_auction_max_bid_trigger';
+
 export const productAuctionBidTrigger = `
-create or alter trigger product_auction_max_bid_trigger
-on product_auction_bid
-after insert
-as
-begin
-  if
-  (select price from inserted)
-  <=
-  (SELECT bid.price 
-    FROM product_auction auction
-    INNER JOIN product_auction_bid bid ON auction.currentMaxBidId = bid.id
-    WHERE auction.id = (select auctionId from inserted))
+  create or alter trigger ${PRODUCT_AUCTION_MAX_BID_TRIGGER_NAME}
+  on product_auction_bid
+  after insert, update
+  as
   begin
-    raiserror ('New bid amount cannot be less than the maximum bid', 16, 1);
-    rollback transaction;
-  end
-end;
-`;
+  declare @insertedPrice decimal(18, 2);
+	declare @currMax decimal(18,2);
+    declare @auctionId varchar(255);
+	declare @currUserId varchar(255);
+	declare @currWinnerId varchar(255);
+    
+	select @currUserId = userId, @insertedPrice = price, @auctionId = auctionId from inserted;
+
+	select @currMax=price, @currWinnerId=userId FROM ${GET_AUCTION_MAX_BID_FUNCTION_NAME}(@auctionId);
+
+	if(@currUserId = @currWinnerId)
+	begin
+		declare @deletedMaxPrice decimal(18,2);
+		select @deletedMaxPrice = price from deleted;
+		if(@insertedPrice <= @deletedMaxPrice)
+		begin
+		  raiserror ('New bid amount cannot be less than the maximum bid', 16, 1);
+		  rollback transaction;
+		end
+	end
+    else if (@insertedPrice <= @currMax)
+    begin
+      raiserror ('New bid amount cannot be less than the maximum bid', 16, 1);
+      rollback transaction;
+    end
+  end;
+  `;

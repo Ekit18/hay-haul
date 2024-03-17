@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
+import { updateAuctionTrigger } from './trigger-data/auction.trigger';
+import { productAuctionBidTrigger } from './trigger-data/product-auction-bid.trigger';
 import { deleteProductTypeProcedure } from './trigger-data/product.trigger';
 
 @Injectable()
@@ -12,7 +14,8 @@ export class TriggerService {
 
   private triggers: string[] = [
     deleteProductTypeProcedure,
-    // productAuctionBidTrigger,
+    productAuctionBidTrigger,
+    updateAuctionTrigger,
   ];
 
   private async seedTrigger(): Promise<void> {
