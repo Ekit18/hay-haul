@@ -13,9 +13,9 @@ export class TriggerService {
   }
 
   private triggers: string[] = [
+    updateAuctionTrigger,
     deleteProductTypeProcedure,
     productAuctionBidTrigger,
-    updateAuctionTrigger,
   ];
 
   private async seedTrigger(): Promise<void> {

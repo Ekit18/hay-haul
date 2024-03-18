@@ -16,3 +16,8 @@ export enum ComparisonOperator {
   LESS_THAN,
   LESS_THAN_OR_EQUAL,
 }
+
+export enum ServerEventName {
+  Notification = 'notification',
+  AuctionUpdated = 'auction_updated',
+}

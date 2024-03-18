@@ -1,14 +1,11 @@
 import { CreateProductFormValues } from '@/components/products/modals/create-product-modal/validation';
 import { UpdateProductFormValues } from '@/components/products/modals/update-product-modal/validation';
 import { Product } from '@/lib/types/Product/Product.type';
-import { DataWithCount } from '@/lib/types/types';
+import { DataWithCount, UpdateRequestDto } from '@/lib/types/types';
 import { TagType, api } from '@/store/api';
 import { generatePath } from 'react-router-dom';
 
-export type UpdateProductDto = {
-  body: UpdateProductFormValues;
-  id: string;
-};
+export type UpdateProductDto = UpdateRequestDto<UpdateProductFormValues>;
 
 export const productsApi = api.injectEndpoints({
   endpoints: (builder) => ({

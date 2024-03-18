@@ -1,8 +1,10 @@
+import { ComparisonOperator } from '../enums/comparison-operator.enum';
 import { EntityTitle } from '../enums/entity-title.enum';
 import { SortOrder } from '../enums/sort-order.enum';
 
 export type ValueOf<T> = T[keyof T];
 export type SortOrderValues = ValueOf<typeof SortOrder>;
+export type ComparisonOperatorValues = ValueOf<typeof ComparisonOperator>;
 
 export type DataWithCount<T> = {
   data: T[];
@@ -19,3 +21,8 @@ export type ArrayFields<T> = {
 export type EntityTitleValues = ValueOf<typeof EntityTitle>;
 
 export type EmptyCallback = () => void;
+
+export type UpdateRequestDto<T> = {
+  body: T;
+  id: string;
+};

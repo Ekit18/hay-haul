@@ -12,10 +12,10 @@ import { SendOtpDto } from 'src/auth/dto/send-otp.dto';
 import { EmailService } from 'src/email/services/email.service';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
 import { OtpType } from 'src/lib/enums/enums';
+import { TokenPayload } from 'src/lib/types/token-payload.type';
 import { ProductTypeService } from 'src/product-type/product-type.service';
 import { TokenTypeEnum } from 'src/token/token-type.enum';
 import { TokenService } from 'src/token/token.service';
-import { TokenData } from 'src/token/token.type';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
 import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
@@ -78,7 +78,7 @@ export class AuthService {
       });
     }
 
-    const userData: TokenData | null = this.tokenService.checkToken(
+    const userData: TokenPayload | null = this.tokenService.checkToken(
       refreshToken,
       TokenTypeEnum.REFRESH,
     );

@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/user/user.entity';
 
+import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import {
   Check,
   Column,
@@ -18,10 +18,6 @@ const notificationMessages = Object.values(NotificationMessage)
 @Entity()
 @Check(`"message" IN (${notificationMessages})`)
 export class Notification {
-  @ApiProperty({
-    description: 'Unique identifier for notification',
-    example: 'e02769c5-60c7-4c88-8372-6c2598f9a234',
-  })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -36,21 +32,27 @@ export class Notification {
   @Column({ default: false })
   isRead: boolean;
 
-  // @ApiProperty({
-  //   description: 'Link to the associated appointment',
-  //   type: () => User,
-  // })
-  // @ManyToOne(() => Appointment, (appointment) => appointment.notification, {
-  //   onDelete: 'CASCADE',
-  // })
-  // @JoinColumn({ name: 'appointmentId' })
-  // appointment: Appointment;
+  @Column()
+  productAuctionId: string;
+
+  @ManyToOne(
+    () => ProductAuction,
+    (productAuction) => productAuction.notifications,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  @JoinColumn({ name: 'productAuctionId' })
+  productAuction: ProductAuction;
+
+  @Column()
+  receiverId: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'receiverId' })
   receiver: User;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'senderId' })
-  sender: User;
+  // @ManyToOne(() => User)
+  // @JoinColumn({ name: 'senderId' })
+  // sender: User;
 }

@@ -4,30 +4,26 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 import { ALLOWED_ROLES_KEY } from 'src/lib/decorators/roles-auth.decorator';
+import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { TokenTypeEnum } from 'src/token/token-type.enum';
+import { TokenService } from 'src/token/token.service';
 import { UserRole } from 'src/user/user.entity';
 import { AuthErrorMessage } from './auth-error-message.enum';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  private readonly jwtAccessTokenSecret = this.configService.get<string>(
-    'JWT_ACCESS_TOKEN_SECRET',
-  );
-
   constructor(
-    private jwtService: JwtService,
-    private readonly configService: ConfigService,
+    private tokenService: TokenService,
     private reflector: Reflector,
   ) {}
 
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const req = context.switchToHttp().getRequest();
+    const req = context.switchToHttp().getRequest() as AuthenticatedRequest;
 
     try {
       const authHeader = req.headers.authorization;
@@ -40,9 +36,7 @@ export class JwtAuthGuard implements CanActivate {
         });
       }
 
-      const user = this.jwtService.verify(token, {
-        secret: this.jwtAccessTokenSecret,
-      });
+      const user = this.tokenService.checkToken(token, TokenTypeEnum.ACCESS);
 
       req.user = user;
 

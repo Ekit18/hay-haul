@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NotificationModule } from 'src/notification/notification.module';
 import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { ProductAuctionModule } from 'src/product-auction/product-auction.module';
 import { TokenModule } from 'src/token/token.module';
@@ -16,6 +17,7 @@ import { ProductAuctionBidService } from './product-auction-bid.service';
     ProductAuctionModule,
     UserModule,
     TokenModule,
+    NotificationModule,
   ],
 })
 export class ProductAuctionBidModule {}

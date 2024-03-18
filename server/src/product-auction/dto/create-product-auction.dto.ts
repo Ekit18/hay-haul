@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsNumber, Min } from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
 import { ScalarComparer } from 'src/lib/class-validators/scalar-comparer';
 import { ComparisonOperator } from 'src/lib/enums/enums';
 
@@ -41,4 +41,8 @@ export class CreateProductAuctionDto {
   @IsNumber()
   @IsNotEmpty()
   bidStep: number;
+
+  @IsNotEmpty()
+  @IsString()
+  description: string;
 }

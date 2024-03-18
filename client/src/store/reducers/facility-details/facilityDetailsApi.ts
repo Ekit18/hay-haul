@@ -1,16 +1,15 @@
 import { CreateFacilityFormValues } from '@/components/facility/modals/create-facility-modal/validation';
 import { UpdateFacilityFormValues } from '@/components/facility/modals/update-facility-modal/validation';
 import { FacilityDetails } from '@/lib/types/FacilityDetails/FacilityDetails.type';
+import { UpdateRequestDto } from '@/lib/types/types';
 import { TagType, api } from '@/store/api';
 import { generatePath } from 'react-router-dom';
 
 export type CreateFacilityDto = CreateFacilityFormValues & {
   userId: string;
 };
-export type UpdateFacilityDto = {
-  body: UpdateFacilityFormValues;
-  id: string;
-};
+
+export type UpdateFacilityDto = UpdateRequestDto<UpdateFacilityFormValues>;
 
 export const facilityDetailsApi = api.injectEndpoints({
   endpoints: (builder) => ({

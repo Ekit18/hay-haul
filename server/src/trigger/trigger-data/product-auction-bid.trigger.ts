@@ -11,7 +11,7 @@ export const productAuctionBidTrigger = `
   begin
   declare @insertedPrice decimal(18, 2);
 	declare @currMax decimal(18,2);
-    declare @auctionId varchar(255);
+  declare @auctionId varchar(255);
 	declare @currUserId varchar(255);
 	declare @currWinnerId varchar(255);
     

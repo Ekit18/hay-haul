@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+} from '@nestjs/common';
+import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { CreateProductAuctionDto } from './dto/create-product-auction.dto';
+import { ProductAuctionQueryDto } from './dto/product-auction-query.dto';
 import { UpdateProductAuctionDto } from './dto/update-product-auction.dto';
 import { ProductAuctionService } from './product-auction.service';
 
@@ -19,19 +30,17 @@ export class ProductAuctionController {
     return this.productAuctionService.create(productId, dto);
   }
 
-  @Get('/:userId')
-  async getAllByUserId(@Param('userId') userId: string) {
-    return this.productAuctionService.findAllByUserId(userId);
-  }
-
   @Get('/product/:productId')
   async getOneByProductId(@Param('productId') productId: string) {
     return this.productAuctionService.findOneByProductId(productId);
   }
 
   @Get()
-  async getAll() {
-    return this.productAuctionService.findAll();
+  async getAll(
+    @Query() query: ProductAuctionQueryDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.productAuctionService.findAll(query, req);
   }
 
   @Put('/:id')

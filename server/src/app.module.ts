@@ -7,6 +7,8 @@ import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
 import { FacilityDetailsModule } from './facility-details/facility-details.module';
 import { FunctionService } from './function/function.service';
+import { Notification } from './notification/notification.entity';
+import { NotificationModule } from './notification/notification.module';
 import { ProductAuctionBid } from './product-auction-bid/product-auction-bid.entity';
 import { ProductAuctionBidModule } from './product-auction-bid/product-auction-bid.module';
 import { ProductAuction } from './product-auction/product-auction.entity';
@@ -15,6 +17,8 @@ import { ProductType } from './product-type/product-type.entity';
 import { ProductTypeModule } from './product-type/product-type.module';
 import { Product } from './product/product.entity';
 import { ProductModule } from './product/product.module';
+import { ProductsAuctionGatewayModule } from './products-auction-gateway/products-auction-gateway.module';
+import { SocketModule } from './socket/socket.module';
 import { Token } from './token/token.entity';
 import { TokenModule } from './token/token.module';
 import { TriggerService } from './trigger/trigger.service';
@@ -44,6 +48,7 @@ import { UserModule } from './user/user.module';
           Otp,
           ProductAuctionBid,
           ProductAuction,
+          Notification,
         ],
         // logger: 'simple-console',
         logging: true,
@@ -63,6 +68,9 @@ import { UserModule } from './user/user.module';
     ProductTypeModule,
     ProductAuctionModule,
     ProductAuctionBidModule,
+    NotificationModule,
+    SocketModule,
+    ProductsAuctionGatewayModule,
   ],
   providers: [TriggerService, FunctionService],
 })
@@ -73,7 +81,7 @@ export class AppModule implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    await this.seedingService.seed();
     await this.functionService.seed();
+    await this.seedingService.seed();
   }
 }

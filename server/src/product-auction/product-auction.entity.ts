@@ -1,3 +1,4 @@
+import { Notification } from 'src/notification/notification.entity';
 import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
 import { Product } from 'src/product/product.entity';
 import {
@@ -9,16 +10,17 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export enum AuctionStatus {
+export enum ProductAuctionStatus {
   Inactive = 'Inactive',
   Active = 'Active',
+  EndSoon = 'End soon',
+  Ended = 'Ended',
   WaitingPayment = 'Waiting payment',
   Closed = 'Closed',
-  Ended = 'Ended',
   Unpaid = 'Unpaid',
 }
 
-const statuses = Object.values(AuctionStatus)
+const statuses = Object.values(ProductAuctionStatus)
   .map((role) => `'${role}'`)
   .join(', ');
 
@@ -50,23 +52,28 @@ export class ProductAuction {
   paymentPeriod: Date;
 
   @Column()
+  description: string;
+
+  @Column()
   endDate: Date;
 
-  //todo: cascade delete
-  @OneToOne(() => ProductAuctionBid)
+  @OneToOne(() => ProductAuctionBid, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'currentMaxBidId' })
   currentMaxBid: ProductAuctionBid;
 
   @Column({ nullable: true })
   currentMaxBidId: string;
 
-  //todo: cascade delete
   @OneToMany(
     () => ProductAuctionBid,
     (productAuctionBid) => productAuctionBid.productAuction,
+    { cascade: true, onDelete: 'CASCADE' },
   )
   bids: ProductAuctionBid[];
 
-  @Column({ default: AuctionStatus.Inactive })
-  auctionStatus: AuctionStatus;
+  @Column({ default: ProductAuctionStatus.Inactive })
+  auctionStatus: ProductAuctionStatus;
+
+  @OneToMany(() => Notification, (notification) => notification.productAuction)
+  notifications: Notification;
 }

@@ -14,7 +14,7 @@ import { Repository } from 'typeorm';
 import { TokenErrorMessage } from './token-error-message.enum';
 import { TokenTypeEnum } from './token-type.enum';
 import { Token } from './token.entity';
-import { TokenData, Tokens } from './token.type';
+import { Tokens } from './token.type';
 
 @Injectable()
 export class TokenService {
@@ -91,15 +91,15 @@ export class TokenService {
     }
   }
 
-  public checkToken(token: string, tokenType: TokenTypeEnum): TokenData {
+  public checkToken(token: string, tokenType: TokenTypeEnum): TokenPayload {
     try {
       switch (tokenType) {
         case TokenTypeEnum.ACCESS:
-          return this.jwtService.verify<TokenData>(token, {
+          return this.jwtService.verify<TokenPayload>(token, {
             secret: this.jwtAccessTokenSecret,
           });
         case TokenTypeEnum.REFRESH:
-          return this.jwtService.verify<TokenData>(token, {
+          return this.jwtService.verify<TokenPayload>(token, {
             secret: this.jwtRefreshTokenSecret,
           });
       }
