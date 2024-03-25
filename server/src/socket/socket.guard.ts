@@ -31,6 +31,7 @@ export class SocketAuthGuard implements CanActivate {
         TokenTypeEnum.ACCESS,
       );
       client.user = tokenData;
+
       return true;
     } catch (e) {
       throw new WsException({

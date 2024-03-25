@@ -1,9 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  DEFAULT_OFFSET,
+  DEFAULT_PAGINATION_LIMIT,
+} from 'src/lib/constants/constants';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductErrorMessage } from 'src/product/product-error-message.enum';
 import { ProductService } from 'src/product/product.service';
+import { S3FileService, S3Folder } from 'src/s3-file/s3-file.service';
 import { SocketService } from 'src/socket/socket.service';
+import { UserRole } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { CreateProductAuctionDto } from './dto/create-product-auction.dto';
 import { ProductAuctionQueryDto } from './dto/product-auction-query.dto';
@@ -18,18 +24,48 @@ export class ProductAuctionService {
     private productAuctionRepository: Repository<ProductAuction>,
     private productService: ProductService,
     private socketService: SocketService,
+    private s3FileService: S3FileService,
   ) {}
 
-  async create(productId: string, dto: CreateProductAuctionDto) {
+  async create({
+    productId,
+    dto,
+    photos,
+    req,
+  }: {
+    productId: string;
+    dto: CreateProductAuctionDto;
+    photos: Express.Multer.File[];
+    req: AuthenticatedRequest;
+  }) {
+    const userId = req.user.id;
     const product = await this.productService.findOne(productId);
+
     if (!product) {
       throw new HttpException(
         ProductErrorMessage.ProductNotFound,
         HttpStatus.NOT_FOUND,
       );
     }
+
+    if (product.facilityDetails.user.id !== userId) {
+      throw new HttpException(
+        ProductAuctionErrorMessage.FacilityNotMatched,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     try {
-      return this.productAuctionRepository.save({ ...dto, productId });
+      const fileEntities = await this.s3FileService.create(
+        photos,
+        S3Folder.AUCTION_IMAGES,
+      );
+
+      return this.productAuctionRepository.save({
+        ...dto,
+        productId,
+        photos: fileEntities,
+      });
     } catch (error) {
       console.error(error);
       throw new HttpException(
@@ -52,8 +88,8 @@ export class ProductAuctionService {
 
   async findAll(
     {
-      limit,
-      offset,
+      limit = DEFAULT_PAGINATION_LIMIT,
+      offset = DEFAULT_OFFSET,
       productName,
       maxBuyoutPrice,
       minBuyoutPrice,
@@ -69,12 +105,16 @@ export class ProductAuctionService {
       startDateSort,
     }: ProductAuctionQueryDto,
     request: AuthenticatedRequest,
+    hasRoleBeChecked = false,
   ) {
     try {
       const userId = request.user.id;
       const queryBuilder = this.productAuctionRepository
         .createQueryBuilder('productAuction')
-        .leftJoinAndSelect('productAuction.product', 'product');
+        .leftJoinAndSelect('productAuction.product', 'product')
+        .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
+        .leftJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
+        .leftJoinAndSelect('productAuction.photos', 'photos');
 
       if (productName) {
         queryBuilder.where('product.name LIKE :productName', {
@@ -152,14 +192,46 @@ export class ProductAuctionService {
         queryBuilder.orderBy('productAuction.startDate', startDateSort);
       }
 
-      const [result, total] = await queryBuilder
+      if (!hasRoleBeChecked) {
+        queryBuilder.andWhere(
+          'productAuction.auctionStatus IN (:...auctionStatus)',
+          {
+            auctionStatus: [
+              ProductAuctionStatus.Active,
+              ProductAuctionStatus.EndSoon,
+            ],
+          },
+        );
+      }
+
+      if (hasRoleBeChecked) {
+        switch (request.user.role) {
+          case UserRole.Farmer:
+            queryBuilder.andWhere('facilityDetails.userId = :userId', {
+              userId,
+            });
+            break;
+          case UserRole.Businessman:
+            queryBuilder.innerJoinAndSelect('productAuction.bids', 'bids');
+            queryBuilder.andWhere('bids.userId = :userId', { userId });
+            break;
+        }
+      }
+
+      const [auctions, total] = await queryBuilder
         .take(limit)
         .skip(offset)
         .getManyAndCount();
       const pageCount = Math.ceil(total / limit);
 
+      for await (const auction of auctions) {
+        for await (const photo of auction.photos) {
+          photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
+        }
+      }
+
       return {
-        data: result,
+        data: auctions,
         count: pageCount,
       };
     } catch (error) {
@@ -222,10 +294,23 @@ export class ProductAuctionService {
     }
   }
 
-  async update(auctionId: string, dto: UpdateProductAuctionDto) {
-    const auction = await this.productAuctionRepository.findOne({
-      where: { id: auctionId },
-    });
+  async update({
+    photos,
+    auctionId,
+    dto,
+  }: {
+    photos: Express.Multer.File[];
+    auctionId: string;
+    dto: UpdateProductAuctionDto;
+  }) {
+    const auction = await this.productAuctionRepository
+      .createQueryBuilder('productAuction')
+      .leftJoinAndSelect('productAuction.photos', 'photos')
+      .select('productAuction')
+      .where({
+        id: auctionId,
+      })
+      .getOne();
     if (auction.auctionStatus !== ProductAuctionStatus.Inactive) {
       throw new HttpException(
         ProductAuctionErrorMessage.AuctionNotInactive,
@@ -233,7 +318,18 @@ export class ProductAuctionService {
       );
     }
     try {
-      await this.productAuctionRepository.update(auctionId, dto);
+      const prevPhotosKeys = auction.photos.map((photo) => photo.key);
+      await this.s3FileService.removeByKeys(prevPhotosKeys);
+
+      const fileEntities = await this.s3FileService.create(
+        photos,
+        S3Folder.AUCTION_IMAGES,
+      );
+
+      await this.productAuctionRepository.update(auctionId, {
+        ...dto,
+        photos: fileEntities,
+      });
     } catch (error) {
       throw new HttpException(
         ProductAuctionErrorMessage.FailedUpdateProductAuction,

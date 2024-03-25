@@ -6,8 +6,8 @@ import { SidebarUserInfo } from './components/SidebarUserInfo';
 export function Sidebar() {
   return (
     <>
-      <div className="min-[1068px]:w-3/12 xl:w-2/12 w-0 h-screen ">
-        <div className="w-full h-full min-[1068px]:flex bg-secondary  flex-col items-center pt-12 px-2 hidden">
+      <div className="w-0 h-screen min-[1068px]:w-2/12">
+        <div className="w-full h-full min-[1068px]:flex bg-secondary  flex-col items-center pt-12 hidden">
           <SidebarUserInfo />
           <SidebarLinks />
           <LogOutButton />

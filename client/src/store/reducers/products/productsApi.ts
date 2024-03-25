@@ -14,7 +14,7 @@ export const productsApi = api.injectEndpoints({
         url: '/product/filter',
         params: searchParams
       }),
-      providesTags: [TagType.Product]
+      providesTags: [TagType.ProductAuction]
     }),
     createProduct: builder.mutation<Product, CreateProductFormValues>({
       query: ({ productTypeId, farmId, ...body }) => ({
@@ -25,14 +25,14 @@ export const productsApi = api.injectEndpoints({
         }),
         body
       }),
-      invalidatesTags: [TagType.Product]
+      invalidatesTags: [TagType.ProductAuction]
     }),
     deleteProduct: builder.mutation<void, string>({
       query: (id) => ({
         method: 'DELETE',
         url: generatePath(`/product/:id`, { id })
       }),
-      invalidatesTags: [TagType.Product]
+      invalidatesTags: [TagType.ProductAuction]
     }),
     updateProduct: builder.mutation<Product, UpdateProductDto>({
       query: ({ id, body }) => ({
@@ -40,7 +40,7 @@ export const productsApi = api.injectEndpoints({
         url: generatePath(`/product/:id`, { id }),
         body
       }),
-      invalidatesTags: [TagType.Product]
+      invalidatesTags: [TagType.ProductAuction]
     })
   })
 });

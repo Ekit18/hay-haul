@@ -19,7 +19,8 @@ export const AppRoute = {
     SignUp: '/sign-up',
     OtpConfirm: '/otp-confirm',
     ResetPassword: '/reset-password',
-    Auctions: '/auctions'
+    Auctions: '/auctions',
+    MyAuctions: '/my-auctions'
   },
   Farmer: {
     Products: '/products',
@@ -27,7 +28,7 @@ export const AppRoute = {
     // MyAuctions: '/my-auctions'
   },
   Businessman: {
-    Warehouses: '/warehouses',
+    Depots: '/depots',
     Products: '/products',
     Bids: '/bids',
     Delivery: '/delivery'

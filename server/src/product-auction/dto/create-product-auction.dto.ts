@@ -17,6 +17,7 @@ export class CreateProductAuctionDto {
   @IsNotEmpty()
   buyoutPrice: number;
 
+  // todo check dates compatability if start date is in future and end date is in past
   @IsDate()
   @IsNotEmpty()
   startDate: Date;

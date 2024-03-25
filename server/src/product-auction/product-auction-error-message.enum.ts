@@ -6,4 +6,5 @@ export enum ProductAuctionErrorMessage {
   FailedUpdateProductAuction = 'Failed to update product auction',
   AuctionNotInactive = 'Auction is not inactive',
   FailedFinishAuctionSuccessfully = 'Failed to finish auction successfully',
+  FacilityNotMatched = 'Facility not matched',
 }

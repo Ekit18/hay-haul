@@ -1,6 +1,7 @@
 import { Notification } from 'src/notification/notification.entity';
 import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
 import { Product } from 'src/product/product.entity';
+import { S3File } from 'src/s3-file/s3-file.entity';
 import {
   Column,
   Entity,
@@ -76,4 +77,7 @@ export class ProductAuction {
 
   @OneToMany(() => Notification, (notification) => notification.productAuction)
   notifications: Notification;
+
+  @OneToMany(() => S3File, (file) => file.productAuction)
+  photos: S3File[];
 }

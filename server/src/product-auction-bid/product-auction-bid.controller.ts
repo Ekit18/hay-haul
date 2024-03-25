@@ -1,12 +1,13 @@
 import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AllowedRoles } from 'src/lib/decorators/roles-auth.decorator';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { UserRole } from 'src/user/user.entity';
 import { CreateProductAuctionBidDto } from './dto/create-product-bid-auction.dto';
 import { ProductAuctionBidService } from './product-auction-bid.service';
 
-// TODO:fix this
 @UseGuards(JwtAuthGuard)
-// @AllowedRoles(UserRole.Businessman)
+@AllowedRoles(UserRole.Businessman)
 @Controller('product-auction-bid')
 export class ProductAuctionBidController {
   constructor(

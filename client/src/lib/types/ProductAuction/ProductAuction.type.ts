@@ -1,3 +1,4 @@
+import { AuctionPhotoType } from '../AuctionPhoto/AuctionPhoto.type';
 import { Product } from '../Product/Product.type';
 import { ProductAuctionBid } from '../ProductAuctionBid/ProductAuctionBid.type';
 
@@ -25,4 +26,5 @@ export type ProductAuction = {
   currentMaxBid: ProductAuctionBid | null;
   currentMaxBidId: string;
   auctionStatus: ProductAuctionStatus;
+  photos: AuctionPhotoType[];
 };

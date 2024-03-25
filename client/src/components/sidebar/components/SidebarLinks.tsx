@@ -16,11 +16,11 @@ export function SidebarLinks() {
       {links[userRole].map((link) => (
         <Button
           variant="link"
-          className="w-full text-left hover:rounded-none justify-start text-white font-medium text-lg flex flex-row items-center gap-5 decoration-2"
+          className="w-full text-left hover:rounded-none justify-start text-white font-medium text-lg flex flex-row items-center gap-5 decoration-2 px-3 xl:px-4"
           onClick={() => navigate(link.url)}
           key={link.title}
         >
-          <link.icon />
+          <link.icon className="w-5 h-5 xl:w-6 xl:h-6" />
           {link.title}
         </Button>
       ))}
