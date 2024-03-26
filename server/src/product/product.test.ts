@@ -7,8 +7,10 @@ import {
   TestEventsSuite,
   TestSuite,
 } from 'nestjs-mocha-decorators';
+import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
 import { TokenPayload } from 'src/lib/types/token-payload.type';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { ProductTypeService } from 'src/product-type/product-type.service';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './product.entity';
@@ -26,6 +28,10 @@ export class ProductServiceTest {
   private readonly productService: ProductService;
   @InjectRepository(Product)
   private readonly productRepository: Repository<Product>;
+  @Inject()
+  private readonly facilityDetailsService: FacilityDetailsService;
+  @Inject()
+  private readonly productTypeService: ProductTypeService;
 
   @TestEvent(TestEventsEnum.AFTER_EACH)
   afterEach() {
@@ -46,6 +52,7 @@ export class ProductServiceTest {
   @Test('should throw an error if id is not provided')
   async findOneIdError() {
     try {
+      chai.spy.on(this.productRepository, 'findOne', () => Promise.resolve());
       await this.productService.findOne(null);
     } catch (err) {
       chai.expect(err).to.exist;
@@ -54,6 +61,8 @@ export class ProductServiceTest {
 
   @Test('should handle error from findOne')
   async handleErrorFindOne() {
+    chai.spy.on(this.productRepository, 'findOne', () => Promise.resolve());
+
     this.productRepository.findOne = () => {
       throw new Error('Error');
     };
@@ -67,6 +76,13 @@ export class ProductServiceTest {
   @Test('should throw an error if facilityId is not provided')
   async errorFacilityId() {
     try {
+      chai.spy.on(this.productTypeService, 'findOneById', () =>
+        Promise.resolve(),
+      );
+      chai.spy.on(this.facilityDetailsService, 'getOneById', () =>
+        Promise.resolve(),
+      );
+
       await this.productService.create({
         dto: {} as CreateProductDto,
         facilityId: null,
@@ -82,6 +98,14 @@ export class ProductServiceTest {
     this.productService.findOne = () => {
       throw new Error('Error');
     };
+
+    chai.spy.on(this.productTypeService, 'findOneById', () =>
+      Promise.resolve(),
+    );
+    chai.spy.on(this.facilityDetailsService, 'getOneById', () =>
+      Promise.resolve(),
+    );
+
     try {
       await this.productService.create({
         dto: {} as CreateProductDto,

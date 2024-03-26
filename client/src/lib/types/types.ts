@@ -11,11 +11,22 @@ export type DataWithCount<T> = {
   count: number;
 };
 
+export type NumberRange = {
+  from: number | undefined;
+  to?: number | undefined;
+};
+
 export type IfArray<T, U> = T extends Array<U> ? U : never;
+export type IfDate<T> = T extends Date ? T : never;
 
 export type ArrayFields<T> = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [K in keyof T]: IfArray<T[K], any>;
+};
+
+export type DateFields<T> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [K in keyof T]: IfDate<T[K]>;
 };
 
 export type EntityTitleValues = ValueOf<typeof EntityTitle>;

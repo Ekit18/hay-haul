@@ -192,21 +192,22 @@ export class ProductAuctionService {
         queryBuilder.orderBy('productAuction.startDate', startDateSort);
       }
 
-      if (!hasRoleBeChecked) {
-        queryBuilder.andWhere(
-          'productAuction.auctionStatus IN (:...auctionStatus)',
-          {
-            auctionStatus: [
-              ProductAuctionStatus.Active,
-              ProductAuctionStatus.EndSoon,
-            ],
-          },
-        );
-      }
+      // if (!hasRoleBeChecked) {
+      //   queryBuilder.andWhere(
+      //     'productAuction.auctionStatus IN (:...auctionStatus)',
+      //     {
+      //       auctionStatus: [
+      //         ProductAuctionStatus.Active,
+      //         ProductAuctionStatus.EndSoon,
+      //       ],
+      //     },
+      //   );
+      // }
 
       if (hasRoleBeChecked) {
         switch (request.user.role) {
           case UserRole.Farmer:
+            queryBuilder.leftJoinAndSelect('facilityDetails.user', 'user');
             queryBuilder.andWhere('facilityDetails.userId = :userId', {
               userId,
             });

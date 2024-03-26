@@ -13,6 +13,7 @@ import {
 
 export enum ProductAuctionStatus {
   Inactive = 'Inactive',
+  StartSoon = 'Start soon',
   Active = 'Active',
   EndSoon = 'End soon',
   Ended = 'Ended',

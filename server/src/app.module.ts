@@ -37,6 +37,7 @@ export const RedisOptions: CacheModuleAsyncOptions = {
     const store = await redisStore({
       url: configService.get<string>('REDIS_URL'),
       ttl: Number(configService.get<number>('CACHE_TTL')),
+      pingInterval: Number(configService.get<number>('REDIS_PING_INTERVAL')),
     });
     return {
       store: () => store,
@@ -47,20 +48,6 @@ export const RedisOptions: CacheModuleAsyncOptions = {
 
 @Module({
   imports: [
-    // CacheModule.registerAsync<RedisClientOptions>({
-    //   imports: [ConfigModule],
-    //   isGlobal: true,
-    //   useFactory: async (configService: ConfigService) => ({
-    //     ttl: Number(configService.get<number>('CACHE_TTL')),
-    //     socket: {
-    //       host: configService.get<string>('REDIS_HOST'),
-    //       port: Number(configService.get<number>('REDIS_PORT')),
-    //     },
-    //     password: configService.get<string>('REDIS_PASSWORD'),
-    //     username: configService.get<string>('REDIS_USER'),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
     CacheModule.registerAsync(RedisOptions),
     ConfigModule.forRoot({
       isGlobal: true,

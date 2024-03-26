@@ -26,6 +26,7 @@ export class CustomImageValidationPipe
         message: 'File was not found',
       });
     }
+
     if (
       !file.mimetype.match(this.MIME_TYPE) ||
       !file.originalname.match(this.ORIGINAL_TYPE)
@@ -34,6 +35,7 @@ export class CustomImageValidationPipe
         message: 'Only jpg, jpeg ,png files allowed',
       });
     }
+
     if (
       Number.isInteger(Number.parseInt(file.size.toString())) &&
       file.size > this.MAX_FILE_SIZE
@@ -43,7 +45,14 @@ export class CustomImageValidationPipe
       });
     }
   }
+
   async transform(value: Express.Multer.File[]): Promise<any> {
+    if (!value.length) {
+      throw new BadRequestException({
+        message: 'Files were not found',
+      });
+    }
+
     value.forEach((file) => {
       this.validateFile(file);
     });

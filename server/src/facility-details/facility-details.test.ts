@@ -7,6 +7,7 @@ import {
   TestEventsSuite,
   TestSuite,
 } from 'nestjs-mocha-decorators';
+import { ProductTypeService } from 'src/product-type/product-type.service';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { FacilityDetails } from './facility-details.entity';
@@ -26,6 +27,8 @@ export class FacilityDetailsServiceTest {
   private readonly userService: UserService;
   @InjectRepository(FacilityDetails)
   private readonly facilityDetailsRepository: Repository<FacilityDetails>;
+  @Inject()
+  private readonly productTypeService: ProductTypeService;
 
   @TestEvent(TestEventsEnum.AFTER_EACH)
   afterEach() {
@@ -44,9 +47,12 @@ export class FacilityDetailsServiceTest {
     const user = { id: '1', name: 'User' };
 
     chai.spy.on(this.userService, 'getUserById', () => Promise.resolve(user));
+
     chai.spy.on(this.facilityDetailsRepository, 'save', () =>
       Promise.resolve({ ...facilityDetailsDto, user }),
     );
+
+    chai.spy.on(this.productTypeService, 'createMany', () => Promise.resolve());
 
     const result = await this.facilityDetailsService.create(
       facilityDetailsDto,
@@ -88,9 +94,9 @@ export class FacilityDetailsServiceTest {
 
     chai.spy.on(this.facilityDetailsRepository, 'createQueryBuilder', () => ({
       select: () => ({
-        leftJoinAndSelect: () => ({
-          where: () => ({
-            getOne: () => Promise.resolve(facilityDetails),
+        where: () => ({
+          leftJoinAndSelect: () => ({
+            getMany: () => Promise.resolve(facilityDetails),
           }),
         }),
       }),
@@ -105,7 +111,7 @@ export class FacilityDetailsServiceTest {
     const id = '1';
     const facilityDetails = { id, name: 'Facility 1' };
 
-    chai.spy.on(this.facilityDetailsRepository, 'findOneBy', () =>
+    chai.spy.on(this.facilityDetailsRepository, 'findOne', () =>
       Promise.resolve(facilityDetails),
     );
 
@@ -138,11 +144,12 @@ export class FacilityDetailsServiceTest {
     };
 
     const updatedFacilityDetails = { ...facilityDetailsDto, id };
+
     chai.spy.on(this.facilityDetailsRepository, 'update', () =>
       Promise.resolve(),
     );
 
-    chai.spy.on(this.facilityDetailsRepository, 'findOneById', () =>
+    chai.spy.on(this.facilityDetailsRepository, 'findOne', () =>
       Promise.resolve(updatedFacilityDetails),
     );
 

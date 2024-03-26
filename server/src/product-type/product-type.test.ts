@@ -89,12 +89,13 @@ export class ProductTypeServiceTest {
   @Test('should create a product type')
   async create() {
     const productType = new CreateProductTypeDto();
+    productType.name = 'type1';
     const facilityId = '1';
     const facilityDetails = new FacilityDetails();
     facilityDetails.id = facilityId;
 
     const saveSpy = chai.spy.on(this.productTypeRepository, 'save', () =>
-      Promise.resolve(),
+      Promise.resolve({ ...productType, facilityDetails }),
     );
     const getOneByIdSpy = chai.spy.on(
       this.facilityDetailsService,
@@ -105,7 +106,9 @@ export class ProductTypeServiceTest {
     await this.productTypeService.create(productType, facilityId);
 
     chai.expect(getOneByIdSpy).to.have.been.called.with(facilityId);
-    chai.expect(saveSpy).to.have.been.called.with(productType);
+    chai
+      .expect(saveSpy)
+      .to.have.been.called.with({ ...productType, facilityDetails });
   }
 
   @Test('should update a product type')
@@ -116,7 +119,7 @@ export class ProductTypeServiceTest {
     const updateSpy = chai.spy.on(this.productTypeRepository, 'update', () =>
       Promise.resolve(),
     );
-    const findOneSpy = chai.spy.on(this.productTypeRepository, 'findOne', () =>
+    chai.spy.on(this.productTypeRepository, 'findOneBy', () =>
       Promise.resolve(),
     );
 
@@ -128,13 +131,17 @@ export class ProductTypeServiceTest {
   @Test('should delete a product type')
   async deleteProductType() {
     const id = '1';
-    const deleteSpy = chai.spy.on(this.productTypeRepository, 'delete', () =>
+    const deleteSpy = chai.spy.on(this.productTypeRepository, 'query', () =>
       Promise.resolve(),
     );
-
     await this.productTypeService.delete(id);
 
-    chai.expect(deleteSpy).to.have.been.called.with(id);
+    chai
+      .expect(deleteSpy)
+      .to.have.been.called.with(
+        'execute [dbo].[delete_product_type_procedure] @0',
+        [id],
+      );
   }
 
   @Test(
