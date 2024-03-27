@@ -3,53 +3,39 @@ import { Test, TestingModule, TestingModuleBuilder } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { run } from 'mocha';
 import { MochaTestModule, MochaTestService } from 'nestjs-mocha-decorators';
-import { AppModule } from 'src/app.module';
+import { AppModuleTest } from 'src/appmoduleTest';
+import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { FacilityDetailsModule } from 'src/facility-details/facility-details.module';
 import { FacilityDetailsServiceTest } from 'src/facility-details/facility-details.test';
+import { ProductType } from 'src/product-type/product-type.entity';
 import { ProductTypeModule } from 'src/product-type/product-type.module';
 import { ProductTypeServiceTest } from 'src/product-type/product-type.test';
+import { Product } from 'src/product/product.entity';
 import { ProductModule } from 'src/product/product.module';
 import { ProductServiceTest } from 'src/product/product.test';
 import { UserModule } from 'src/user/user.module';
-import { MockTypeOrmModule } from './MockTypeOrmModule';
 
 const initNest = async (): Promise<INestApplication> => {
-  const testingModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
-    imports: [
-      TypeOrmModule.forRootAsync({
-        useFactory: async () => ({
-          type: 'mssql',
-          host: 'localhost',
-          port: 0,
-          username: 'localhost',
-          password: 'localhost',
-          database: 'localhost',
-          entities: [],
-          // logger: 'simple-console',
-          logging: true,
-        }),
-      }),
-      AppModule,
-      MochaTestModule.registerTests(
-        [
-          ProductServiceTest,
-          FacilityDetailsServiceTest,
-          ProductTypeServiceTest,
-        ],
-        [
-          FacilityDetailsModule,
-          UserModule,
-          ProductTypeModule,
-          // TypeOrmModule.forFeature([Product, FacilityDetails, ProductType]),
-          ProductModule,
-        ],
-      ),
-    ],
-  })
-    .overrideModule(TypeOrmModule)
-    .useModule(MockTypeOrmModule);
-  // .overrideProvider(TypeOrmModule)
-  // .useClass(MockTypeOrmModule);
+  const testingModuleBuilder: TestingModuleBuilder =
+    await Test.createTestingModule({
+      imports: [
+        AppModuleTest,
+        MochaTestModule.registerTests(
+          [
+            ProductServiceTest,
+            FacilityDetailsServiceTest,
+            ProductTypeServiceTest,
+          ],
+          [
+            FacilityDetailsModule,
+            UserModule,
+            ProductTypeModule,
+            TypeOrmModule.forFeature([Product, FacilityDetails, ProductType]),
+            ProductModule,
+          ],
+        ),
+      ],
+    });
 
   const testingModule: TestingModule = await testingModuleBuilder.compile();
   const app = testingModule.createNestApplication();
@@ -61,7 +47,11 @@ const initNest = async (): Promise<INestApplication> => {
 };
 
 (async (): Promise<void> => {
-  const app = await initNest();
-  app.get(MochaTestService).declareTests();
-  run();
+  try {
+    const app = await initNest();
+    app.get(MochaTestService).declareTests();
+    run();
+  } catch (err) {
+    console.error(err);
+  }
 })();

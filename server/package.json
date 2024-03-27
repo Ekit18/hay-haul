@@ -74,6 +74,7 @@
     "mocha-junit-reporter": "^2.2.1",
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",
+    "sql.js": "^1.10.2",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
