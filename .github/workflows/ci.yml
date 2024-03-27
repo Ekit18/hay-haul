@@ -41,3 +41,14 @@ jobs:
       - name: Test
         working-directory: ./server
         run: npm run test
+        env:
+          SENDGRID_API_KEY: "SG.033"
+          S3_REGION: "eu-central-1"
+          S3_AWS_ACCESS_KEY_ID: "empty"
+          S3_AWS_SECRET_ACCESS_KEY: "empty"
+          S3_BUCKET_NAME: "empty"
+          S3_AWS_SESSION_TOKEN: "empty"
+          S3_SIGNED_URL_EXPIRES_IN_SECONDS: "600"
+          IMAGE_VALIDATION_MIME_TYPE: "(image\\/)?(jpg|jpeg|png)"
+          IMAGE_VALIDATION_ORIGINAL_TYPE: "\\.(jpg|jpeg|png)"
+          IMAGE_VALIDATION_MAX_FILE_SIZE: "5000000"
