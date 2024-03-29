@@ -16,6 +16,13 @@ export const productsApi = api.injectEndpoints({
       }),
       providesTags: [TagType.ProductAuction]
     }),
+    getProductsNotInAuction: builder.query<DataWithCount<Product>, URLSearchParams>({
+      query: (searchParams) => ({
+        url: '/product/not-in-auction',
+        params: searchParams
+      }),
+      providesTags: [TagType.ProductAuction]
+    }),
     createProduct: builder.mutation<Product, CreateProductFormValues>({
       query: ({ productTypeId, farmId, ...body }) => ({
         method: 'POST',

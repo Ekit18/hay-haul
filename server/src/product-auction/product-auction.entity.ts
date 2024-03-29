@@ -3,6 +3,7 @@ import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.e
 import { Product } from 'src/product/product.entity';
 import { S3File } from 'src/s3-file/s3-file.entity';
 import {
+  Check,
   Column,
   Entity,
   JoinColumn,
@@ -23,9 +24,10 @@ export enum ProductAuctionStatus {
 }
 
 const statuses = Object.values(ProductAuctionStatus)
-  .map((role) => `'${role}'`)
+  .map((status) => `'${status}'`)
   .join(', ');
 
+@Check(`"auctionStatus" IN (${statuses})`)
 @Entity()
 export class ProductAuction {
   @PrimaryGeneratedColumn('uuid')

@@ -3,8 +3,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { DateFields } from '@/lib/types/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { uk } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { CalendarIcon } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
 import { Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
 import { DropdownCalendar } from './dropdown-calendar';
 
@@ -27,7 +28,7 @@ export function DatePickerWithRange<T extends FieldValues, K extends Path<DateFi
   } = useFormContext();
 
   // TODO: non-typesafe field. Its type must be inferred from
-  const date = watch(field);
+  const date: DateRange = watch(field);
 
   return (
     <Popover>
@@ -45,7 +46,9 @@ export function DatePickerWithRange<T extends FieldValues, K extends Path<DateFi
           <div className="flex w-full flex-col justify-between">
             <p className="text-gray-400">{title}</p>
             <p className="overflow-hidden text-clip whitespace-nowrap text-black dark:text-white">
-              {date ? format(date, 'd MMMM, E', { locale: uk }) : 'Оберіть дату'}
+              {date
+                ? `${date.from ? format(date.from, 'd MMMM, yyyy', { locale: enUS }) : ''} — ${date?.to ? format(date.to, 'd MMMM, yyyy', { locale: enUS }) : ''}`
+                : 'Pick date range'}
             </p>
           </div>
           <CalendarIcon className="ml-auto hidden h-5 w-5 text-secondary xl:block" />

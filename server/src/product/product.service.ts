@@ -40,6 +40,7 @@ export class ProductService {
       quantitySort,
     }: ProductQueryDto,
     request: AuthenticatedRequest,
+    withoutAuction = false,
   ) {
     try {
       const userId = request.user.id;
@@ -100,13 +101,20 @@ export class ProductService {
           minQuantity,
         });
       }
+      if (withoutAuction) {
+        queryBuilder.leftJoin('product.productAuction', 'productAuction');
+        queryBuilder.andWhere('productAuction.productId IS NULL');
+      }
 
       console.log('limit', limit);
       console.log('offset', offset);
-      const [result, total] = await queryBuilder
-        .take(limit)
-        .skip(offset)
-        .getManyAndCount();
+
+      if (!withoutAuction) {
+        queryBuilder.take(limit).skip(offset);
+      }
+      console.log('1111');
+      const [result, total] = await queryBuilder.getManyAndCount();
+      console.log('2222');
       const pageCount = Math.ceil(total / limit);
 
       return {

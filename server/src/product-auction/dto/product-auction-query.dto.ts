@@ -1,5 +1,14 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsArray,
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { SortOrder } from 'src/lib/enums/enums';
+import { ProductAuctionStatus } from '../product-auction.entity';
 
 export class ProductAuctionQueryDto {
   @IsNumber()
@@ -30,19 +39,19 @@ export class ProductAuctionQueryDto {
   @IsOptional()
   maxBuyoutPrice?: number;
 
-  @IsNumber()
+  @IsDate()
   @IsOptional()
   minStartDate?: Date;
 
-  @IsNumber()
+  @IsDate()
   @IsOptional()
   maxStartDate?: Date;
 
-  @IsNumber()
+  @IsDate()
   @IsOptional()
   minEndDate?: Date;
 
-  @IsNumber()
+  @IsDate()
   @IsOptional()
   maxEndDate?: Date;
 
@@ -65,4 +74,12 @@ export class ProductAuctionQueryDto {
   @IsEnum(SortOrder)
   @IsOptional()
   startDateSort?: SortOrder;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(ProductAuctionStatus, { each: true })
+  @Transform(({ value }) =>
+    value ? value.split(',').map((k) => ProductAuctionStatus[k]) : [],
+  )
+  statuses?: ProductAuctionStatus[];
 }

@@ -3,16 +3,20 @@ import { Product } from '../Product/Product.type';
 import { ProductAuctionBid } from '../ProductAuctionBid/ProductAuctionBid.type';
 import { ValueOf } from '../types';
 
-export enum ProductAuctionStatus {
-  Inactive = 'Inactive',
-  StartSoon = 'Start soon',
-  Active = 'Active',
-  EndSoon = 'End soon',
-  Ended = 'Ended',
-  WaitingPayment = 'Waiting payment',
-  Closed = 'Closed',
-  Unpaid = 'Unpaid'
-}
+export const ProductAuctionStatus = {
+  Inactive: 'Inactive',
+  StartSoon: 'Start soon',
+  Active: 'Active',
+  EndSoon: 'End soon',
+  Ended: 'Ended',
+  WaitingPayment: 'Waiting payment',
+  Closed: 'Closed',
+  Unpaid: 'Unpaid'
+} as const;
+
+export type ProductAuctionStatusDict = {
+  [K in string]: string;
+};
 
 export type ProductAuctionStatusValues = ValueOf<typeof ProductAuctionStatus>;
 
@@ -29,6 +33,6 @@ export type ProductAuction = {
   endDate: string;
   currentMaxBid: ProductAuctionBid | null;
   currentMaxBidId: string;
-  auctionStatus: ProductAuctionStatus;
+  auctionStatus: ProductAuctionStatusValues;
   photos: AuctionPhotoType[];
 };

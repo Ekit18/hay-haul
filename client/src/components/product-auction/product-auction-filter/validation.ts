@@ -1,8 +1,7 @@
 import { ComparisonOperator } from '@/lib/enums/comparison-operator.enum';
 import { compareValues } from '@/lib/helpers/compareValues';
 import { ProductAuctionStatus, ProductAuctionStatusValues } from '@/lib/types/ProductAuction/ProductAuction.type';
-import { NumberRange, SortOrderValues } from '@/lib/types/types';
-import { DateRange } from 'react-day-picker';
+import { DateRange, NumberRange, SortOrderValues } from '@/lib/types/types';
 import { AnyObject, ObjectSchema, array, date, number, object, string } from 'yup';
 
 export type ProductAuctionFilterFormValues = {
@@ -13,7 +12,7 @@ export type ProductAuctionFilterFormValues = {
   buyoutPrice?: NumberRange;
   startDate?: DateRange;
   endDate?: DateRange;
-  statuses?: ProductAuctionStatus[];
+  statuses?: ProductAuctionStatusValues[];
   quantity?: NumberRange;
   quantitySort?: SortOrderValues;
   endDateSort?: SortOrderValues;
@@ -29,18 +28,18 @@ export const productAuctionFilterFormDefaultValues: ProductAuctionFilterFormValu
   startDate: undefined,
   endDate: undefined,
   quantity: undefined,
-  statuses: undefined,
+  statuses: [],
   quantitySort: undefined,
   endDateSort: undefined,
   startDateSort: undefined
 };
 
 export const dateRangeObjectSchema = {
-  from: date().required(),
+  from: date(),
   to: date()
 };
 export const numberRangeObjectSchema = {
-  from: number().required(),
+  from: number(),
   to: number()
 };
 
@@ -85,12 +84,22 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
     startPrice: object(numberRangeObjectSchema).test(
       'startPrice',
       'Max start price must be greater than min start price',
-      function (value) {
+      function (value, context) {
         const numberRange = value as NumberRange;
         if (!numberRange) {
           return true;
         }
-        if (!numberRange.from || !numberRange?.to) {
+        if (numberRange.from === undefined && numberRange?.to === undefined) {
+          return true;
+        }
+        console.log('here');
+        if (compareValues(numberRange.from, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+          return context.createError({ message: 'Min start price must be greater than 0' });
+        }
+        if (compareValues(numberRange.to, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+          return context.createError({ message: 'Max start price must be greater than 0' });
+        }
+        if (!numberRange?.from || !numberRange.to) {
           return true;
         }
         return compareValues(numberRange.from, numberRange.to, ComparisonOperator.LESS_THAN);
@@ -99,12 +108,21 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
     buyoutPrice: object(numberRangeObjectSchema).test(
       'buyoutPrice',
       'Max buyout price must be greater than min buyout price',
-      function (value) {
+      function (value, context) {
         const numberRange = value as NumberRange;
         if (!numberRange) {
           return true;
         }
-        if (!numberRange.from || !numberRange?.to) {
+        if (numberRange.from === undefined && numberRange?.to === undefined) {
+          return true;
+        }
+        if (compareValues(numberRange.from, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+          return context.createError({ message: 'Min buyout price must be greater than 0' });
+        }
+        if (compareValues(numberRange.to, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+          return context.createError({ message: 'Max buyout price must be greater than 0' });
+        }
+        if (!numberRange?.from || !numberRange.to) {
           return true;
         }
         return compareValues(numberRange.from, numberRange.to, ComparisonOperator.LESS_THAN);
@@ -118,7 +136,10 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
         if (!dateRange) {
           return true;
         }
-        if (!dateRange.from || !dateRange?.to) {
+        if (dateRange.from === undefined && dateRange?.to === undefined) {
+          return true;
+        }
+        if (!dateRange?.from || !dateRange.to) {
           return true;
         }
         return compareValues(dateRange.from, dateRange.to, ComparisonOperator.LESS_THAN);
@@ -132,22 +153,38 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
         if (!dateRange) {
           return true;
         }
-        if (!dateRange.from || !dateRange?.to) {
+        if (dateRange.from === undefined && dateRange?.to === undefined) {
+          return true;
+        }
+        if (!dateRange?.from || !dateRange.to) {
           return true;
         }
         return compareValues(dateRange.from, dateRange.to, ComparisonOperator.LESS_THAN);
       }
     ),
-    quantity: object(numberRangeObjectSchema).test('minQuantity', function (value) {
-      const numberRange = value as NumberRange;
-      if (!numberRange) {
-        return true;
+    quantity: object(numberRangeObjectSchema).test(
+      'minQuantity',
+      'Max quantity must be greater than min quantity',
+      function (value, context) {
+        const numberRange = value as NumberRange;
+        if (!numberRange) {
+          return true;
+        }
+        if (numberRange.from === undefined && numberRange?.to === undefined) {
+          return true;
+        }
+        if (compareValues(numberRange.from, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+          return context.createError({ message: 'Min quantity price must be greater than 0' });
+        }
+        if (compareValues(numberRange.to, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+          return context.createError({ message: 'Max quantity price must be greater than 0' });
+        }
+        if (!numberRange?.from || !numberRange.to) {
+          return true;
+        }
+        return compareValues(numberRange.from, numberRange.to, ComparisonOperator.LESS_THAN);
       }
-      if (!numberRange.from || !numberRange?.to) {
-        return true;
-      }
-      return compareValues(numberRange.from, numberRange.to, ComparisonOperator.LESS_THAN);
-    }),
+    ),
     statuses: array(string().oneOf<ProductAuctionStatusValues>(Object.values(ProductAuctionStatus)).required()),
     endDateSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     startDateSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),

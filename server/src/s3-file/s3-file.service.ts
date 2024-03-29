@@ -105,6 +105,7 @@ export class S3FileService {
 
     console.log('DB');
     const presignedUrl = await this.s3ClientService.getObjectPresignedUrl(key);
+
     await this.cacheManager.set(key, presignedUrl);
 
     return presignedUrl;

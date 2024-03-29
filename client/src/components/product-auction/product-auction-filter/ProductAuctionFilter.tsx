@@ -1,15 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { AppRoute } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Filter } from 'lucide-react';
+import { ChevronDown, Filter, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { SearchInput } from '../../ui/search-input';
 import { ProductAuctionFilterForm } from './ProductAuctionFilterForm';
 import './styles.module.css';
 import { ProductAuctionFilterFormValues } from './validation';
 
 export function ProductAuctionFilter() {
+  const navigate = useNavigate();
   const { control, reset } = useFormContext<ProductAuctionFilterFormValues>();
   const [filterOpen, setFilterOpen] = useState<boolean>(false);
 
@@ -19,14 +22,11 @@ export function ProductAuctionFilter() {
 
   const handleClearFilter = () => {
     reset({
-      minStartPrice: 0,
-      maxStartPrice: 0,
-      minBuyoutPrice: 0,
-      maxBuyoutPrice: 0,
+      startPrice: undefined,
+      buyoutPrice: undefined,
       startDate: undefined,
       endDate: undefined,
-      minQuantity: 0,
-      maxQuantity: 0,
+      quantity: undefined,
       statuses: undefined
     });
   };
@@ -60,7 +60,13 @@ export function ProductAuctionFilter() {
             Clear filter
           </Button>
         </div>
-        {/* <CreateProductAuctionModal /> */}
+        <Button
+          className="flex gap-1 sm:ml-auto sm:w-60 md:w-auto"
+          type="button"
+          onClick={() => navigate(AppRoute.Farmer.CreateAuction)}
+        >
+          <Plus size={20} /> Create Auction
+        </Button>
       </div>
       <div className="">{filterOpen && <ProductAuctionFilterForm />}</div>
     </>

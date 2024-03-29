@@ -1,4 +1,5 @@
 import { ProductAuctionCard } from '@/components/product-auction/product-auction-card/ProductAuctionCard';
+import { ProductAuctionFilter } from '@/components/product-auction/product-auction-filter/ProductAuctionFilter';
 import {
   ProductAuctionFilterFormValues,
   productAuctionFilterFormDefaultValues,
@@ -19,14 +20,16 @@ export function MyAuctions() {
   const productAuctionFilterFormSchema = useProductAuctionFilterFormSchema();
   const form = useForm<ProductAuctionFilterFormValues>({
     resolver: yupResolver(productAuctionFilterFormSchema),
-    mode: 'onBlur',
+    mode: 'onSubmit',
     defaultValues: productAuctionFilterFormDefaultValues
   });
 
   const watchedFields = form.watch();
-
-  const [filterAuctions, { data, isLoading, isFetching, isUninitialized }] =
-    productAuctionApi.useLazyFilterFarmerProductAuctionsQuery();
+  console.log(form.formState.errors);
+  // const [filterFarmerAuctions, { data: productAuctions, isLoading, isFetching, isUninitialized }] =
+  //   productAuctionApi.useLazyFilterFarmerProductAuctionsQuery();
+  const [filterProductAuctions, { data: productAuctions, isLoading, isFetching, isUninitialized }] =
+    productAuctionApi.useLazyFilterProductAuctionsQuery();
 
   const onSubmit: SubmitHandler<ProductAuctionFilterFormValues> = async (data) => {
     if (isLoading || isFetching) return;
@@ -35,17 +38,29 @@ export function MyAuctions() {
 
     const { statuses, ...body } = data;
 
-    Object.entries({ ...body })
-      .filter(([_key, value]) => Boolean(value))
-      .forEach(([key, value]) => searchParams.append(key, value as string));
+    Object.entries(body).forEach(([key, value]) => {
+      if (value && typeof value === 'object') {
+        const capitalizedNames = key.charAt(0).toUpperCase() + key.slice(1);
 
-    searchParams.append('statuses', statuses?.join(',') ?? '');
+        if (value.from) searchParams.append(`min${capitalizedNames}`, value.from.toString());
+        if (value.to) searchParams.append(`max${capitalizedNames}`, value.to.toString());
+        return;
+      }
 
-    await filterAuctions(searchParams).unwrap().catch(handleRtkError);
+      if (value) searchParams.append(key, value.toString());
+    });
+
+    if (statuses && statuses.length) {
+      searchParams.append('statuses', statuses?.join(',') ?? '');
+    }
+    await filterProductAuctions(searchParams).unwrap().catch(handleRtkError);
   };
 
   useEffect(() => {
-    const debouncedFunction = debounce(() => (!isLoading || !isFetching) && onSubmit(form.getValues()), DEBOUNCE_DELAY);
+    const debouncedFunction = debounce(
+      () => (!isLoading || !isFetching) && (form.trigger(), onSubmit(form.getValues())),
+      DEBOUNCE_DELAY
+    );
 
     form.watch(() => {
       debouncedFunction();
@@ -59,8 +74,6 @@ export function MyAuctions() {
   const user = useAppSelector((state) => state.user.user);
 
   if (!user) return null;
-
-  const { data: productAuctions } = productAuctionApi.useFilterProductAuctionsQuery(new URLSearchParams({ limit: 10 }));
 
   const [currentProductAuction, setCurrentProductAuction] = useState<ProductAuction>();
 
@@ -120,11 +133,10 @@ export function MyAuctions() {
     <div className=" h-full bg-gray-100">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="gap-6 mt-6 flex flex-col">
-          <div className="p-4 pt-6 bg-white">
+          <div className="p-4 bg-white">
             <h2 className="text-3xl font-bold mb-9">My auctions</h2>
-            {/* <ProductAuctionsFilter /> */}
+            <ProductAuctionFilter />
           </div>
-          <div className="px-4">{/* <CreateProductAuctionModal entityTitle={EntityTitle.Farm} /> */}</div>
           <div className="px-4 w-full grid grid-cols-1 gap-4 pt-5 ">
             {productAuctions?.data.map((productAuction) => (
               <ProductAuctionCard

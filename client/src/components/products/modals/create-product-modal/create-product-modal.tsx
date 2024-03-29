@@ -50,7 +50,7 @@ export function CreateProductModal() {
 
   const productTypesByFarmId = farms?.find((farm) => farm.id === farmId)?.productTypes || [];
 
-  const handleDeleteModalOpenChange = (open: boolean) => {
+  const handleCreateModalOpenChange = (open: boolean) => {
     if (!open) {
       setOpen(false);
     }
@@ -64,7 +64,7 @@ export function CreateProductModal() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleDeleteModalOpenChange}>
+    <Dialog open={open} onOpenChange={handleCreateModalOpenChange}>
       <DialogTrigger asChild>
         <Button className="flex gap-1 sm:ml-auto sm:w-60 md:w-auto" type="button" onClick={() => setOpen(true)}>
           <Plus size={20} /> Create Product

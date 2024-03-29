@@ -1,8 +1,9 @@
 import { TagInput } from '@/components/tag-input/TagInput';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FilterSelect } from '@/components/ui/filter-select';
+import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppSelector } from '@/lib/hooks/redux';
+import { FacilityDetails } from '@/lib/types/FacilityDetails/FacilityDetails.type';
 import { facilityDetailsApi } from '@/store/reducers/facility-details/facilityDetailsApi';
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -30,8 +31,8 @@ export function ProductFilterForm() {
 
   return (
     <>
-      <div className="mt-10 flex gap-4 flex-col md:flex-row">
-        <FormField
+      <div className=" flex gap-4 flex-col md:flex-row">
+        {/* <FormField
           control={control}
           name="farmId"
           render={({ field }) => (
@@ -56,23 +57,33 @@ export function ProductFilterForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
-        <TagInput
-          labelText="Select farm products"
-          control={control}
-          noOptionsText="No matching products"
-          name="productTypeId"
-          disabled={!farms?.length || !farmId}
-          suggestions={productTypesByFarmId.map((productType) => ({
-            label: productType.name,
-            value: productType.id
-          }))}
-          selectedFn={(item: string) => ({
-            label: productTypesByFarmId.find((product) => product.id === item)?.name as string,
-            value: item
-          })}
+        <FilterSelect<ProductFilterFormValues, FacilityDetails[]>
+          valueProperty="name"
+          title="Farm"
+          placeholder="Select a farm"
+          values={farms}
+          fieldName="farmId"
+          containerClassName="mt-10 flex gap-4 flex-col md:flex-row w-full"
         />
+        <div className="mt-10 w-full">
+          <TagInput
+            labelText="Select farm products"
+            control={control}
+            noOptionsText="No matching products"
+            name="productTypeId"
+            disabled={!farms?.length || !farmId}
+            suggestions={productTypesByFarmId.map((productType) => ({
+              label: productType.name,
+              value: productType.id
+            }))}
+            selectedFn={(item: string) => ({
+              label: productTypesByFarmId.find((product) => product.id === item)?.name as string,
+              value: item
+            })}
+          />
+        </div>
 
         <div className="flex flex-col w-full justify-end">
           <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">

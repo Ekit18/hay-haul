@@ -44,15 +44,11 @@ export function SignUpForm() {
 
   const selectedRole = form.watch('role');
 
-  console.log('errors', form.formState.errors);
-  console.log('role', selectedRole);
-
   const steps: StepItem[] = [
     {
       stepName: 'Chose role',
       stepComponent: <ChoseRole />,
       onNextClick: async (): Promise<boolean> => {
-        console.log('test1');
         const result = await validateStepFields(form, ['role']);
         return result;
       }
@@ -61,7 +57,6 @@ export function SignUpForm() {
       stepName: 'Your data',
       stepComponent: <MainInfo />,
       onNextClick: async (): Promise<boolean> => {
-        console.log('test2');
         const validationResult = await validateStepFields(form, ['email', 'password', 'fullName', 'role']);
 
         if (!validationResult) return false;
@@ -91,7 +86,6 @@ export function SignUpForm() {
       stepName: `${roleDetails[selectedRole as RegisterableRoles].name as string} info`,
       stepComponent: <FacilityForm />,
       onNextClick: async (): Promise<boolean> => {
-        console.log('test3');
         const result = await validateStepFields(form, [
           'facilityName',
           'facilityAddress',
@@ -105,7 +99,6 @@ export function SignUpForm() {
   ];
 
   const onSubmit: SubmitHandler<SignUpFormValues> = async (data) => {
-    console.log('SDFSDF');
     await registration(data)
       .unwrap()
       .then(({ accessToken }) => {
@@ -117,13 +110,11 @@ export function SignUpForm() {
       })
       .then(() => navigate(AppRoute.General.OtpConfirm))
       .catch((e) => {
-        console.log('ERROR', e);
         handleRtkError(e);
       });
   };
 
   const onBackClick = () => {
-    console.log('test4');
     navigate(AppRoute.General.SignIn);
   };
 

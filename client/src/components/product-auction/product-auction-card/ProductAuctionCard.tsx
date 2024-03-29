@@ -56,6 +56,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
             {productAuction.description.length > 100 ? (
               <>
                 {productAuction.description.substring(0, 100).trimEnd()}...
+                {/* TODO redirect user to auction */}
                 <Button className="text-base p-0 h-min" variant="link">
                   Learn more
                 </Button>
@@ -70,12 +71,13 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
         </div>
       </div>
       <div className="min-[1068px]:pr-4 px-4 pb-4 gap-4 flex flex-col min-[1068px]:py-4 min-[1068px]:pl-0 min-[1068px]:w-3/12 w-full">
-        {productAuction.auctionStatus === ProductAuctionStatus.Active && (
-          <div className="border-b-2 pb-4">
-            <p className="text-center">Ends in:</p>
-            <Timer toDate={productAuction.endDate} />
-          </div>
-        )}
+        {productAuction.auctionStatus === ProductAuctionStatus.Active ||
+          (productAuction.auctionStatus === ProductAuctionStatus.EndSoon && (
+            <div className="border-b-2 pb-4">
+              <p className="text-center">Ends in:</p>
+              <Timer toDate={productAuction.endDate} />
+            </div>
+          ))}
         {productAuction.auctionStatus === ProductAuctionStatus.StartSoon && (
           <div className="border-b-2 pb-4">
             <p className="text-center">Starts in:</p>
@@ -95,6 +97,16 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
                 Place a bet
               </Button>
               <Button className="w-full">Buy now for {productAuction.buyoutPrice}</Button>
+            </>
+          )}
+          {user?.id === productAuction.product.facilityDetails.user?.id && (
+            <>
+              <Button className="w-full" variant="destructive">
+                Delete
+              </Button>
+              <Button className="w-full" variant="secondary">
+                Update
+              </Button>
             </>
           )}
         </div>

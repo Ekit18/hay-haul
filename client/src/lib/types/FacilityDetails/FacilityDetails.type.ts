@@ -1,4 +1,5 @@
 import { ProductType } from '../ProductType/ProductType.type';
+import { User } from '../User/User.type';
 
 export type FacilityDetails = {
   id: string;
@@ -8,4 +9,5 @@ export type FacilityDetails = {
   createdAt: string;
   updatedAt: string;
   productTypes?: ProductType[];
+  user?: User;
 };

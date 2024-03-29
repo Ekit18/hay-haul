@@ -55,6 +55,21 @@ export class ProductController {
     return this.productService.filterAll(query, request);
   }
 
+  @ApiOperation({ summary: 'Return filtered products' })
+  @ApiOkResponse({ description: 'Successfully fetch products' })
+  @ApiBadRequestResponse({
+    description: getSwaggerResponseDescription(
+      ProductErrorMessage.FailedFetchProducts,
+    ),
+  })
+  @Get('/not-in-auction')
+  async filterNotInAuction(
+    @Query() query: ProductQueryDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.productService.filterAll(query, request, true);
+  }
+
   @ApiOperation({ summary: 'Return one product' })
   @ApiOkResponse({ description: 'Successfully fetch product' })
   @ApiBadRequestResponse({

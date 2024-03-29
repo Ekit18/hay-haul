@@ -1,3 +1,5 @@
+import { ComparisonOperator } from '@/lib/enums/comparison-operator.enum';
+import { compareValues } from '@/lib/helpers/compareValues';
 import { SortOrderValues } from '@/lib/types/types';
 import { AnyObject, ObjectSchema, array, number, object, string } from 'yup';
 
@@ -48,14 +50,30 @@ export const useProductFilterFormSchema = (): ObjectSchema<
     searchQuery: string(),
     productTypeId: array().of(string().nonNullable().defined()),
     farmId: string(),
-    minQuantity: number().test('minQuantity', 'Min quantity must be less than max quantity', function (value = 0) {
+    minQuantity: number().test('minQuantity', 'Min quantity must be less than max quantity', function (value, context) {
       const { maxQuantity } = this.parent;
-      return value > 0 ? value <= maxQuantity : true;
+      if (!value) {
+        return true;
+      }
+      if (compareValues(value, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+        return context.createError({ message: 'Min quantity must be greater than 0' });
+      }
+      return compareValues(value, maxQuantity, ComparisonOperator.LESS_THAN_OR_EQUAL);
     }),
-    maxQuantity: number().test('maxQuantity', 'Max quantity must be greater than min quantity', function (value = 0) {
-      const { minQuantity } = this.parent;
-      return value > 0 ? value >= minQuantity : true;
-    }),
+    maxQuantity: number().test(
+      'maxQuantity',
+      'Max quantity must be greater than min quantity',
+      function (value, context) {
+        const { minQuantity } = this.parent;
+        if (!value) {
+          return true;
+        }
+        if (compareValues(value, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+          return context.createError({ message: 'Max quantity must be greater than 0' });
+        }
+        return compareValues(value, minQuantity, ComparisonOperator.GREATER_THAN_OR_EQUAL);
+      }
+    ),
     nameSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     productTypeSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     quantitySort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),

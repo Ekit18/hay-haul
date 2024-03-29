@@ -13,6 +13,7 @@ import { Notification } from './notification/notification.entity';
 import { NotificationModule } from './notification/notification.module';
 import { ProductAuctionBid } from './product-auction-bid/product-auction-bid.entity';
 import { ProductAuctionBidModule } from './product-auction-bid/product-auction-bid.module';
+import { ProductAuctionCronModule } from './product-auction/product-auction-cron/cron.module';
 import { ProductAuction } from './product-auction/product-auction.entity';
 import { ProductAuctionModule } from './product-auction/product-auction.module';
 import { ProductType } from './product-type/product-type.entity';
@@ -30,25 +31,25 @@ import { TriggerService } from './trigger/trigger.service';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 
-export const RedisOptions: CacheModuleAsyncOptions = {
-  isGlobal: true,
-  imports: [ConfigModule],
-  useFactory: async (configService: ConfigService) => {
-    const store = await redisStore({
-      url: configService.get<string>('REDIS_URL'),
-      ttl: Number(configService.get<number>('CACHE_TTL')),
-      pingInterval: Number(configService.get<number>('REDIS_PING_INTERVAL')),
-    });
-    return {
-      store: () => store,
-    };
-  },
-  inject: [ConfigService],
-};
-
 @Module({
   imports: [
-    CacheModule.registerAsync(RedisOptions),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const store = await redisStore({
+          url: configService.get<string>('REDIS_URL'),
+          ttl: Number(configService.get<number>('CACHE_TTL')),
+          pingInterval: Number(
+            configService.get<number>('REDIS_PING_INTERVAL'),
+          ),
+        });
+        return {
+          store: () => store,
+        };
+      },
+      inject: [ConfigService],
+    } as CacheModuleAsyncOptions),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -92,6 +93,7 @@ export const RedisOptions: CacheModuleAsyncOptions = {
     FacilityDetailsModule,
     ProductTypeModule,
     ProductAuctionModule,
+    ProductAuctionCronModule,
     ProductAuctionBidModule,
     NotificationModule,
     SocketModule,

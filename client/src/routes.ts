@@ -1,3 +1,4 @@
+import React from 'react';
 import { AppRoute } from './lib/constants/routes';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SignInPage } from './pages/SignInPage';
@@ -5,12 +6,18 @@ import { SignUpPage } from './pages/SignUpPage';
 import { MainPage as BusinessmanMainPage } from './pages/businessman-pages/MainPage';
 import { Warehouses } from './pages/businessman-pages/Warehouses';
 import { AllAuction } from './pages/farmer-pages/Auctions';
+import { CreateAuction } from './pages/farmer-pages/CreateAuction';
 import { Farms } from './pages/farmer-pages/Farms';
 import { MainPage } from './pages/farmer-pages/MainPage';
 import { MyAuctions } from './pages/farmer-pages/MyAuctions';
 import { ProductsPage } from './pages/farmer-pages/ProductsPage';
 
-export const businessRoutes = [
+type Route = {
+  path: string;
+  Component: () => React.ReactNode;
+};
+
+export const businessRoutes: Route[] = [
   {
     path: AppRoute.General.Main,
     Component: BusinessmanMainPage
@@ -21,7 +28,7 @@ export const businessRoutes = [
   }
 ];
 
-export const farmerRoutes = [
+export const farmerRoutes: Route[] = [
   {
     path: AppRoute.General.Main,
     Component: MainPage
@@ -41,6 +48,10 @@ export const farmerRoutes = [
   {
     path: AppRoute.General.MyAuctions,
     Component: MyAuctions
+  },
+  {
+    path: AppRoute.Farmer.CreateAuction,
+    Component: CreateAuction
   }
   // {
   //   path: AppRoute.Farmer.Farms,
@@ -48,7 +59,7 @@ export const farmerRoutes = [
   // }
 ];
 
-export const authRoutes = [
+export const authRoutes: Route[] = [
   {
     path: AppRoute.General.ResetPassword,
     Component: ResetPasswordPage

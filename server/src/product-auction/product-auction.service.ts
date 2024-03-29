@@ -103,6 +103,7 @@ export class ProductAuctionService {
       maxStartPrice,
       endDateSort,
       startDateSort,
+      statuses,
     }: ProductAuctionQueryDto,
     request: AuthenticatedRequest,
     hasRoleBeChecked = false,
@@ -184,6 +185,12 @@ export class ProductAuctionService {
         });
       }
 
+      if (statuses) {
+        queryBuilder.andWhere('productAuction.auctionStatus IN(:statuses)', {
+          statuses: statuses.join(','),
+        });
+      }
+
       if (endDateSort) {
         queryBuilder.orderBy('productAuction.endDate', endDateSort);
       }
@@ -204,6 +211,8 @@ export class ProductAuctionService {
       //   );
       // }
 
+      console.log('1111');
+
       if (hasRoleBeChecked) {
         switch (request.user.role) {
           case UserRole.Farmer:
@@ -219,15 +228,21 @@ export class ProductAuctionService {
         }
       }
 
+      console.log('2222');
+
       const [auctions, total] = await queryBuilder
         .take(limit)
         .skip(offset)
         .getManyAndCount();
       const pageCount = Math.ceil(total / limit);
 
+      console.log('3333');
       for await (const auction of auctions) {
+        console.log('4444');
         for await (const photo of auction.photos) {
+          console.log('5555');
           photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
+          console.log('6666');
         }
       }
 
@@ -236,6 +251,7 @@ export class ProductAuctionService {
         count: pageCount,
       };
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         ProductAuctionErrorMessage.FailedFetchProductAuctions,
         HttpStatus.INTERNAL_SERVER_ERROR,
