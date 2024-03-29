@@ -50,45 +50,47 @@ export class ProductAuctionCronService {
       .innerJoinAndSelect('productAuction.product', 'product')
       .innerJoinAndSelect('product.facilityDetails', 'facilityDetails')
       .innerJoinAndSelect('facilityDetails.user', 'user')
+      .innerJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
+      .innerJoinAndSelect('currentMaxBid.user', 'maxBidder')
       .getMany();
 
-    // for (const auction of auctionsToUpdate) {
-    auctionsToUpdate.forEach(async (auction) => {
+    for (const auction of auctionsToUpdate) {
       switch (auction.auctionStatus) {
         case ProductAuctionStatus.Inactive:
           if (auction.startDate <= oneHourFromNow) {
-            // email to farmer that his auction is about to start
+            // email/notification to farmer that his auction is about to start
             auction.auctionStatus = ProductAuctionStatus.StartSoon;
           }
           break;
         case ProductAuctionStatus.StartSoon:
           if (auction.startDate <= now) {
             //websocket to bidders that auction is starting
-            // email to farmer that his auction is starting
+            // email/notification to farmer that his auction is starting
             auction.auctionStatus = ProductAuctionStatus.Active;
           }
           break;
         case ProductAuctionStatus.Active:
           if (auction.endDate <= oneHourFromNow) {
             //websocket to bidders that auction is about to end
-            // email to farmer that his auction is about to end
-            // email bidders that auction is about to end
+            // email/notification to farmer that his auction is about to end
+            // email/notification bidders that auction is about to end
             auction.auctionStatus = ProductAuctionStatus.EndSoon;
           }
           break;
         case ProductAuctionStatus.EndSoon:
           if (auction.endDate <= now) {
             console.log(auction);
+            if (auction.currentMaxBid) {
+              // email/notification winner that he won the auction
+            }
             // websocket to bidders that auction is ended
-            // email to farmer that his auction is ended
-            // email winner that he won the auction
+            // email/notification to farmer that his auction is ended
             auction.auctionStatus = ProductAuctionStatus.Ended;
           }
           break;
       }
 
       await this.productAuctionRepository.save(auction);
-    });
-    // }
+    }
   }
 }

@@ -1,11 +1,15 @@
 import { FileObject } from '@/components/drag-and-drop/file-object.type';
-import { AnyObject, ObjectSchema, date, mixed, number, object, ref, string } from 'yup';
+import { ComparisonOperator } from '@/lib/enums/comparison-operator.enum';
+import { compareValues } from '@/lib/helpers/compareValues';
+import { RequiredDateRange } from '@/lib/types/types';
+import { addDays } from 'date-fns';
+import { AnyObject, ObjectSchema, date, mixed, number, object, string } from 'yup';
+import { dateRangeRequiredObjectSchema } from '../product-auction-filter/validation';
 
 export type CreateProductAuctionFormValues = {
   startPrice: number;
   buyoutPrice: number;
-  startDate: Date;
-  endDate: Date;
+  startEndDate: RequiredDateRange;
   paymentPeriod: Date;
   bidStep: number;
   description: string;
@@ -17,8 +21,10 @@ export type CreateProductAuctionFormValues = {
 export const createProductAuctionDefaultValues: CreateProductAuctionFormValues = {
   startPrice: 0,
   buyoutPrice: 0,
-  startDate: new Date(),
-  endDate: new Date(),
+  startEndDate: {
+    from: new Date(),
+    to: addDays(new Date(), 1)
+  },
   paymentPeriod: new Date(),
   bidStep: 0,
   description: '',
@@ -33,8 +39,10 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
   {
     startPrice: undefined;
     buyoutPrice: undefined;
-    startDate: undefined;
-    endDate: undefined;
+    startEndDate: {
+      from: undefined;
+      to: undefined;
+    };
     paymentPeriod: undefined;
     bidStep: undefined;
     description: undefined;
@@ -52,13 +60,18 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
       .required('Buyout price is required')
       .positive('Buyout price must be positive')
       .min(0, 'Buyout price must be greater than 0'),
-    startDate: date()
-      .required('Start date is required')
-      .min(new Date(), 'Start date must be greater than current date'),
-    endDate: date().required('End date is required').min(ref('startDate'), 'End date must be greater than start date'),
+    startEndDate: object(dateRangeRequiredObjectSchema)
+      .required('Start / end date is required')
+      .test('startEndDate', 'Min start date must be less than max start date', function (value) {
+        const dateRange = value as RequiredDateRange;
+        return compareValues(dateRange.from, dateRange.to, ComparisonOperator.LESS_THAN);
+      }),
     paymentPeriod: date()
       .required('Payment period is required')
-      .min(ref('endDate'), 'Payment period must be greater than end date'),
+      .test('startEndDate', 'Payment period must be greater than end date', function (value, context) {
+        const { startEndDate } = context.parent as CreateProductAuctionFormValues;
+        return compareValues(startEndDate.to, value, ComparisonOperator.LESS_THAN);
+      }),
     bidStep: number()
       .required('Bid step is required')
       .positive('Bid step must be positive')

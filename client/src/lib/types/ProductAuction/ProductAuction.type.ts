@@ -5,11 +5,11 @@ import { ValueOf } from '../types';
 
 export const ProductAuctionStatus = {
   Inactive: 'Inactive',
-  StartSoon: 'Start soon',
+  StartSoon: 'StartSoon',
   Active: 'Active',
-  EndSoon: 'End soon',
+  EndSoon: 'EndSoon',
   Ended: 'Ended',
-  WaitingPayment: 'Waiting payment',
+  WaitingPayment: 'WaitingPayment',
   Closed: 'Closed',
   Unpaid: 'Unpaid'
 } as const;

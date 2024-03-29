@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MAX_FILE_SIZE } from '@/lib/constants/constants';
+import { cn } from '@/lib/utils';
 import { Upload } from 'lucide-react';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { FileError, useDropzone } from 'react-dropzone';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { CreateProductAuctionFormValues } from '../product-auction/create-product-auction/validation';
@@ -61,19 +62,24 @@ export function DragAndDrop() {
     name: 'photos'
   });
 
-  console.log('photos');
-  console.log(photos);
+  const onDrop = (acceptedFiles: File[]) => {
+    const newPhotosLength = acceptedFiles.length + photos.length;
+    if (newPhotosLength > 5) {
+      setError('photos', {
+        message: 'You can only upload 5 photos',
+        type: 'manual'
+      });
 
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: File[]) => {
-    console.log('accepted files');
-    console.log(acceptedFiles);
-    console.log('rejected files');
-    console.log(rejectedFiles);
+      const excess = newPhotosLength - 5;
+      if (excess > 0) {
+        acceptedFiles.splice(5 - photos.length, excess);
+      }
+    }
+
     acceptedFiles.forEach(async (file: File) => {
       const validationResult = await fileDimensionsValidator(file);
+
       if (validationResult) {
-        console.log('error');
-        console.log(validationResult);
         setError('photos', {
           message: validationResult.message,
           type: 'manual'
@@ -81,23 +87,18 @@ export function DragAndDrop() {
         return;
       }
 
-      append(
-        acceptedFiles.map(
-          (file) =>
-            ({
-              webkitRelativePath: file.webkitRelativePath,
-              arrayBuffer: file.arrayBuffer(),
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              preview: URL.createObjectURL(file)
-            }) as FileObject
-        )
-      );
+      append({
+        webkitRelativePath: file.webkitRelativePath,
+        arrayBuffer: file.arrayBuffer(),
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        preview: URL.createObjectURL(file)
+      } as FileObject);
     });
-  }, []);
+  };
 
-  const { getRootProps, getInputProps, fileRejections } = useDropzone({
+  const { getRootProps, getInputProps, fileRejections, isDragActive, isDragReject } = useDropzone({
     onDrop,
     accept: {
       'image/jpeg': [],
@@ -121,11 +122,21 @@ export function DragAndDrop() {
         <CardContent>
           <div
             {...getRootProps()}
-            className="border-dashed border-2 border-gray-500 dark:border-gray-300 rounded-md h-40 flex items-center justify-center flex-col gap-4 cursor-pointer"
+            className={cn(
+              `border-dashed border-2
+            border-gray-500 dark:border-gray-300
+            rounded-md h-40 flex items-center justify-center flex-col gap-4 px-4 cursor-pointer
+            w-56
+            `,
+              isDragActive && 'border-primary dark:border-primary',
+              isDragReject && 'border-red-500 dark:border-red-300'
+            )}
           >
-            <Upload className="h-10 w-10 text-gray-500 dark:text-gray-300" />
+            {!isDragActive && <Upload className="h-10 w-10 text-gray-500 dark:text-gray-300" />}
             <Input type="file" {...getInputProps()} />
-            <p className="text-gray-500 dark:text-gray-300">Click or drag & drop to upload images</p>
+            <p className={cn('text-gray-500 dark:text-gray-300', isDragActive && 'text-primary')}>
+              {isDragActive ? 'Drop here' : 'Click or drag & drop to upload images'}
+            </p>
           </div>
         </CardContent>
       </Card>

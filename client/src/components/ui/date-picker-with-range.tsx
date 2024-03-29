@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { DateFields } from '@/lib/types/types';
+import { DateRangeFields } from '@/lib/types/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { enUS } from 'date-fns/locale';
@@ -12,12 +12,12 @@ import { DropdownCalendar } from './dropdown-calendar';
 const HIGHEST_YEAR = 2100;
 const LOWEST_YEAR = 1900;
 
-interface DatePickerWithRangeProps<T extends FieldValues, K extends Path<DateFields<T>>> {
+interface DatePickerWithRangeProps<T extends FieldValues, K extends Path<DateRangeFields<T>>> {
   field: K;
   title: string;
 }
 
-export function DatePickerWithRange<T extends FieldValues, K extends Path<DateFields<T>>>({
+export function DatePickerWithRange<T extends FieldValues, K extends Path<DateRangeFields<T>>>({
   field,
   title
 }: DatePickerWithRangeProps<T, K>) {

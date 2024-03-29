@@ -1,3 +1,4 @@
+import { CreateProductAuctionFormValues } from '@/components/product-auction/create-product-auction/validation';
 import { UpdateProductFormValues } from '@/components/products/modals/update-product-modal/validation';
 import { ProductAuction } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { DataWithCount, UpdateRequestDto } from '@/lib/types/types';
@@ -29,17 +30,34 @@ export const productAuctionApi = api.injectEndpoints({
       }),
       providesTags: [TagType.ProductAuction]
     }),
-    // createProductAuction: builder.mutation<ProductAuction, CreateProductAuctionFormValues>({
-    //   query: ({ productTypeId, farmId, ...body }) => ({
-    //     method: 'POST',
-    //     url: generatePath('/product/facility/:facilityId/productType/:productTypeId', {
-    //       facilityId: farmId,
-    //       productTypeId
-    //     }),
-    //     body
-    //   }),
-    //   invalidatesTags: [TagType.ProductAuction]
-    // }),
+    createProductAuction: builder.mutation<ProductAuction, CreateProductAuctionFormValues>({
+      query: ({ farmId: _, productId, photos, ...body }) => {
+        const bodyFormData = new FormData();
+        photos.forEach(async (photo) => {
+          const arrayBuffer = await photo.arrayBuffer;
+          const blob = new Blob([new Uint8Array(arrayBuffer)], { type: photo.type });
+          const file = new File([blob], photo.name, { type: photo.type });
+          bodyFormData.append('photos', file);
+        });
+
+        Object.entries(body).forEach(([key, value]) => {
+          if (key === 'startEndDate' && typeof value === 'object' && 'from' in value && 'to' in value) {
+            bodyFormData.append('startDate', value.from.toString());
+            bodyFormData.append('endDate', value.to.toString());
+            return;
+          }
+          bodyFormData.append(key, value.toString());
+        });
+        return {
+          method: 'POST',
+          url: generatePath('/product-auction/product/:productId', {
+            productId
+          }),
+          body: bodyFormData
+        };
+      },
+      invalidatesTags: [TagType.ProductAuction]
+    }),
     deleteProductAuction: builder.mutation<void, string>({
       query: (id) => ({
         method: 'DELETE',

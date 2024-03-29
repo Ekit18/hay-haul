@@ -10,7 +10,9 @@ import {
 import { useEffect, useState } from 'react';
 import { DragAndDrop } from '../drag-and-drop/DragAndDrop';
 import { FileObject } from '../drag-and-drop/file-object.type';
+import { CarouselImageAdd } from './CarouselImageAdd';
 import { CarouselImageInputItem } from './CarouselImageInputItem';
+import { CarouselImagePreview } from './CarouselImagePreview';
 
 type Properties = {
   items: FileObject[];
@@ -32,7 +34,14 @@ export function FileInputCarousel({ items }: Properties) {
     api.on('select', () => {
       setCurrent(api.selectedScrollSnap() + 1);
     });
-  }, [api]);
+  }, [api, items]);
+
+  const handlePreviewClick = (index: number) => {
+    if (!api) {
+      return;
+    }
+    api.scrollTo(index, true);
+  };
 
   const dragDropItem = (
     <CarouselItem key="input">
@@ -44,16 +53,37 @@ export function FileInputCarousel({ items }: Properties) {
     </CarouselItem>
   );
 
+  console.log(current, count, items.length);
+
   return (
-    <div>
-      <Carousel setApi={setApi} className="w-full max-w-xs">
-        <CarouselContent>
-          {items?.map((item) => <CarouselImageInputItem key={item.id} photo={item} />)}
-          {dragDropItem}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+    <div className="px-16 w-full flex-col items-center">
+      <div className="flex flex-col items-center">
+        <Carousel setApi={setApi} className="w-full max-w-xs">
+          <CarouselContent>
+            {items?.map((item) => <CarouselImageInputItem key={item.preview} photo={item} />)}
+            {items.length < 5 && dragDropItem}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      </div>
+      <div className="flex mt-4 gap-4 justify-center">
+        {items?.map((item, index) => (
+          <CarouselImagePreview
+            key={item.preview}
+            isActive={index === current - 1}
+            photo={item}
+            index={index}
+            onClick={handlePreviewClick}
+          />
+        ))}
+        {items.length < 5 && (
+          <CarouselImageAdd
+            isActive={current === items.length + 1}
+            onClick={() => handlePreviewClick(items.length + 1)}
+          />
+        )}
+      </div>
       {/* <div className="py-2 text-center text-sm text-muted-foreground">
         Slide {current} of {count}
       </div> */}

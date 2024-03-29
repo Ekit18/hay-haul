@@ -1,7 +1,7 @@
 import { ProductAuctionStatus } from '@/lib/types/ProductAuction/ProductAuction.type';
 
 export type ProductAuctionStatusType = {
-  [key in ProductAuctionStatus]: string;
+  [K in keyof typeof ProductAuctionStatus]: string;
 };
 
 export const productAuctionStatus: ProductAuctionStatusType = {

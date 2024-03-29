@@ -34,6 +34,11 @@ export const productAuctionFilterFormDefaultValues: ProductAuctionFilterFormValu
   startDateSort: undefined
 };
 
+export const dateRangeRequiredObjectSchema = {
+  from: date().required('Start date is required'),
+  to: date().required('End date is required')
+};
+
 export const dateRangeObjectSchema = {
   from: date(),
   to: date()

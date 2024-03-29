@@ -23,11 +23,10 @@ export function CarouselImageInputItem({ photo }: CarouselImageInputItemProps) {
     [remove, photos, clearErrors]
   );
 
-  // Change button to right top cross icon
   return (
-    <CarouselItem key="input">
+    <CarouselItem key={photo.id}>
       <Card>
-        <CardContent className="flex aspect-square items-center justify-center p-6">
+        <CardContent className="flex relative aspect-square items-center justify-center p-6">
           <img
             src={photo.preview}
             alt="product"
@@ -40,7 +39,7 @@ export function CarouselImageInputItem({ photo }: CarouselImageInputItemProps) {
             variant="destructive"
             onClick={() => handleDeleteFile(photo.id)}
           >
-            <Trash className="fixed " size={16} />
+            <Trash className="fixed" size={16} />
           </Button>
         </CardContent>
       </Card>
