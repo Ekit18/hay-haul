@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ServerEventName } from 'src/lib/enums/enums';
 import { SocketService } from 'src/socket/socket.service';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { NotificationMessage } from './enums/notification-message.enum';
 import { Notification } from './notification.entity';
 import {
@@ -40,17 +40,27 @@ export class NotificationService {
     userId: string,
     productAuctionId: string,
     message: NotificationMessage,
+    transactionalEntityManager?: EntityManager,
   ): Promise<void> {
-    await this.notificationRepository.save({
+    if (transactionalEntityManager) {
+      await transactionalEntityManager.save(Notification, {
+        message,
+        isRead: false,
+        receiverId: userId,
+        productAuctionId,
+      });
+    } else {
+      await this.notificationRepository.save({
+        message,
+        isRead: false,
+        receiverId: userId,
+        productAuctionId,
+      });
+    }
+    SocketService.SocketServer.to(userId).emit(
+      ServerEventName.Notification,
       message,
-      isRead: false,
-      receiverId: userId,
-      productAuctionId,
-    });
-
-    this.socketService.socketServer
-      .to(userId)
-      .emit(ServerEventName.Notification, message);
+    );
   }
 
   // public async createNotificationWithTransaction(

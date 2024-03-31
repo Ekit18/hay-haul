@@ -29,17 +29,16 @@ export function DatePickerWithRange<T extends FieldValues, K extends Path<DateRa
 
   // TODO: non-typesafe field. Its type must be inferred from
   const date: DateRange = watch(field);
-
   return (
     <Popover>
       <PopoverTrigger
         asChild
-        className="col-span-2 min-h-[56px] rounded-none border-0 border-r-secondary sm:col-span-1 sm:border-r-[1px] sm:even:rounded-bl-2xl lg:col-span-1 lg:even:rounded-none"
+        className="col-span-2 min-h-[56px] rounded-none border-0 border-r-secondary sm:col-span-1 sm:border-r-[1px] lg:col-span-1"
       >
         <Button
           variant="outline"
           className={cn(
-            'mb-[1px] flex h-auto w-full flex-row items-center justify-start bg-popover px-4 py-2 text-start even:border-r-[1px] sm:mb-0',
+            'mb-[1px] flex h-auto w-full flex-row items-center justify-start bg-popover px-4 py-2 text-start xl:odd:border-r-[1px] border-0 last-of-type:border-0 sm:mb-0',
             !!errors[field] && 'shadow-[inset_0px_0px_8px_0px_#ff0000]'
           )}
         >

@@ -6,7 +6,7 @@ export function CreateAuction() {
       <div className="p-4 pt-6 bg-white">
         <h2 className="text-3xl font-bold mb-9">Create auction</h2>
       </div>
-      <div className="px-4 w-full grid grid-cols-1 gap-4 pt-5 ">
+      <div className="px-4 w-full grid grid-cols-1 gap-4 pt-5 bg-gray-100">
         <CreateProductAuctionForm />
       </div>
     </div>

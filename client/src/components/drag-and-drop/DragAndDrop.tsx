@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { MAX_FILE_SIZE } from '@/lib/constants/constants';
+import { MAX_FILES, MAX_FILE_SIZE } from '@/lib/constants/constants';
 import { cn } from '@/lib/utils';
 import { Upload } from 'lucide-react';
 import React, { useEffect } from 'react';
@@ -53,27 +53,22 @@ export function DragAndDrop() {
     formState: { errors }
   } = useFormContext<CreateProductAuctionFormValues>();
 
-  const {
-    fields: photos,
-    append,
-    remove
-  } = useFieldArray({
+  const { fields: photos, append } = useFieldArray({
     control,
     name: 'photos'
   });
 
   const onDrop = (acceptedFiles: File[]) => {
+    clearErrors('photos');
+
     const newPhotosLength = acceptedFiles.length + photos.length;
-    if (newPhotosLength > 5) {
+    if (newPhotosLength > MAX_FILES) {
       setError('photos', {
-        message: 'You can only upload 5 photos',
+        message: `You can only upload ${MAX_FILES} photos`,
         type: 'manual'
       });
 
-      const excess = newPhotosLength - 5;
-      if (excess > 0) {
-        acceptedFiles.splice(5 - photos.length, excess);
-      }
+      acceptedFiles.splice(MAX_FILES - photos.length);
     }
 
     acceptedFiles.forEach(async (file: File) => {
@@ -140,14 +135,16 @@ export function DragAndDrop() {
           </div>
         </CardContent>
       </Card>
-      {errors.photos && <FormMessage>{errors.photos.message}</FormMessage>}
-      {fileRejections.map(({ errors }) => (
-        <React.Fragment key={errors[0].message}>
-          {errors.map((e) => (
-            <FormMessage key={e.message}>{e.message}</FormMessage>
-          ))}
-        </React.Fragment>
-      ))}
+      <div className="h-5 mt-2">
+        {errors.photos && <FormMessage>{errors.photos.message}</FormMessage>}
+        {fileRejections.map(({ errors }) => (
+          <React.Fragment key={errors[0].message}>
+            {errors.map((e) => (
+              <FormMessage key={e.message}>{e.message}</FormMessage>
+            ))}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 }

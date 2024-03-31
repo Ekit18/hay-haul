@@ -1,12 +1,18 @@
 import { Logger, UseGuards } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { ClientToServerEventName } from 'src/lib/enums/client-to-server-event-name.enum';
+import { ClientToServerEventParameter } from 'src/lib/types/Socket/client-to-server-event-parameter.type';
+import { FirstParameter } from 'src/lib/types/types';
 import { AuthenticatedSocket } from 'src/lib/types/user.request.type';
 import { SocketAuthGuard } from 'src/socket/socket.guard';
 import { SocketService } from 'src/socket/socket.service';
@@ -31,10 +37,15 @@ export class ProductsAuctionGateway
   private logger: Logger = new Logger('AppGateway');
 
   afterInit(server: Server) {
-    if (!this.socketService.socketServer) {
-      return;
-    }
-    this.socketService.socketServer = server;
+    SocketService.SocketServer = server;
+    SocketService.SocketServer.use((client: AuthenticatedSocket, next) => {
+      try {
+        SocketAuthGuard.CanActivate(client, this.tokenService);
+        next();
+      } catch (e) {
+        next(e);
+      }
+    });
   }
 
   handleDisconnect(client: AuthenticatedSocket) {
@@ -48,5 +59,19 @@ export class ProductsAuctionGateway
       `Client connected: ${client.id} (user id: ${client.user?.id})`,
     );
     if (client.user.id) client.rooms.add(client.user.id);
+  }
+
+  @SubscribeMessage(ClientToServerEventName.JOIN_PRODUCT_AUCTION_ROOMS)
+  joinProductAuctionRooms(
+    @MessageBody()
+    productAuctionIds: FirstParameter<
+      ClientToServerEventParameter[ClientToServerEventName.JOIN_PRODUCT_AUCTION_ROOMS]
+    >,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    this.logger.log(
+      `Client ${client.user?.id} joined rooms: ${productAuctionIds}`,
+    );
+    client.join(productAuctionIds);
   }
 }

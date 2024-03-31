@@ -97,9 +97,7 @@ export class S3FileService {
   async getUrlByKey(key: string): Promise<string> {
     const cacheEntry = await this.cacheManager.get<string | null>(key);
 
-    console.log('entry', cacheEntry);
     if (cacheEntry) {
-      console.log('CACHE');
       return cacheEntry;
     }
 

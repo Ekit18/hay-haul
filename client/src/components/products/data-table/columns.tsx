@@ -1,3 +1,4 @@
+import { productAuctionStatus } from '@/components/product-auction/product-auction-card/ProductAuctionStatus.enum';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,7 +9,9 @@ import {
 import { FormControl, FormField, FormItem } from '@/components/ui/form';
 import { SortOrder } from '@/lib/enums/sort-order.enum';
 import { Product } from '@/lib/types/Product/Product.type';
+import { ProductAuctionStatus, ProductAuctionStatusText } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { SortOrderValues } from '@/lib/types/types';
+import { cn } from '@/lib/utils';
 import {
   CurrentProductUsageContext,
   useCurrentProductContext
@@ -176,13 +179,19 @@ export const columns: ColumnDef<Product>[] = [
     cell: ({ row }) => {
       const product = row.original;
       const { setCurrentProduct, setUsageContext } = useCurrentProductContext();
-      return (
+      return product.productAuction === null ||
+        product.productAuction.auctionStatus === ProductAuctionStatus.Inactive ||
+        product.productAuction.auctionStatus === ProductAuctionStatus.StartSoon ? (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-5 w-5" />
-            </Button>
+          <DropdownMenuTrigger asChild className="flex">
+            <div className="h-full w-full flex justify-center">
+              <div className="">
+                <Button variant="ghost" className="h-full w-full">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem
@@ -203,6 +212,15 @@ export const columns: ColumnDef<Product>[] = [
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      ) : (
+        <p
+          className={cn(
+            'w-max p-2 rounded-lg text-sm whitespace-nowrap',
+            productAuctionStatus[product.productAuction.auctionStatus]
+          )}
+        >
+          {ProductAuctionStatusText[product.productAuction.auctionStatus]}
+        </p>
       );
     }
   }

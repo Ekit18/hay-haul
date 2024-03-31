@@ -8,7 +8,7 @@ import { Toaster } from './components/ui/toaster.tsx';
 import './index.css';
 import { setupStore } from './store/store.ts';
 
-const store = setupStore();
+export const store = setupStore();
 const persistor = persistStore(store);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -27,7 +27,7 @@ export function ProductAuctionFilter() {
       startDate: undefined,
       endDate: undefined,
       quantity: undefined,
-      statuses: undefined
+      statuses: []
     });
   };
 

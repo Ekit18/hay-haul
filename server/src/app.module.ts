@@ -75,7 +75,7 @@ import { UserModule } from './user/user.module';
           S3File,
         ],
         // logger: 'simple-console',
-        logging: true,
+        // logging: true,
         synchronize: true,
         options: {
           encrypt: false,

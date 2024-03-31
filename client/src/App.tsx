@@ -7,24 +7,58 @@ import { cn } from './lib/utils';
 import { setUser } from './store/reducers/user/userSlice';
 // eslint-disable-next-line camelcase
 import jwt_decode from 'jwt-decode';
-import { User } from './lib/types/User/User.type';
+import { handleRtkError } from './lib/helpers/handleRtkError';
+import { socket } from './lib/helpers/socketService';
+import { UserToken } from './lib/types/User/User.type';
+import { setAccessToken } from './store/reducers/token/tokenSlice';
+import { userApi } from './store/reducers/user/userApi';
 
 function App() {
   const token = useAppSelector((state) => state.accessToken.accessToken);
   const dispatch = useAppDispatch();
+  const [refresh, { isUninitialized: isRefreshingToken, isSuccess }] = userApi.useRefreshMutation();
 
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!token) {
-      return setLoading(false);
-    }
+    (async () => {
+      if (!token) {
+        return setLoading(false);
+      }
 
-    const user = jwt_decode<User>(token);
+      let user: UserToken | null = null;
 
-    dispatch(setUser(user));
+      try {
+        user = jwt_decode<UserToken>(token);
 
-    setLoading(false);
+        if (user.exp * 1000 < Date.now()) {
+          try {
+            console.log(1);
+            console.log('rerender');
+            await refresh(undefined)
+              .unwrap()
+              .then(({ accessToken }) => {
+                dispatch(setAccessToken(accessToken));
+                user = jwt_decode<UserToken>(accessToken);
+                socket.removeAllListeners();
+                socket.connect(accessToken);
+              });
+          } catch (e) {
+            handleRtkError(e);
+          }
+        } else {
+          console.log(2);
+          socket.removeAllListeners();
+          socket.connect(token);
+        }
+      } catch (e) {
+        console.log('error decoding token');
+      }
+
+      if (user) dispatch(setUser(user));
+
+      setLoading(false);
+    })();
   }, [dispatch, token]);
 
   if (loading) {

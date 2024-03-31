@@ -20,45 +20,28 @@ export function ProductFilterForm() {
 
   const userId = user.id;
   const farmId = getValues('farmId');
+  const productTypeId = getValues('productTypeId');
 
   const { data: farms } = facilityDetailsApi.useGetAllByUserIdQuery(userId);
 
   const productTypesByFarmId = farms?.find((farm) => farm.id === farmId)?.productTypes || [];
 
   useEffect(() => {
+    if (!farmId) return;
+
+    if (
+      productTypeId &&
+      productTypeId.length &&
+      productTypesByFarmId.find((product) => product.id === productTypeId[0])
+    )
+      return;
+
     setValue('productTypeId', []);
   }, [farmId]);
 
   return (
     <>
       <div className=" flex gap-4 flex-col md:flex-row">
-        {/* <FormField
-          control={control}
-          name="farmId"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel>Farm</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value} disabled={!farms?.length}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a farm" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectGroup>
-                    {farms?.map((farm) => (
-                      <SelectItem key={farm.id} value={farm.id}>
-                        {farm.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
-
         <FilterSelect<ProductFilterFormValues, FacilityDetails[]>
           valueProperty="name"
           title="Farm"

@@ -25,13 +25,13 @@ export const productAuctionBidTrigger = `
 		select @deletedMaxPrice = price from deleted;
 		if(@insertedPrice <= @deletedMaxPrice)
 		begin
-		  raiserror ('New bid amount cannot be less than the maximum bid', 16, 1);
+		  raiserror ('New bid amount cannot be less than the maximum bid. Deleted max price: ' + CAST(CAST(@deletedMaxPrice as decimal(18,2)) as VARCHAR) + ' Inserted price: ' + CAST(CAST(@insertedPrice as decimal(18,2)) as VARCHAR), 16, 1);
 		  rollback transaction;
 		end
 	end
     else if (@insertedPrice <= @currMax)
     begin
-      raiserror ('New bid amount cannot be less than the maximum bid', 16, 1);
+      raiserror ('New bid amount cannot be less than the maximum bid22', 16, 1);
       rollback transaction;
     end
   end;

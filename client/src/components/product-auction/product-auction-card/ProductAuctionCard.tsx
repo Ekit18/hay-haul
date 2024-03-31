@@ -1,6 +1,10 @@
 import { Timer } from '@/components/timer/Timer';
 import { Button } from '@/components/ui/button';
-import { ProductAuction, ProductAuctionStatus } from '@/lib/types/ProductAuction/ProductAuction.type';
+import {
+  ProductAuction,
+  ProductAuctionStatus,
+  ProductAuctionStatusText
+} from '@/lib/types/ProductAuction/ProductAuction.type';
 
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -22,7 +26,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
     <div className="min-[1068px]:w-full w-full flex flex-col min-[1068px]:flex-row gap-4 justify-start items-center rounded-lg bg-white">
       <div className="w-full min-[1068px]:h-full min-[1068px]:w-4/12 xl:w-3/12">
         <img
-          className="h-40 min-[1068px]:h-72 w-full  object-cover min-[1068px]:rounded-l-lg rounded-t-lg min-[1068px]:rounded-tr-none"
+          className="h-40 min-[1068px]:h-full w-full  object-cover min-[1068px]:rounded-l-lg rounded-t-lg min-[1068px]:rounded-tr-none"
           src={productAuction?.photos[0]?.signedUrl}
           alt={productAuction.product.name}
         />
@@ -32,6 +36,8 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
           <div className="flex flex-row justify-start items-center gap-3">
             <p className="font-semibold text-xl text-left w-max">
               {capitalize(productAuction.product.name)} by {capitalize(productAuction.product.facilityDetails.name)}
+              <br />
+              {productAuction.id}
             </p>
             <p
               className={cn(
@@ -39,7 +45,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
                 productAuctionStatus[productAuction.auctionStatus]
               )}
             >
-              {productAuction.auctionStatus}
+              {ProductAuctionStatusText[productAuction.auctionStatus]}
             </p>
           </div>
 
@@ -68,16 +74,22 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
           <p>
             Address of farm: <span className="font-medium">{productAuction.product.facilityDetails.address}</span>
           </p>
+          <p>
+            Quantity:{' '}
+            <span className="font-medium">
+              {productAuction.product.quantity} {productAuction.product.quantity === 1 ? 'tonne' : 'tonnes'}
+            </span>
+          </p>
         </div>
       </div>
       <div className="min-[1068px]:pr-4 px-4 pb-4 gap-4 flex flex-col min-[1068px]:py-4 min-[1068px]:pl-0 min-[1068px]:w-3/12 w-full">
-        {productAuction.auctionStatus === ProductAuctionStatus.Active ||
-          (productAuction.auctionStatus === ProductAuctionStatus.EndSoon && (
-            <div className="border-b-2 pb-4">
-              <p className="text-center">Ends in:</p>
-              <Timer toDate={productAuction.endDate} />
-            </div>
-          ))}
+        {(productAuction.auctionStatus === ProductAuctionStatus.Active ||
+          productAuction.auctionStatus === ProductAuctionStatus.EndSoon) && (
+          <div className="border-b-2 pb-4">
+            <p className="text-center">Ends in:</p>
+            <Timer toDate={productAuction.endDate} />
+          </div>
+        )}
         {productAuction.auctionStatus === ProductAuctionStatus.StartSoon && (
           <div className="border-b-2 pb-4">
             <p className="text-center">Starts in:</p>

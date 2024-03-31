@@ -211,8 +211,6 @@ export class ProductAuctionService {
       //   );
       // }
 
-      console.log('1111');
-
       if (hasRoleBeChecked) {
         switch (request.user.role) {
           case UserRole.Farmer:
@@ -228,23 +226,21 @@ export class ProductAuctionService {
         }
       }
 
-      console.log('2222');
-
       const [auctions, total] = await queryBuilder
         .take(limit)
         .skip(offset)
         .getManyAndCount();
       const pageCount = Math.ceil(total / limit);
 
-      console.log('3333');
       for await (const auction of auctions) {
-        console.log('4444');
         for await (const photo of auction.photos) {
-          console.log('5555');
           photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
-          console.log('6666');
         }
       }
+
+      // auctions.forEach((auction) => {
+      // this.socketService.socketServer.socketsJoin(auction.id);
+      // })
 
       return {
         data: auctions,

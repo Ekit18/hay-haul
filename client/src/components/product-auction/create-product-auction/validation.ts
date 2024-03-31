@@ -25,7 +25,7 @@ export const createProductAuctionDefaultValues: CreateProductAuctionFormValues =
     from: new Date(),
     to: addDays(new Date(), 1)
   },
-  paymentPeriod: new Date(),
+  paymentPeriod: addDays(new Date(), 2),
   bidStep: 0,
   description: '',
   productId: '',
@@ -52,14 +52,14 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
   ''
 > => {
   return object({
-    startPrice: number()
-      .required('Start price is required')
-      .positive('Start price must be positive')
-      .min(0, 'Start price must be greater than 0'),
+    startPrice: number().required('Start price is required').min(0, 'Start price must be greater than 0'),
     buyoutPrice: number()
       .required('Buyout price is required')
-      .positive('Buyout price must be positive')
-      .min(0, 'Buyout price must be greater than 0'),
+      .min(0, 'Buyout price must be greater than 0')
+      .test('buyoutPrice', 'Buyout price must be greater than start price', function (value, context) {
+        const { startPrice } = context.parent as CreateProductAuctionFormValues;
+        return compareValues(startPrice, value, ComparisonOperator.LESS_THAN);
+      }),
     startEndDate: object(dateRangeRequiredObjectSchema)
       .required('Start / end date is required')
       .test('startEndDate', 'Min start date must be less than max start date', function (value) {
@@ -72,10 +72,7 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
         const { startEndDate } = context.parent as CreateProductAuctionFormValues;
         return compareValues(startEndDate.to, value, ComparisonOperator.LESS_THAN);
       }),
-    bidStep: number()
-      .required('Bid step is required')
-      .positive('Bid step must be positive')
-      .min(0, 'Bid step must be greater than 0'),
+    bidStep: number().required('Bid step is required').min(1, 'Bid step must be greater than 0'),
     description: string().required('Description is required').min(10, 'Description must be at least 10 characters'),
     productId: string().required('Product is required'),
     farmId: string().required('Farm is required'),

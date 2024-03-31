@@ -1,5 +1,3 @@
-import { ComparisonOperator } from '@/lib/enums/comparison-operator.enum';
-import { compareValues } from '@/lib/helpers/compareValues';
 import { NumberRange, NumberRangeFields } from '@/lib/types/types';
 import { FieldValues, Path, useFormContext } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormMessage } from './form';
@@ -34,14 +32,16 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
                   onBlur={(e) => {
                     if (e.target.value === '') {
                       field.onChange({ ...currentValue, from: undefined });
+                      return;
                     }
+                    field.onChange({ ...currentValue, from: 0 });
                   }}
                   onChange={(e) => {
                     if (Number.isNaN(e.target.valueAsNumber)) {
-                      field.onChange({ ...currentValue, to: undefined });
+                      field.onChange({ ...currentValue, from: undefined });
                       return;
                     }
-                    if (compareValues(e.target.valueAsNumber, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+                    if (e.target.valueAsNumber <= 0) {
                       return;
                     }
                     field.onChange({ ...currentValue, from: e.target.valueAsNumber });
@@ -65,21 +65,21 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
                   placeholder="Max"
                   {...field}
                   onBlur={(e) => {
-                    console.log('blur');
                     if (e.target.value === '') {
                       field.onChange({ ...currentValue, to: undefined });
+                      return;
                     }
+                    field.onChange({ ...currentValue, to: 0 });
                   }}
                   onChange={(e) => {
-                    console.log('change');
                     if (Number.isNaN(e.target.valueAsNumber)) {
                       field.onChange({ ...currentValue, to: undefined });
                       return;
                     }
-                    if (compareValues(e.target.valueAsNumber, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
+                    if (e.target.valueAsNumber <= 0) {
                       return;
                     }
-                    field.onChange({ ...currentValue, to: e.target.value });
+                    field.onChange({ ...currentValue, to: e.target.valueAsNumber });
                   }}
                   value={(field.value as NumberRange)?.to || ''}
                   type="number"

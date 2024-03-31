@@ -11,7 +11,7 @@ import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { productsApi } from '@/store/reducers/products/productsApi';
 import { yupResolver } from '@hookform/resolvers/yup';
 import debounce from 'debounce';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { CurrentProductContextProvider } from './contexts/currentProductContext';
 
@@ -25,8 +25,6 @@ export function ProductsPage() {
     mode: 'onBlur',
     defaultValues: productFilterFormDefaultValues
   });
-
-  const watchedFields = form.watch();
 
   const onSubmit: SubmitHandler<ProductFilterFormValues> = async (data) => {
     if (isLoading || isFetching) return;
@@ -43,17 +41,30 @@ export function ProductsPage() {
     await filterProducts(searchParams).unwrap().catch(handleRtkError);
   };
 
+  const firstRender = useRef(true);
   useEffect(() => {
-    const debouncedFunction = debounce(() => (!isLoading || !isFetching) && onSubmit(form.getValues()), DEBOUNCE_DELAY);
+    const getFunction = () => {
+      if (!isLoading || !isFetching) {
+        onSubmit(form.getValues());
+      }
+    };
 
-    form.watch(() => {
+    const debouncedFunction = debounce(getFunction, DEBOUNCE_DELAY);
+
+    const watchSubscription = form.watch(() => {
+      if (firstRender.current) {
+        getFunction();
+        firstRender.current = false;
+        return;
+      }
       debouncedFunction();
     });
 
     return () => {
+      watchSubscription.unsubscribe();
       debouncedFunction.clear();
     };
-  }, [watchedFields]);
+  }, []);
 
   return (
     <>

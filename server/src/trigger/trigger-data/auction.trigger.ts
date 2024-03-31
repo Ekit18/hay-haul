@@ -9,7 +9,7 @@ as
 begin
 declare @auctionStatus varchar(255);
 select @auctionStatus=auctionStatus from deleted;
- if (@auctionStatus = 'Inactive')
+ if (@auctionStatus = 'Inactive' or @auctionStatus = 'StartSoon')
  begin
       return
  end

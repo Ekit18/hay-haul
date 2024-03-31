@@ -7,3 +7,8 @@ export type User = {
   role: UserRole;
   isVerified: boolean;
 };
+
+export type UserToken = User & {
+  iat: number;
+  exp: number;
+};

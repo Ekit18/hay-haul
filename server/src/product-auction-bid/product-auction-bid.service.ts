@@ -74,6 +74,7 @@ export class ProductAuctionBidService {
           let res: UpdateResult | ProductAuctionBid;
 
           if (candidateBid && candidateBid.price === price) {
+            console.log('update');
             res = await transactionalEntityManager.update(
               ProductAuctionBid,
               {
@@ -86,6 +87,7 @@ export class ProductAuctionBidService {
               },
             );
           } else {
+            console.log('save');
             res = await transactionalEntityManager.save(ProductAuctionBid, {
               ...(candidateBid ? { id: candidateBid.id } : {}),
               price,
@@ -95,10 +97,16 @@ export class ProductAuctionBidService {
           }
 
           console.log('res', res instanceof ProductAuctionBid);
-          await transactionalEntityManager.save(ProductAuction, {
-            ...auction,
-            currentMaxBidId: 'id' in res ? res.id : candidateBid.id,
-          });
+          const currentMaxBidId = 'id' in res ? res.id : candidateBid.id;
+          console.log('currentMaxBidId', currentMaxBidId);
+          const res2 = await transactionalEntityManager.update(
+            ProductAuction,
+            { id: auctionId },
+            {
+              currentMaxBidId,
+            },
+          );
+          console.log('res2', res2);
 
           if (price >= auction.buyoutPrice) {
             await transactionalEntityManager.update(
@@ -114,23 +122,29 @@ export class ProductAuctionBidService {
           //todo: notify current max bidder by socket/email/notifications
           //start
 
-          const previousMaxBidderId = auction.currentMaxBid.userId;
-
+          const previousMaxBidderId = auction.currentMaxBid?.userId;
           if (previousMaxBidderId) {
+            console.log('creating notification');
             await this.notificationService.createNotification(
               previousMaxBidderId, // todo: check if current max bidder updated here
               auction.id,
               NotificationMessage.BidOverbid,
+              transactionalEntityManager,
             );
+            console.log('created notification');
           }
 
-          this.socketService.socketServer
-            .to(auction.id)
-            .emit(ServerEventName.AuctionUpdated, {
-              newMaxBid: auction.currentMaxBid.price,
-            });
+          SocketService.SocketServer.to(auction.id).emit(
+            ServerEventName.AuctionUpdated,
+            {
+              auctionId: auction.id,
+              currentMaxBid: price,
+              currentMaxBidId: currentMaxBidId,
+            },
+          );
+          console.log('emitted socket event');
 
-          //end
+          //end s
           return res;
         } catch (error) {
           console.log('===================');

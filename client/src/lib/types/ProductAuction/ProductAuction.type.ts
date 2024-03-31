@@ -18,6 +18,17 @@ export type ProductAuctionStatusDict = {
   [K in string]: string;
 };
 
+export const ProductAuctionStatusText = {
+  [ProductAuctionStatus.Active]: 'Active',
+  [ProductAuctionStatus.Closed]: 'Closed',
+  [ProductAuctionStatus.EndSoon]: 'End soon',
+  [ProductAuctionStatus.Ended]: 'Ended',
+  [ProductAuctionStatus.Inactive]: 'Inactive',
+  [ProductAuctionStatus.StartSoon]: 'Start soon',
+  [ProductAuctionStatus.WaitingPayment]: 'Waiting payment',
+  [ProductAuctionStatus.Unpaid]: 'Unpaid'
+};
+
 export type ProductAuctionStatusValues = ValueOf<typeof ProductAuctionStatus>;
 
 export type ProductAuction = {

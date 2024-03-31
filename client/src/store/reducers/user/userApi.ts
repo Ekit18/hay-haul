@@ -101,6 +101,12 @@ export const userApi = api.injectEndpoints({
         url: '/auth/confirm-reset-password',
         method: 'POST'
       })
+    }),
+    refresh: builder.mutation<TokenResponse, undefined>({
+      query: () => ({
+        url: '/auth/refresh',
+        method: 'POST'
+      })
     })
   })
 });

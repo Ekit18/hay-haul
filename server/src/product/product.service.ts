@@ -8,6 +8,7 @@ import {
 } from 'src/lib/constants/constants';
 import { SortOrder } from 'src/lib/enums/enums';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { ProductAuctionStatus } from 'src/product-auction/product-auction.entity';
 import { ProductTypeErrorMessage } from 'src/product-type/product-type-error-message.enum';
 import { ProductTypeService } from 'src/product-type/product-type.service';
 import { Repository } from 'typeorm';
@@ -50,7 +51,8 @@ export class ProductService {
       const queryBuilder = this.productRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
-        .leftJoinAndSelect('product.productType', 'productType');
+        .leftJoinAndSelect('product.productType', 'productType')
+        .leftJoinAndSelect('product.productAuction', 'productAuction');
 
       if (nameSort) {
         queryBuilder.addOrderBy('product.name', nameSort);
@@ -102,19 +104,15 @@ export class ProductService {
         });
       }
       if (withoutAuction) {
-        queryBuilder.leftJoin('product.productAuction', 'productAuction');
         queryBuilder.andWhere('productAuction.productId IS NULL');
       }
-
-      console.log('limit', limit);
-      console.log('offset', offset);
 
       if (!withoutAuction) {
         queryBuilder.take(limit).skip(offset);
       }
-      console.log('1111');
+
       const [result, total] = await queryBuilder.getManyAndCount();
-      console.log('2222');
+
       const pageCount = Math.ceil(total / limit);
 
       return {
@@ -134,7 +132,7 @@ export class ProductService {
     try {
       return await this.productRepository.findOne({
         where: { id },
-        relations: { facilityDetails: { user: true } },
+        relations: { facilityDetails: { user: true }, productAuction: true },
       });
     } catch (error) {
       throw new HttpException(
@@ -197,6 +195,16 @@ export class ProductService {
     const userId = request.user.id;
 
     const product = await this.findOne(id);
+
+    if (
+      product.productAuction.auctionStatus !== ProductAuctionStatus.Inactive &&
+      product.productAuction.auctionStatus !== ProductAuctionStatus.StartSoon
+    ) {
+      throw new HttpException(
+        ProductErrorMessage.ProductCannotBeUpdated,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     if (product.facilityDetails.user.id !== userId) {
       throw new HttpException(

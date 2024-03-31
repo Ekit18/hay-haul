@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { api } from './api';
+import { socketSlice } from './reducers/socket/socket.slice';
 import tokenReducer from './reducers/token/tokenSlice';
 import { userApi } from './reducers/user/userApi';
 import { userSlice } from './reducers/user/userSlice';
@@ -20,6 +21,7 @@ export const rootReducer = combineReducers({
   // productReducer,
   // cartReducer,
   [userSlice.reducerPath]: userSlice.reducer,
+  [socketSlice.reducerPath]: socketSlice.reducer,
   // productReducer
   // checkOutReducer,
   // eslint-disable-next-line no-use-before-define
@@ -45,5 +47,6 @@ export const setupStore = () => {
 };
 
 export type RootState = ReturnType<typeof rootReducer>;
+
 export type AppStore = ReturnType<typeof setupStore>;
 export type AppDispatch = AppStore['dispatch'];

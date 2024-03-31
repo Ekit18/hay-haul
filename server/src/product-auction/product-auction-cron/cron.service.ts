@@ -17,7 +17,7 @@ export class ProductAuctionCronService {
   //   this.configService.get<string>(
   //     'SENDGRID_SEEKER_SUBMIT_CONTRACT_PROPOSAL_TEMPLATE_ID',
   //   );
-  private readonly logger = new Logger('test');
+  private readonly logger = new Logger('ProductAuctionCronService');
 
   constructor(
     private configService: ConfigService,

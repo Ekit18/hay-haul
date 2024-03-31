@@ -7,4 +7,5 @@ export enum ProductErrorMessage {
   UnauthorizedUpdateProduct = 'Unauthorized to update product',
   ProductNotFound = 'Product not found',
   UserNotFound = 'User not found',
+  ProductCannotBeUpdated = 'Product cannot be updated',
 }

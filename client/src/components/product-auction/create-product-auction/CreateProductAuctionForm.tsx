@@ -16,11 +16,12 @@ import { facilityDetailsApi } from '@/store/reducers/facility-details/facilityDe
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { productsApi } from '@/store/reducers/products/productsApi';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { format } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { addDaysRatios, buyoutPriceRatios } from './constants';
 import {
   CreateProductAuctionFormValues,
   createProductAuctionDefaultValues,
@@ -51,6 +52,10 @@ export function CreateProductAuctionForm() {
 
   const farmId = form.watch('farmId');
   const photos = form.watch('photos');
+  const startPrice = form.watch('startPrice');
+  const buyoutPrice = form.watch('buyoutPrice');
+  const startEndDate = form.watch('startEndDate');
+  const paymentPeriod = form.watch('paymentPeriod');
   // const { fields: photos } = useFieldArray({ control: form.control, name: 'photos' });
 
   useEffect(() => {
@@ -66,6 +71,28 @@ export function CreateProductAuctionForm() {
       .catch(handleRtkError);
   };
 
+  const handleAddBuyoutPrice = (percent: number) => {
+    form.setValue('buyoutPrice', buyoutPrice + startPrice * percent);
+  };
+
+  const handleAddStartEndDays = (days: number) => {
+    if (!startEndDate) {
+      const startDate = new Date();
+      form.setValue('startEndDate', { from: addDays(startDate, days), to: addDays(startDate, days + 1) });
+      return;
+    }
+    if (!startEndDate.to) {
+      const endDate = addDays(startEndDate.from, days);
+      form.setValue('startEndDate', { from: startEndDate.from, to: endDate });
+      return;
+    }
+    form.setValue('startEndDate', { from: startEndDate.from, to: addDays(startEndDate.to, days) });
+  };
+
+  const handleAddPaymentPeriod = (days: number) => {
+    form.setValue('paymentPeriod', addDays(paymentPeriod, days));
+  };
+
   return (
     <Form {...form}>
       <div className="w-full flex flex-col justify-center items-center gap-10 bg-gray-100">
@@ -75,7 +102,7 @@ export function CreateProductAuctionForm() {
           </div>
           <div className="w-full xl:w-6/12">
             <div className="flex flex-row w-full gap-4 py-4">
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-4">
                 <FilterSelect
                   fieldName="farmId"
                   title="Farm"
@@ -108,6 +135,19 @@ export function CreateProductAuctionForm() {
                                 field.onChange(0);
                               }
                             }}
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.valueAsNumber)) {
+                                field.onChange(0);
+                                form.setValue('buyoutPrice', 0);
+                                return;
+                              }
+                              if (e.target.valueAsNumber <= 0) {
+                                return;
+                              }
+                              field.onChange(e.target.valueAsNumber);
+                              form.setValue('buyoutPrice', e.target.valueAsNumber + e.target.valueAsNumber * 0.25);
+                            }}
+                            value={field.value || ''}
                             type="number"
                           />
                         </FormControl>
@@ -123,6 +163,19 @@ export function CreateProductAuctionForm() {
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel>Buyout price</FormLabel>
+                        <div className="flex flex-row gap-1">
+                          {buyoutPriceRatios.map((ratio) => (
+                            <Button
+                              type="button"
+                              key={ratio.label}
+                              className="w-10 text-xs h-5"
+                              disabled={!startPrice}
+                              onClick={() => handleAddBuyoutPrice(ratio.value)}
+                            >
+                              +{ratio.label}
+                            </Button>
+                          ))}
+                        </div>
                         <FormControl>
                           <Input
                             placeholder="Enter buyout price"
@@ -132,6 +185,17 @@ export function CreateProductAuctionForm() {
                                 field.onChange(0);
                               }
                             }}
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.valueAsNumber)) {
+                                field.onChange(0);
+                                return;
+                              }
+                              if (e.target.valueAsNumber <= 0) {
+                                return;
+                              }
+                              field.onChange(e.target.valueAsNumber);
+                            }}
+                            value={field.value || ''}
                             type="number"
                           />
                         </FormControl>
@@ -141,7 +205,7 @@ export function CreateProductAuctionForm() {
                   />
                 </div>
               </div>
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-4">
                 <div className="w-full items-center ">
                   <FormField
                     control={form.control}
@@ -158,6 +222,17 @@ export function CreateProductAuctionForm() {
                                 field.onChange(0);
                               }
                             }}
+                            onChange={(e) => {
+                              if (Number.isNaN(e.target.valueAsNumber)) {
+                                field.onChange(0);
+                                return;
+                              }
+                              if (e.target.valueAsNumber <= 0) {
+                                return;
+                              }
+                              field.onChange(e.target.valueAsNumber);
+                            }}
+                            value={field.value || ''}
                             type="number"
                           />
                         </FormControl>
@@ -173,6 +248,18 @@ export function CreateProductAuctionForm() {
                     render={() => (
                       <FormItem className="w-full">
                         <FormLabel className="block">Choose start / end date</FormLabel>
+                        <div className="flex flex-row gap-1">
+                          {addDaysRatios.map((ratio) => (
+                            <Button
+                              type="button"
+                              className="w-10 text-xs h-5"
+                              onClick={() => handleAddStartEndDays(ratio.value)}
+                              key={ratio.label}
+                            >
+                              +{ratio.label}
+                            </Button>
+                          ))}
+                        </div>
                         <FormControl>
                           <DatePickerWithRange<CreateProductAuctionFormValues, 'startEndDate'>
                             field="startEndDate"
@@ -191,6 +278,18 @@ export function CreateProductAuctionForm() {
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel className="block">Choose payment period</FormLabel>
+                        <div className="flex flex-row gap-1">
+                          {addDaysRatios.map((ratio) => (
+                            <Button
+                              type="button"
+                              className="w-10 text-xs h-5"
+                              onClick={() => handleAddPaymentPeriod(ratio.value)}
+                              key={ratio.label}
+                            >
+                              +{ratio.label}
+                            </Button>
+                          ))}
+                        </div>
                         <FormControl>
                           <Popover>
                             <PopoverTrigger asChild>
@@ -224,7 +323,7 @@ export function CreateProductAuctionForm() {
             </div>
           </div>
         </div>
-        <div className="w-1/2 self-start">
+        <div className="w-full self-start flex flex-col xl:flex-row items-center xl:justify-between justify-center gap-5">
           <FormField
             control={form.control}
             name="description"
@@ -232,25 +331,29 @@ export function CreateProductAuctionForm() {
               <FormItem className="w-full">
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea className="max-h-36" placeholder="Enter description" {...field} />
+                  <Textarea
+                    maxLength={255}
+                    className="max-h-32 w-full xl:w-2/3"
+                    placeholder="Enter description"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
-
-        <div className="flex gap-4 self-end pb-10">
-          <Button
-            type="button"
-            onClick={() => navigate(AppRoute.General.MyAuctions)}
-            className="px-10 w-full bg-gray-500"
-          >
-            Back
-          </Button>
-          <Button type="button" onClick={form.handleSubmit(onSubmit)} className="px-10 w-full">
-            Create
-          </Button>
+          <div className="flex w-full xl:w-1/3 gap-4 self-end items-center h-full pb-5">
+            <Button
+              type="button"
+              onClick={() => navigate(AppRoute.General.MyAuctions)}
+              className="px-10 w-full bg-gray-500"
+            >
+              Back
+            </Button>
+            <Button type="button" onClick={form.handleSubmit(onSubmit)} className="px-10 w-full">
+              Create
+            </Button>
+          </div>
         </div>
       </div>
     </Form>

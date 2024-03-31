@@ -14,19 +14,16 @@ export function CarouselImageInputItem({ photo }: CarouselImageInputItemProps) {
 
   const { fields: photos, remove } = useFieldArray({ control, name: 'photos' });
 
-  const handleDeleteFile = useCallback(
-    (id: string) => {
-      const index = photos.findIndex((photo) => photo.id === id);
-      remove(index);
-      clearErrors('photos');
-    },
-    [remove, photos, clearErrors]
-  );
+  const handleDeleteFile = useCallback(() => {
+    const index = photos.findIndex((item) => item.preview === photo.preview);
+    remove(index);
+    clearErrors('photos');
+  }, [remove, photos, clearErrors]);
 
   return (
-    <CarouselItem key={photo.id}>
+    <CarouselItem key={photo.preview}>
       <Card>
-        <CardContent className="flex relative aspect-square items-center justify-center p-6">
+        <CardContent className="flex relative aspect-square items-center justify-center p-6 mb-4">
           <img
             src={photo.preview}
             alt="product"
@@ -37,7 +34,7 @@ export function CarouselImageInputItem({ photo }: CarouselImageInputItemProps) {
             className="absolute right-2 top-2 rounded-full p-4 h-4 w-4"
             type="button"
             variant="destructive"
-            onClick={() => handleDeleteFile(photo.id)}
+            onClick={handleDeleteFile}
           >
             <Trash className="fixed" size={16} />
           </Button>
