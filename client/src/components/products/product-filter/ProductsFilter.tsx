@@ -23,7 +23,8 @@ export function ProductsFilter() {
       minQuantity: 0,
       maxQuantity: 0,
       farmId: '',
-      productTypeId: []
+      productTypeId: [],
+      searchQuery: undefined
     });
   };
 

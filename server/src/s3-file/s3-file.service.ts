@@ -32,6 +32,7 @@ export class S3FileService {
       async (transactionalEntityManager) => {
         for await (const key of keys) {
           await this.s3ClientService.deleteObject(key);
+          await this.cacheManager.del(key);
         }
         await transactionalEntityManager.getRepository(S3File).delete({
           key: In(keys),

@@ -11,6 +11,7 @@ import { Farms } from './pages/farmer-pages/Farms';
 import { MainPage } from './pages/farmer-pages/MainPage';
 import { MyAuctions } from './pages/farmer-pages/MyAuctions';
 import { ProductsPage } from './pages/farmer-pages/ProductsPage';
+import { UpdateAuction } from './pages/farmer-pages/UpdateAuction';
 
 type Route = {
   path: string;
@@ -52,6 +53,10 @@ export const farmerRoutes: Route[] = [
   {
     path: AppRoute.Farmer.CreateAuction,
     Component: CreateAuction
+  },
+  {
+    path: `${AppRoute.Farmer.UpdateAuction}/:id`,
+    Component: UpdateAuction
   }
   // {
   //   path: AppRoute.Farmer.Farms,

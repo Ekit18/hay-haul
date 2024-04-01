@@ -18,7 +18,7 @@ import { productsApi } from '@/store/reducers/products/productsApi';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { addDays, format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { addDaysRatios, buyoutPriceRatios } from './constants';
@@ -93,10 +93,16 @@ export function CreateProductAuctionForm() {
     form.setValue('paymentPeriod', addDays(paymentPeriod, days));
   };
 
+  const selectedProductName = useMemo(() => {
+    console.log('mem');
+    return products && products.data.find((product) => product.id === form.getValues('productId'))?.name;
+  }, [form.watch('productId')]);
+
   return (
     <Form {...form}>
       <div className="w-full flex flex-col justify-center items-center gap-10 bg-gray-100">
         <div className="w-full flex flex-col xl:flex-row justify-start items-center">
+          <h3 className="self-start text-2xl font-bold min-h-8">{selectedProductName}</h3>
           <div className="w-full xl:w-6/12 flex justify-center">
             <FileInputCarousel items={photos} />
           </div>

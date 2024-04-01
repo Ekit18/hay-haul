@@ -16,52 +16,51 @@ import { userApi } from './store/reducers/user/userApi';
 function App() {
   const token = useAppSelector((state) => state.accessToken.accessToken);
   const dispatch = useAppDispatch();
-  const [refresh, { isUninitialized: isRefreshingToken, isSuccess }] = userApi.useRefreshMutation();
+  const [refresh] = userApi.useRefreshMutation();
 
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    (async () => {
-      if (!token) {
-        return setLoading(false);
-      }
+    if (!token) {
+      return setIsLoading(false);
+    }
 
-      let user: UserToken | null = null;
+    try {
+      const user = jwt_decode<UserToken>(token);
 
-      try {
-        user = jwt_decode<UserToken>(token);
+      if (user.exp * 1000 < Date.now()) {
+        try {
+          refresh(undefined)
+            .unwrap()
+            .then(({ accessToken }) => {
+              dispatch(setAccessToken(accessToken));
+              const user = jwt_decode<UserToken>(accessToken);
 
-        if (user.exp * 1000 < Date.now()) {
-          try {
-            console.log(1);
-            console.log('rerender');
-            await refresh(undefined)
-              .unwrap()
-              .then(({ accessToken }) => {
-                dispatch(setAccessToken(accessToken));
-                user = jwt_decode<UserToken>(accessToken);
-                socket.removeAllListeners();
-                socket.connect(accessToken);
-              });
-          } catch (e) {
-            handleRtkError(e);
-          }
-        } else {
-          console.log(2);
-          socket.removeAllListeners();
-          socket.connect(token);
+              if (user) dispatch(setUser(user));
+            })
+            .finally(() => {
+              setIsLoading(false);
+            });
+        } catch (e) {
+          handleRtkError(e);
         }
-      } catch (e) {
-        console.log('error decoding token');
+      } else {
+        if (user) dispatch(setUser(user));
+        setIsLoading(false);
       }
-
-      if (user) dispatch(setUser(user));
-
-      setLoading(false);
-    })();
+    } catch (e) {
+      console.log('error decoding token');
+    }
   }, [dispatch, token]);
 
-  if (loading) {
+  useEffect(() => {
+    if (!isLoading) {
+      socket.removeAllListeners();
+      socket.connect(token);
+    }
+  }, [isLoading]);
+
+  if (isLoading) {
     return <Loader2 className={cn('mr-2 hidden h-4 w-4 animate-spin')} />;
   }
 

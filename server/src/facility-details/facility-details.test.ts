@@ -8,6 +8,7 @@ import {
   TestSuite,
 } from 'nestjs-mocha-decorators';
 import { ProductTypeService } from 'src/product-type/product-type.service';
+import { ProductService } from 'src/product/product.service';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { FacilityDetails } from './facility-details.entity';
@@ -29,6 +30,7 @@ export class FacilityDetailsServiceTest {
   private readonly facilityDetailsRepository: Repository<FacilityDetails>;
   @Inject()
   private readonly productTypeService: ProductTypeService;
+  @Inject() private readonly productService: ProductService;
 
   @TestEvent(TestEventsEnum.AFTER_EACH)
   afterEach() {
@@ -126,6 +128,7 @@ export class FacilityDetailsServiceTest {
     chai.spy.on(this.facilityDetailsRepository, 'delete', () =>
       Promise.resolve(),
     );
+    chai.spy.on(this.productService, 'findAllByFacilityId', () => []);
 
     await this.facilityDetailsService.remove(id);
 

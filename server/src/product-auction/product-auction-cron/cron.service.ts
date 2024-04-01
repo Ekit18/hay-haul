@@ -29,68 +29,85 @@ export class ProductAuctionCronService {
 
   @Cron('1 * * * * *')
   async updateAuctionStatus(): Promise<void> {
-    this.logger.log('Updating auction status');
+    try {
+      this.logger.log('Updating auction status');
 
-    const now = new Date();
-    now.setMilliseconds(0);
-    now.setSeconds(0);
-    const oneHourFromNow = addHours(now, 1);
+      const now = new Date();
+      now.setMilliseconds(0);
+      now.setSeconds(0);
+      const oneHourFromNow = addHours(now, 1);
 
-    const auctionsToUpdate = await this.productAuctionRepository
-      .createQueryBuilder('productAuction')
-      .select()
-      .where('auctionStatus IN (:...statuses)', {
-        statuses: [
-          ProductAuctionStatus.Inactive,
-          ProductAuctionStatus.StartSoon,
-          ProductAuctionStatus.Active,
-          ProductAuctionStatus.EndSoon,
-        ],
-      })
-      .innerJoinAndSelect('productAuction.product', 'product')
-      .innerJoinAndSelect('product.facilityDetails', 'facilityDetails')
-      .innerJoinAndSelect('facilityDetails.user', 'user')
-      .innerJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
-      .innerJoinAndSelect('currentMaxBid.user', 'maxBidder')
-      .getMany();
+      const auctionsToUpdate = await this.productAuctionRepository
+        .createQueryBuilder('productAuction')
+        .select()
+        .where('auctionStatus IN (:...statuses)', {
+          statuses: [
+            ProductAuctionStatus.Inactive,
+            ProductAuctionStatus.StartSoon,
+            ProductAuctionStatus.Active,
+            ProductAuctionStatus.EndSoon,
+          ],
+        })
+        .innerJoinAndSelect('productAuction.product', 'product')
+        .innerJoinAndSelect('product.facilityDetails', 'facilityDetails')
+        .innerJoinAndSelect('facilityDetails.user', 'user')
+        .innerJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
+        .innerJoinAndSelect('currentMaxBid.user', 'maxBidder')
+        .getMany();
 
-    for (const auction of auctionsToUpdate) {
-      switch (auction.auctionStatus) {
-        case ProductAuctionStatus.Inactive:
-          if (auction.startDate <= oneHourFromNow) {
-            // email/notification to farmer that his auction is about to start
-            auction.auctionStatus = ProductAuctionStatus.StartSoon;
-          }
-          break;
-        case ProductAuctionStatus.StartSoon:
-          if (auction.startDate <= now) {
-            //websocket to bidders that auction is starting
-            // email/notification to farmer that his auction is starting
-            auction.auctionStatus = ProductAuctionStatus.Active;
-          }
-          break;
-        case ProductAuctionStatus.Active:
-          if (auction.endDate <= oneHourFromNow) {
-            //websocket to bidders that auction is about to end
-            // email/notification to farmer that his auction is about to end
-            // email/notification bidders that auction is about to end
-            auction.auctionStatus = ProductAuctionStatus.EndSoon;
-          }
-          break;
-        case ProductAuctionStatus.EndSoon:
-          if (auction.endDate <= now) {
-            console.log(auction);
-            if (auction.currentMaxBid) {
-              // email/notification winner that he won the auction
+      for (const auction of auctionsToUpdate) {
+        console.log(auction);
+        switch (auction.auctionStatus) {
+          case ProductAuctionStatus.Inactive:
+            if (auction.startDate <= oneHourFromNow) {
+              // email/notification to farmer that his auction is about to start
+              auction.auctionStatus = ProductAuctionStatus.StartSoon;
             }
-            // websocket to bidders that auction is ended
-            // email/notification to farmer that his auction is ended
-            auction.auctionStatus = ProductAuctionStatus.Ended;
-          }
-          break;
-      }
+            break;
+          case ProductAuctionStatus.StartSoon:
+            if (auction.startDate <= now) {
+              //websocket to bidders that auction is starting
+              // email/notification to farmer that his auction is starting
+              auction.auctionStatus = ProductAuctionStatus.Active;
+            }
+            break;
+          case ProductAuctionStatus.Active:
+            if (auction.endDate <= oneHourFromNow) {
+              //websocket to bidders that auction is about to end
+              // email/notification to farmer that his auction is about to end
+              // email/notification bidders that auction is about to end
+              auction.auctionStatus = ProductAuctionStatus.EndSoon;
+            }
+            break;
+          case ProductAuctionStatus.EndSoon:
+            if (auction.endDate <= now) {
+              if (auction.currentMaxBid) {
+                // email/notification winner that he won the auction
+                // set the winner of auction
+              }
+              // websocket to bidders that auction is ended
+              // email/notification to farmer that his auction is ended
+              auction.auctionStatus = ProductAuctionStatus.Ended;
+            }
+            break;
+          // TODO: add waiting payment
+          // case ProductAuctionStatus.WaitingPayment:
+          //   if (auction.endDate <= now) {
+          //     if (auction.currentMaxBid) {
+          //       // email/notification winner that he won the auction
+          //       // set the winner of auction
+          //     }
+          //     // websocket to bidders that auction is ended
+          //     // email/notification to farmer that his auction is ended
+          //     auction.auctionStatus = ProductAuctionStatus.Ended;
+          //   }
+          //   break;
+        }
 
-      await this.productAuctionRepository.save(auction);
+        await this.productAuctionRepository.save(auction);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 }

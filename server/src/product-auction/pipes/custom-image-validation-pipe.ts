@@ -47,7 +47,8 @@ export class CustomImageValidationPipe
   }
 
   async transform(value: Express.Multer.File[]): Promise<any> {
-    if (!value.length) {
+    console.log(value);
+    if (!value?.length) {
       throw new BadRequestException({
         message: 'Files were not found',
       });

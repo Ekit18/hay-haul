@@ -4,6 +4,13 @@ import { ProductAuctionStatus, ProductAuctionStatusValues } from '@/lib/types/Pr
 import { DateRange, NumberRange, SortOrderValues } from '@/lib/types/types';
 import { AnyObject, ObjectSchema, array, date, number, object, string } from 'yup';
 
+export const productAuctionSortKeys = ['quantitySort', 'endDateSort', 'startDateSort'] as const;
+export type ProductAuctionSortKeys = (typeof productAuctionSortKeys)[number];
+export const productAuctionSortKeyToLabelMap: Record<ProductAuctionSortKeys, string> = {
+  [productAuctionSortKeys[0]]: 'Quantity',
+  [productAuctionSortKeys[1]]: 'End date',
+  [productAuctionSortKeys[2]]: 'Start date'
+};
 export type ProductAuctionFilterFormValues = {
   limit?: number;
   offset?: number;
@@ -17,6 +24,8 @@ export type ProductAuctionFilterFormValues = {
   quantitySort?: SortOrderValues;
   endDateSort?: SortOrderValues;
   startDateSort?: SortOrderValues;
+  innerSortKey?: ProductAuctionSortKeys;
+  innerSortOrder?: SortOrderValues;
 };
 
 export const productAuctionFilterFormDefaultValues: ProductAuctionFilterFormValues = {
@@ -31,7 +40,9 @@ export const productAuctionFilterFormDefaultValues: ProductAuctionFilterFormValu
   statuses: [],
   quantitySort: undefined,
   endDateSort: undefined,
-  startDateSort: undefined
+  startDateSort: undefined,
+  innerSortKey: undefined,
+  innerSortOrder: undefined
 };
 
 export const dateRangeRequiredObjectSchema = {
@@ -79,6 +90,8 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
     endDateSort: undefined;
     startDateSort: undefined;
     statuses: undefined;
+    innerSortKey: undefined;
+    innerSortOrder: undefined;
   },
   ''
 > => {
@@ -193,6 +206,8 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
     statuses: array(string().oneOf<ProductAuctionStatusValues>(Object.values(ProductAuctionStatus)).required()),
     endDateSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     startDateSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
-    quantitySort: string().oneOf<SortOrderValues>(['ASC', 'DESC'])
+    quantitySort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
+    innerSortKey: string().oneOf<ProductAuctionSortKeys>(['quantitySort', 'endDateSort', 'startDateSort']),
+    innerSortOrder: string().oneOf<SortOrderValues>(['ASC', 'DESC'])
   });
 };

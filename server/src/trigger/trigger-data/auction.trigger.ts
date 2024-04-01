@@ -9,9 +9,9 @@ as
 begin
 declare @auctionStatus varchar(255);
 select @auctionStatus=auctionStatus from deleted;
- if (@auctionStatus = 'Inactive' or @auctionStatus = 'StartSoon')
+ if (@auctionStatus = 'Inactive' or @auctionStatus = 'StartSoon' or @auctionStatus = 'EndSoon')
  begin
-      return
+      return;
  end
 
  if (@auctionStatus != 'Active')

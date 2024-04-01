@@ -10,9 +10,7 @@ export class TriggerService {
   }
 
   private triggers: string[] = [
-    // updateAuctionTrigger,
-    // deleteProductTypeProcedure,
-    // productAuctionBidTrigger,
+    //"DO NOT REMOVE THIS COMMENT",
   ];
 
   private async seedTrigger(): Promise<void> {

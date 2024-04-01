@@ -45,7 +45,7 @@ export class ProductServiceTest {
     await this.productService.findOne('id');
     chai.expect(this.productRepository.findOne).to.have.been.called.with({
       where: { id: 'id' },
-      relations: { facilityDetails: { user: true } },
+      relations: { facilityDetails: { user: true }, productAuction: true },
     });
   }
 
@@ -145,7 +145,7 @@ export class ProductServiceTest {
   @Test('should throw an error if id is not provided')
   async shouldThrowOnNoId() {
     try {
-      await this.productService.remove(null);
+      await this.productService.remove(null, {} as AuthenticatedRequest);
     } catch (err) {
       chai.expect(err).to.exist;
     }
@@ -157,7 +157,7 @@ export class ProductServiceTest {
       throw new Error('Error');
     };
     try {
-      await this.productService.remove('id');
+      await this.productService.remove('id', {} as AuthenticatedRequest);
     } catch (err) {
       chai.expect(err).to.exist;
     }

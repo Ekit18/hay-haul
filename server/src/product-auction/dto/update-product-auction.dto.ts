@@ -9,5 +9,6 @@ export class UpdateProductAuctionDto extends PartialType(
     'endDate',
     'paymentPeriod',
     'description',
+    'bidStep',
   ]),
 ) {}

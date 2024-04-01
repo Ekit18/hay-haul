@@ -13,10 +13,11 @@ interface SearchInputProps extends Omit<InputProps, 'onChange'> {
 const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({ className, onChange, ...props }, ref) => {
   const disabled = props.value === '' || props.value === undefined || props.disabled;
 
-  const [value, setValue] = useState<string>('');
+  const [value, setValue] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const debouncedOnValueChange = libraryDebounce(() => {
+      if (value === undefined) return;
       onChange(value);
     }, DEBOUNCE_DELAY);
 
@@ -27,6 +28,11 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({ className,
     };
   }, [value, onChange]);
 
+  useEffect(() => {
+    if (!props.value) return setValue(undefined);
+    setValue(props.value as string);
+  }, [props.value]);
+
   return (
     <div className="relative">
       <Input
@@ -35,7 +41,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({ className,
         ref={ref}
         {...props}
         onChange={(e) => setValue(e.target.value)}
-        value={value}
+        value={value || ''}
       />
       <Button
         type="submit"

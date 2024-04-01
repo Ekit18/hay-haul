@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductTypeModule } from 'src/product-type/product-type.module';
+import { ProductModule } from 'src/product/product.module';
 import { TokenModule } from 'src/token/token.module';
 import { UserModule } from 'src/user/user.module';
 import { FacilityDetailsController } from './facility-details.controller';
@@ -12,6 +13,7 @@ import { FacilityDetailsService } from './facility-details.service';
     TypeOrmModule.forFeature([FacilityDetails]),
     UserModule,
     forwardRef(() => ProductTypeModule),
+    forwardRef(() => ProductModule),
     TokenModule,
   ],
   controllers: [FacilityDetailsController],

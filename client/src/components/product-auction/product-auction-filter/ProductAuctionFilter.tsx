@@ -22,6 +22,7 @@ export function ProductAuctionFilter() {
 
   const handleClearFilter = () => {
     reset({
+      productName: undefined,
       startPrice: undefined,
       buyoutPrice: undefined,
       startDate: undefined,

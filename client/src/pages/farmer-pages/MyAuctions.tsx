@@ -1,3 +1,4 @@
+import { DeleteModal } from '@/components/delete-modal/delete-modal';
 import { ProductAuctionCard } from '@/components/product-auction/product-auction-card/ProductAuctionCard';
 import { ProductAuctionCardSkeleton } from '@/components/product-auction/product-auction-card/ProductAuctionCard.skeleton';
 import { ProductAuctionFilter } from '@/components/product-auction/product-auction-filter/ProductAuctionFilter';
@@ -8,6 +9,7 @@ import {
 } from '@/components/product-auction/product-auction-filter/validation';
 import { Form } from '@/components/ui/form';
 import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
+import { EntityTitle } from '@/lib/enums/entity-title.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { ProductAuction } from '@/lib/types/ProductAuction/ProductAuction.type';
@@ -25,10 +27,7 @@ export function MyAuctions() {
     defaultValues: productAuctionFilterFormDefaultValues
   });
 
-  const watchedFields = form.watch();
-  // const [filterFarmerAuctions, { data: productAuctions, isLoading, isFetching, isUninitialized }] =
-  //   productAuctionApi.useLazyFilterFarmerProductAuctionsQuery();
-  const [filterProductAuctions, { data: productAuctions, isLoading, isFetching, isUninitialized }] =
+  const [filterProductAuctions, { data: productAuctions, isLoading, isFetching }] =
     productAuctionApi.useLazyFilterProductAuctionsQuery();
 
   const onSubmit: SubmitHandler<ProductAuctionFilterFormValues> = async (data) => {
@@ -36,7 +35,7 @@ export function MyAuctions() {
 
     const searchParams = new URLSearchParams();
 
-    const { statuses, ...body } = data;
+    const { statuses, innerSortKey, innerSortOrder, ...body } = data;
 
     Object.entries(body).forEach(([key, value]) => {
       if (value && typeof value === 'object') {
@@ -50,6 +49,10 @@ export function MyAuctions() {
       if (value) searchParams.append(key, value.toString());
     });
 
+    if (innerSortKey && innerSortOrder) {
+      searchParams.append(innerSortKey, innerSortOrder);
+    }
+
     if (statuses && statuses.length) {
       searchParams.append('statuses', statuses?.join(',') ?? '');
     }
@@ -60,19 +63,19 @@ export function MyAuctions() {
   useEffect(() => {
     const getFunction = () => {
       if (!isLoading || !isFetching) {
-        form.trigger();
         onSubmit(form.getValues());
       }
     };
 
-    const debouncedFunction = debounce(getFunction, DEBOUNCE_DELAY * 3);
+    const debouncedFunction = debounce(getFunction, DEBOUNCE_DELAY);
+
+    if (firstRender.current) {
+      getFunction();
+      firstRender.current = false;
+      return;
+    }
 
     const watchSubscription = form.watch(() => {
-      if (firstRender.current) {
-        getFunction();
-        firstRender.current = false;
-        return;
-      }
       debouncedFunction();
     });
 
@@ -90,21 +93,12 @@ export function MyAuctions() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
-
   const handleDeleteModalOpenChange = useCallback((open: boolean) => setIsDeleteModalOpen(open), []);
-
-  const handleUpdateModalOpenChange = useCallback((open: boolean) => setIsUpdateModalOpen(open), []);
 
   const deleteModalConfirmName = useMemo<string>(
     () => currentProductAuction?.product.name ?? '>',
     [currentProductAuction]
   );
-
-  const handleEditClick = (facility: ProductAuction) => {
-    setCurrentProductAuction(facility);
-    setIsUpdateModalOpen(true);
-  };
 
   const handleDeleteClick = (facility: ProductAuction) => {
     setCurrentProductAuction(facility);
@@ -112,18 +106,6 @@ export function MyAuctions() {
   };
 
   const [deleteProductAuction] = productAuctionApi.useDeleteProductAuctionMutation();
-  const [updateProductAuction] = productAuctionApi.useUpdateProductAuctionMutation();
-
-  const handleUpdateProductAuction = (data: UpdateProductAuctionFormValues) => {
-    if (!currentProductAuction) return;
-
-    const { farmProductTypes: _, ...body } = data;
-
-    updateProductAuction({ id: currentProductAuction.id, body })
-      .unwrap()
-      .finally(() => setIsUpdateModalOpen(false))
-      .catch(handleRtkError);
-  };
 
   const handleDeleteProductAuction = () => {
     if (!currentProductAuction) return;
@@ -159,13 +141,23 @@ export function MyAuctions() {
               <ProductAuctionCard
                 key={productAuction.id}
                 productAuction={productAuction}
-                onEditClick={() => handleEditClick(productAuction)}
                 onDeleteClick={() => handleDeleteClick(productAuction)}
               />
             ))}
           </div>
         </form>
       </Form>
+      {currentProductAuction && (
+        <>
+          <DeleteModal
+            handleOpenChange={handleDeleteModalOpenChange}
+            open={isDeleteModalOpen}
+            name={deleteModalConfirmName}
+            entityTitle={EntityTitle.ProductAuction}
+            deleteCallback={handleDeleteProductAuction}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FacilityDetailsErrorMessage } from 'src/facility-details/facility-details-error-message.enum';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
@@ -23,7 +29,9 @@ export class ProductService {
   public constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @Inject(forwardRef(() => FacilityDetailsService))
     private readonly facilityDetailsService: FacilityDetailsService,
+    @Inject(forwardRef(() => ProductTypeService))
     private readonly productTypeService: ProductTypeService,
   ) {}
 
@@ -128,6 +136,19 @@ export class ProductService {
     }
   }
 
+  async findAllByFacilityId(facilityId: string) {
+    try {
+      return await this.productRepository.find({
+        where: { facilityDetailsId: facilityId },
+      });
+    } catch (error) {
+      throw new HttpException(
+        ProductErrorMessage.FailedFetchProducts,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async findOne(id: string) {
     try {
       return await this.productRepository.findOne({
@@ -197,6 +218,7 @@ export class ProductService {
     const product = await this.findOne(id);
 
     if (
+      product.productAuction &&
       product.productAuction.auctionStatus !== ProductAuctionStatus.Inactive &&
       product.productAuction.auctionStatus !== ProductAuctionStatus.StartSoon
     ) {
@@ -227,14 +249,30 @@ export class ProductService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, request: AuthenticatedRequest) {
     try {
+      const product = await this.findOne(id);
+      const userId = request.user.id;
+      if (product.facilityDetails.user.id !== userId) {
+        throw new HttpException(
+          ProductErrorMessage.UnauthorizedUpdateProduct,
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      if (
+        product.productAuction &&
+        product.productAuction.auctionStatus !==
+          ProductAuctionStatus.Inactive &&
+        product.productAuction.auctionStatus !== ProductAuctionStatus.StartSoon
+      ) {
+        throw new HttpException(
+          ProductErrorMessage.CannotDeleteProductInEndedAuction,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       await this.productRepository.delete(id);
     } catch (error) {
-      throw new HttpException(
-        ProductErrorMessage.FailedDeleteProduct,
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }

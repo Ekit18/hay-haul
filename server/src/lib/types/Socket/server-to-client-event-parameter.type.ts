@@ -1,5 +1,6 @@
 import { ServerToClientEventName } from 'src/lib/enums/server-to-client-event-name.enum';
 import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
+import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
 import { ProductAuction } from 'src/product-auction/product-auction.entity';
 
 type ServerToClientEventParameter = {
@@ -16,7 +17,7 @@ type ServerToClientEventParameter = {
   //   [ServerEventName.ORDER_CREATED]: (order: OrderResponseDto) => void;
   [ServerToClientEventName.AuctionUpdated]: (payload: {
     auctionId: ProductAuction['id'];
-    currentMaxBid: ProductAuction['currentMaxBid'];
+    currentMaxBid: ProductAuctionBid['price'];
     currentMaxBidId: ProductAuction['currentMaxBidId'];
   }) => void;
   [ServerToClientEventName.BaseEvent]: (payload: unknown) => void;

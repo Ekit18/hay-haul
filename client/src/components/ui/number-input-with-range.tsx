@@ -3,7 +3,6 @@ import { FieldValues, Path, useFormContext } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormMessage } from './form';
 import { Input } from './input';
 
-// TODO: make use of the component in product filter
 export type NumberInputWithRangeInputProps<T extends FieldValues, K extends Path<NumberRangeFields<T>>> = {
   title: string;
   fieldName: K;
@@ -19,7 +18,7 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
       <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
         {title}
       </p>
-      <div className="flex mt-3">
+      <div className="grid mt-3 grid-cols-[1fr_min-content_1fr] text-center">
         <FormField
           control={control}
           name={fieldName}
@@ -27,6 +26,7 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
             <FormItem>
               <FormControl>
                 <Input
+                  className="w-full"
                   placeholder="Min"
                   {...field}
                   onBlur={(e) => {
@@ -62,6 +62,7 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
             <FormItem>
               <FormControl>
                 <Input
+                  className="w-full"
                   placeholder="Max"
                   {...field}
                   onBlur={(e) => {

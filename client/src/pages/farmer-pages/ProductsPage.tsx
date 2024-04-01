@@ -36,7 +36,9 @@ export function ProductsPage() {
       .filter(([_key, value]) => Boolean(value))
       .forEach(([key, value]) => searchParams.append(key, value as string));
 
-    searchParams.append('productTypeId', productTypeId?.join(',') ?? '');
+    const joinedProductTypeId = productTypeId?.join(',');
+
+    if (joinedProductTypeId) searchParams.append('productTypeId', joinedProductTypeId);
 
     await filterProducts(searchParams).unwrap().catch(handleRtkError);
   };
@@ -51,12 +53,15 @@ export function ProductsPage() {
 
     const debouncedFunction = debounce(getFunction, DEBOUNCE_DELAY);
 
+    if (firstRender.current) {
+      console.log(2);
+      getFunction();
+      firstRender.current = false;
+      return;
+    }
+
     const watchSubscription = form.watch(() => {
-      if (firstRender.current) {
-        getFunction();
-        firstRender.current = false;
-        return;
-      }
+      console.log(1);
       debouncedFunction();
     });
 

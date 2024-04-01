@@ -2,12 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { MAX_FILES, MAX_FILE_SIZE } from '@/lib/constants/constants';
+import { convertFileToFileObject } from '@/lib/helpers/convertFileToFileObject';
 import { cn } from '@/lib/utils';
 import { Upload } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { FileError, useDropzone } from 'react-dropzone';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { CreateProductAuctionFormValues } from '../product-auction/create-product-auction/validation';
 import { FileObject } from './file-object.type';
 
 function fileDimensionsValidator(file: File): Promise<FileError | null> {
@@ -51,7 +51,7 @@ export function DragAndDrop() {
     setError,
     clearErrors,
     formState: { errors }
-  } = useFormContext<CreateProductAuctionFormValues>();
+  } = useFormContext<{ photos: FileObject[] }>();
 
   const { fields: photos, append } = useFieldArray({
     control,
@@ -82,14 +82,7 @@ export function DragAndDrop() {
         return;
       }
 
-      append({
-        webkitRelativePath: file.webkitRelativePath,
-        arrayBuffer: file.arrayBuffer(),
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        preview: URL.createObjectURL(file)
-      } as FileObject);
+      append(convertFileToFileObject(file));
     });
   };
 
@@ -104,7 +97,6 @@ export function DragAndDrop() {
   });
 
   useEffect(() => {
-    // return () => photo && URL.revokeObjectURL(photo.preview);
     return () => photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
   }, [photos]);
 

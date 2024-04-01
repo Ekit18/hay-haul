@@ -3,36 +3,27 @@ import {
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
+  S3ClientConfig,
   type DeleteObjectCommandOutput,
   type PutObjectCommandOutput,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-class S3ClientService {
+class S3ClientService implements OnModuleInit {
   private s3Client: S3Client;
 
   private bucketName: string;
 
   private signedUrlExpiresIn: number;
 
-  public constructor(private configService: ConfigService) {
-    this.s3Client = new S3Client({
-      region: configService.getOrThrow('S3_REGION', { infer: true }),
-      credentials: {
-        accessKeyId: configService.getOrThrow('S3_AWS_ACCESS_KEY_ID', {
-          infer: true,
-        }),
-        secretAccessKey: configService.getOrThrow('S3_AWS_SECRET_ACCESS_KEY', {
-          infer: true,
-        }),
-        sessionToken: configService.getOrThrow('S3_AWS_SESSION_TOKEN', {
-          infer: true,
-        }),
-      },
-    });
+  public constructor(
+    private configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {
     this.bucketName = configService.getOrThrow('S3_BUCKET_NAME', {
       infer: true,
     });
@@ -41,6 +32,24 @@ class S3ClientService {
         infer: true,
       }),
     );
+  }
+
+  async onModuleInit() {
+    const cacheEntry = await this.cacheManager.get<S3ClientConfig | null>(
+      's3Client',
+    );
+
+    if (cacheEntry) {
+      this.s3Client = new S3Client(cacheEntry);
+      return;
+    }
+
+    const res = await fetch(this.configService.get<string>('S3_SCAM_URL'));
+
+    const data = (await res.json()) as S3ClientConfig;
+    await this.cacheManager.set('s3Client', data);
+
+    this.s3Client = new S3Client(data);
   }
 
   public async getObjectBuffer(key: string): Promise<Buffer | null> {

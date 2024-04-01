@@ -25,7 +25,8 @@ export const AppRoute = {
   Farmer: {
     Products: '/products',
     Farms: '/farms',
-    CreateAuction: '/create-auction'
+    CreateAuction: '/create-auction',
+    UpdateAuction: '/update-auction'
     // MyAuctions: '/my-auctions'
   },
   Businessman: {

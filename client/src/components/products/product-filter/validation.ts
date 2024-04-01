@@ -26,7 +26,7 @@ export const productFilterFormDefaultValues: ProductFilterFormValues = {
   quantitySort: undefined,
   productTypeSort: undefined,
   offset: 0,
-  limit: 10
+  limit: 0
 };
 
 export const useProductFilterFormSchema = (): ObjectSchema<

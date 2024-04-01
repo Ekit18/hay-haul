@@ -8,4 +8,5 @@ export enum ProductErrorMessage {
   ProductNotFound = 'Product not found',
   UserNotFound = 'User not found',
   ProductCannotBeUpdated = 'Product cannot be updated',
+  CannotDeleteProductInEndedAuction = 'Cannot delete product in ended auction',
 }

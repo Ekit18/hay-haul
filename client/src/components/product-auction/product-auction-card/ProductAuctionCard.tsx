@@ -3,24 +3,28 @@ import { Button } from '@/components/ui/button';
 import {
   ProductAuction,
   ProductAuctionStatus,
-  ProductAuctionStatusText
+  ProductAuctionStatusText,
+  ProductAuctionStatusValues
 } from '@/lib/types/ProductAuction/ProductAuction.type';
 
+import { AppRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import capitalize from 'lodash.capitalize';
+import { useNavigate } from 'react-router-dom';
 import { productAuctionStatus } from './ProductAuctionStatus.enum';
 
 type ProductAuctionCardProps = {
   productAuction: ProductAuction;
-  onEditClick: () => void;
   onDeleteClick: () => void;
 };
 
-export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick }: ProductAuctionCardProps) {
+export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuctionCardProps) {
   const user = useAppSelector((state) => state.user.user);
+
+  const navigate = useNavigate();
 
   return (
     <div className="min-[1068px]:w-full w-full flex flex-col min-[1068px]:flex-row gap-4 justify-start items-center rounded-lg bg-white">
@@ -111,16 +115,25 @@ export function ProductAuctionCard({ productAuction, onDeleteClick, onEditClick 
               <Button className="w-full">Buy now for {productAuction.buyoutPrice}</Button>
             </>
           )}
-          {user?.id === productAuction.product.facilityDetails.user?.id && (
-            <>
-              <Button className="w-full" variant="destructive">
-                Delete
-              </Button>
-              <Button className="w-full" variant="secondary">
-                Update
-              </Button>
-            </>
-          )}
+          {/* {user?.id === productAuction.product.facilityDetails.user?.id && ( */}
+          <>
+            <Button
+              type="button"
+              className="w-full"
+              disabled={
+                !(
+                  [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
+                ).includes(productAuction.auctionStatus)
+              }
+              onClick={() => navigate(`${AppRoute.Farmer.UpdateAuction}/${productAuction.id}`)}
+            >
+              Update
+            </Button>
+            <Button type="button" className="w-full" variant="destructive" onClick={onDeleteClick}>
+              Delete
+            </Button>
+          </>
+          {/* )} */}
         </div>
       </div>
     </div>

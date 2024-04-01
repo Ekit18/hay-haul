@@ -75,6 +75,28 @@ export class ProductAuctionService {
     }
   }
 
+  async findOneById(id: string) {
+    try {
+      const auction = await this.productAuctionRepository.findOne({
+        where: { id },
+        relations: {
+          photos: true,
+          product: { facilityDetails: true },
+          currentMaxBid: true,
+        },
+      });
+      for await (const photo of auction.photos) {
+        photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
+      }
+      return auction;
+    } catch (error) {
+      throw new HttpException(
+        ProductAuctionErrorMessage.FailedFetchProductAuction,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async setMaxBid(auctionId: string, bidId: string) {
     try {
       await this.productAuctionRepository.save({
@@ -103,6 +125,7 @@ export class ProductAuctionService {
       maxStartPrice,
       endDateSort,
       startDateSort,
+      quantitySort,
       statuses,
     }: ProductAuctionQueryDto,
     request: AuthenticatedRequest,
@@ -197,6 +220,10 @@ export class ProductAuctionService {
 
       if (startDateSort) {
         queryBuilder.orderBy('productAuction.startDate', startDateSort);
+      }
+
+      if (quantitySort) {
+        queryBuilder.orderBy('product.quantity', quantitySort);
       }
 
       // if (!hasRoleBeChecked) {
@@ -316,38 +343,68 @@ export class ProductAuctionService {
     auctionId: string;
     dto: UpdateProductAuctionDto;
   }) {
-    const auction = await this.productAuctionRepository
-      .createQueryBuilder('productAuction')
-      .leftJoinAndSelect('productAuction.photos', 'photos')
-      .select('productAuction')
-      .where({
-        id: auctionId,
-      })
-      .getOne();
-    if (auction.auctionStatus !== ProductAuctionStatus.Inactive) {
+    // TODO: check if auction is user's auction
+    const auction = await this.productAuctionRepository.findOne({
+      where: { id: auctionId },
+      relations: {
+        photos: true,
+        product: { facilityDetails: true },
+        currentMaxBid: true,
+      },
+    });
+    if (
+      auction.auctionStatus !== ProductAuctionStatus.Inactive &&
+      auction.auctionStatus !== ProductAuctionStatus.StartSoon
+    ) {
       throw new HttpException(
         ProductAuctionErrorMessage.AuctionNotInactive,
         HttpStatus.BAD_REQUEST,
       );
     }
     try {
+      console.log(auction);
       const prevPhotosKeys = auction.photos.map((photo) => photo.key);
       await this.s3FileService.removeByKeys(prevPhotosKeys);
-
       const fileEntities = await this.s3FileService.create(
         photos,
         S3Folder.AUCTION_IMAGES,
       );
 
-      await this.productAuctionRepository.update(auctionId, {
+      await this.productAuctionRepository.save({
         ...dto,
+        id: auctionId,
         photos: fileEntities,
       });
     } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async remove(auctionId: string) {
+    const auction = await this.productAuctionRepository.findOne({
+      where: { id: auctionId },
+      relations: {
+        bids: true,
+        product: true,
+        currentMaxBid: true,
+        photos: true,
+      },
+    });
+    if (
+      auction.auctionStatus !== ProductAuctionStatus.Inactive &&
+      auction.auctionStatus !== ProductAuctionStatus.StartSoon
+    ) {
       throw new HttpException(
-        ProductAuctionErrorMessage.FailedUpdateProductAuction,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        ProductAuctionErrorMessage.FailedRemoveProductAuction,
+        HttpStatus.BAD_REQUEST,
       );
+    }
+    try {
+      const photosKeys = auction.photos.map((photo) => photo.key);
+      await this.s3FileService.removeByKeys(photosKeys);
+      await this.productAuctionRepository.delete(auctionId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }

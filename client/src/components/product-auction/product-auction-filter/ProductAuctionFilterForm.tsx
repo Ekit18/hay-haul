@@ -3,6 +3,7 @@ import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
 import { NumberInputWithRange } from '@/components/ui/number-input-with-range';
 import { ProductAuctionStatus, ProductAuctionStatusDict } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { useFormContext } from 'react-hook-form';
+import { ProductAuctionSortSelect } from './ProductAuctionSortSelect';
 import { ProductAuctionFilterFormValues } from './validation';
 
 const STATUSES = Object.entries(ProductAuctionStatus);
@@ -11,10 +12,9 @@ const STATUSES = Object.entries(ProductAuctionStatus);
 export function ProductAuctionFilterForm() {
   const { control } = useFormContext<ProductAuctionFilterFormValues>();
 
-  // TODO: rewrite number input ranges to use NumberInputWithRange. Also do it for product filter
   return (
     <>
-      <div className="mt-10 flex gap-4 flex-col md:flex-row">
+      <div className="mt-10 grid gap-4 flex-col md:flex-row md:grid-cols-3">
         <NumberInputWithRange<ProductAuctionFilterFormValues, 'startPrice'>
           fieldName="startPrice"
           title="Start Price"
@@ -25,8 +25,10 @@ export function ProductAuctionFilterForm() {
           title="Buyout Price"
           key="buyoutPrice"
         />
-        <DatePickerWithRange<ProductAuctionFilterFormValues, 'startDate'> field="startDate" title="Start date" />
-        <DatePickerWithRange<ProductAuctionFilterFormValues, 'endDate'> field="endDate" title="End date" />
+        <div className="flex">
+          <DatePickerWithRange<ProductAuctionFilterFormValues, 'startDate'> field="startDate" title="Start date" />
+          <DatePickerWithRange<ProductAuctionFilterFormValues, 'endDate'> field="endDate" title="End date" />
+        </div>
         <NumberInputWithRange<ProductAuctionFilterFormValues, 'quantity'>
           fieldName="quantity"
           title="Quantity"
@@ -46,6 +48,7 @@ export function ProductAuctionFilterForm() {
             value: item
           })}
         />
+        <ProductAuctionSortSelect />
       </div>
     </>
   );

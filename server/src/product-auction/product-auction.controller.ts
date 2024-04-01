@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -53,6 +54,12 @@ export class ProductAuctionController {
     return this.productAuctionService.findAll(query, req);
   }
 
+  @Get('/:id')
+  async getOne(@Param('id') id: string) {
+    console.log('id', id);
+    return this.productAuctionService.findOneById(id);
+  }
+
   @AllowedRoles(UserRole.Farmer)
   @Get('/filter/farmer')
   async getAllFarmerAuctions(
@@ -72,11 +79,21 @@ export class ProductAuctionController {
   }
 
   @Put('/:id')
+  @UseInterceptors(FilesInterceptor(ProductAuctionController.IMAGE_FIELD_NAME))
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateProductAuctionDto,
     @UploadedFiles(CustomImageValidationPipe) photos: Express.Multer.File[],
   ) {
-    // return this.productAuctionService.update(id, dto, photos);
+    return this.productAuctionService.update({
+      auctionId: id,
+      dto: dto,
+      photos: photos,
+    });
+  }
+
+  @Delete('/:id')
+  async delete(@Param('id') id: string) {
+    return this.productAuctionService.remove(id);
   }
 }

@@ -14,6 +14,7 @@ export type FilterSelectInputProps<T extends FieldValues, K extends Array<unknow
       ? NonTypeKeys<K[number], object>
       : never
     : never;
+  disabled?: boolean;
   containerClassName?: string;
 };
 
@@ -23,7 +24,8 @@ export function FilterSelect<T extends FieldValues, K extends Array<unknown>>({
   values,
   placeholder,
   valueProperty,
-  containerClassName
+  containerClassName,
+  disabled
 }: FilterSelectInputProps<T, K>) {
   const { control } = useFormContext<T>();
 
@@ -35,7 +37,7 @@ export function FilterSelect<T extends FieldValues, K extends Array<unknown>>({
         render={({ field }) => (
           <FormItem className="w-full">
             <FormLabel>{title}</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value} disabled={!values?.length}>
+            <Select onValueChange={field.onChange} value={field.value} disabled={!values?.length || disabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder={placeholder} />
@@ -54,6 +56,7 @@ export function FilterSelect<T extends FieldValues, K extends Array<unknown>>({
                       key = 'id' in item ? (item.id as string) : (itemValue as string);
                     } else if (typeof item !== 'object') {
                       value = item as string | number;
+                      key = item as string;
                     }
 
                     return (
