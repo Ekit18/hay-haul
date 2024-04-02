@@ -68,7 +68,7 @@ export function Stepper<T extends FieldValues>({
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-between py-5">
+    <div className="flex h-full w-full flex-col items-center justify-between py-5">
       <div className="flex justify-between">
         {steps?.map((step, index) => (
           <div
@@ -80,7 +80,7 @@ export function Stepper<T extends FieldValues>({
             <button
               type="button"
               className={cn(
-                'w-6 h-6 flex text-xs items-center justify-center z-10 relative bg-slate-700 rounded-full font-semibold text-white',
+                'relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-slate-700 text-xs font-semibold text-white',
                 currentStep === index + 1 && 'bg-sky-600',
                 (index + 1 < currentStep || complete) && 'bg-primary text-white'
               )}
@@ -88,20 +88,20 @@ export function Stepper<T extends FieldValues>({
             >
               {index + 1 < currentStep || complete ? <CheckCircle2 /> : index + 1}
             </button>
-            <p className="text-gray-500 text-base text-center">{step.stepName}</p>
+            <p className="text-center text-base text-gray-500">{step.stepName}</p>
           </div>
         ))}
       </div>
-      <div className="mt-4 w-full h-full">{currentStepItem.stepComponent}</div>
+      <div className="mt-4 h-full w-full">{currentStepItem.stepComponent}</div>
       {!complete && (
         <div className="flex w-full flex-row justify-center gap-4">
-          <Button type="button" size="sm" className="w-full mt-4" onClick={handleBackClick}>
+          <Button type="button" size="sm" className="mt-4 w-full" onClick={handleBackClick}>
             Back
           </Button>
           <Button
             type="button"
             size="sm"
-            className="w-full mt-4"
+            className="mt-4 w-full"
             onClick={currentStep === steps.length ? form.handleSubmit(onSubmit) : handleNextClick}
           >
             {currentStep === steps.length ? submitButtonText : 'Next'}

@@ -94,21 +94,20 @@ export function CreateProductAuctionForm() {
   };
 
   const selectedProductName = useMemo(() => {
-    console.log('mem');
     return products && products.data.find((product) => product.id === form.getValues('productId'))?.name;
   }, [form.watch('productId')]);
 
   return (
     <Form {...form}>
-      <div className="w-full flex flex-col justify-center items-center gap-10 bg-gray-100">
-        <div className="w-full flex flex-col xl:flex-row justify-start items-center">
-          <h3 className="self-start text-2xl font-bold min-h-8">{selectedProductName}</h3>
-          <div className="w-full xl:w-6/12 flex justify-center">
-            <FileInputCarousel items={photos} />
+      <div className="flex w-full flex-col items-center justify-center gap-10 bg-gray-100">
+        <h3 className="min-h-8 self-start text-2xl font-bold">{selectedProductName}</h3>
+        <div className="flex w-full flex-col items-center justify-start xl:flex-row">
+          <div className="flex w-full justify-center xl:w-6/12">
+            <FileInputCarousel items={photos} hasAddButton />
           </div>
           <div className="w-full xl:w-6/12">
-            <div className="flex flex-row w-full gap-4 py-4">
-              <div className="w-full flex flex-col gap-4">
+            <div className="flex w-full flex-row gap-4 py-4">
+              <div className="flex w-full flex-col gap-4">
                 <FilterSelect
                   fieldName="farmId"
                   title="Farm"
@@ -174,7 +173,7 @@ export function CreateProductAuctionForm() {
                             <Button
                               type="button"
                               key={ratio.label}
-                              className="w-10 text-xs h-5"
+                              className="h-5 w-10 text-xs"
                               disabled={!startPrice}
                               onClick={() => handleAddBuyoutPrice(ratio.value)}
                             >
@@ -211,7 +210,7 @@ export function CreateProductAuctionForm() {
                   />
                 </div>
               </div>
-              <div className="w-full flex flex-col gap-4">
+              <div className="flex w-full flex-col gap-4">
                 <div className="w-full items-center ">
                   <FormField
                     control={form.control}
@@ -258,7 +257,7 @@ export function CreateProductAuctionForm() {
                           {addDaysRatios.map((ratio) => (
                             <Button
                               type="button"
-                              className="w-10 text-xs h-5"
+                              className="h-5 w-10 text-xs"
                               onClick={() => handleAddStartEndDays(ratio.value)}
                               key={ratio.label}
                             >
@@ -288,7 +287,7 @@ export function CreateProductAuctionForm() {
                           {addDaysRatios.map((ratio) => (
                             <Button
                               type="button"
-                              className="w-10 text-xs h-5"
+                              className="h-5 w-10 text-xs"
                               onClick={() => handleAddPaymentPeriod(ratio.value)}
                               key={ratio.label}
                             >
@@ -329,7 +328,7 @@ export function CreateProductAuctionForm() {
             </div>
           </div>
         </div>
-        <div className="w-full self-start flex flex-col xl:flex-row items-center xl:justify-between justify-center gap-5">
+        <div className="flex w-full flex-col items-center justify-center gap-5 self-start xl:flex-row xl:justify-between">
           <FormField
             control={form.control}
             name="description"
@@ -348,15 +347,15 @@ export function CreateProductAuctionForm() {
               </FormItem>
             )}
           />
-          <div className="flex w-full xl:w-1/3 gap-4 self-end items-center h-full pb-5">
+          <div className="flex h-full w-full items-center gap-4 self-end pb-5 xl:w-1/3">
             <Button
               type="button"
               onClick={() => navigate(AppRoute.General.MyAuctions)}
-              className="px-10 w-full bg-gray-500"
+              className="w-full bg-gray-500 px-10"
             >
               Back
             </Button>
-            <Button type="button" onClick={form.handleSubmit(onSubmit)} className="px-10 w-full">
+            <Button type="button" onClick={form.handleSubmit(onSubmit)} className="w-full px-10">
               Create
             </Button>
           </div>

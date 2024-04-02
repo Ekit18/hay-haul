@@ -7,7 +7,7 @@ export function InputEmail() {
   const { control } = useFormContext<ResetPasswordFormValues>();
 
   return (
-    <div className="w-full h-full">
+    <div className="h-full w-full">
       <FormField
         control={control}
         name="email"

@@ -110,10 +110,10 @@ export function DragAndDrop() {
           <div
             {...getRootProps()}
             className={cn(
-              `border-dashed border-2
-            border-gray-500 dark:border-gray-300
-            rounded-md h-40 flex items-center justify-center flex-col gap-4 px-4 cursor-pointer
-            w-56
+              `flex h-40
+            w-56 cursor-pointer
+            flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed border-gray-500 px-4
+            dark:border-gray-300
             `,
               isDragActive && 'border-primary dark:border-primary',
               isDragReject && 'border-red-500 dark:border-red-300'
@@ -127,7 +127,7 @@ export function DragAndDrop() {
           </div>
         </CardContent>
       </Card>
-      <div className="h-5 mt-2">
+      <div className="mt-2 h-5">
         {errors.photos && <FormMessage>{errors.photos.message}</FormMessage>}
         {fileRejections.map(({ errors }) => (
           <React.Fragment key={errors[0].message}>

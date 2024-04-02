@@ -47,7 +47,7 @@ export function DataTable<TData, TValue>({ columns, data, pageCount, isLoading }
     content = (
       <TableRow>
         <TableCell colSpan={5} className="h-24 text-center">
-          <Loader2 className={cn('mr-2 hidden h-4 w-4 animate-spin flex mx-auto')} />
+          <Loader2 className={cn('mx-auto mr-2 flex hidden h-4 w-4 animate-spin')} />
         </TableCell>
       </TableRow>
     );

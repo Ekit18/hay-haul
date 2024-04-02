@@ -122,7 +122,6 @@ export class ProductService {
       const [result, total] = await queryBuilder.getManyAndCount();
 
       const pageCount = Math.ceil(total / limit);
-
       return {
         data: result,
         count: pageCount,

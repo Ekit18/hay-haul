@@ -9,11 +9,11 @@ export function OtpSuccess() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-10 justify-center items-center">
+    <div className="flex w-full flex-col items-center justify-center gap-10">
       <div>
         <img src="public/images/confirm.svg" alt="" />
       </div>
-      <div className="text-center flex flex-col gap-5">
+      <div className="flex flex-col gap-5 text-center">
         <div className="text-xl font-semibold">Successfully verified</div>
         <div className="text-base">
           Now you can pass background check and set up your profile and start exploring customers who need it farm

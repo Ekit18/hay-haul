@@ -34,7 +34,7 @@ export function ProductAuctionFilter() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:gap-0">
         <div className="w-full md:w-4/12">
           <FormField
             control={control}
@@ -55,7 +55,7 @@ export function ProductAuctionFilter() {
           </Button>
           <Button
             variant="link"
-            className="underline decoration-wavy  border-dashed hover:text-secondary"
+            className="border-dashed underline  decoration-wavy hover:text-secondary"
             onClick={handleClearFilter}
           >
             Clear filter

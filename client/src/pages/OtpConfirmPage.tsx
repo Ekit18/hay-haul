@@ -8,8 +8,8 @@ export function OtpConfirmPage() {
 
   return (
     <AuthContainer>
-      <div className="w-10/12 lg:w-10/12 flex flex-col h-full gap-10 justify-center items-center">
-        <h2 className="text-3xl font-bold text-center">Account Verification</h2>
+      <div className="flex h-full w-10/12 flex-col items-center justify-center gap-10 lg:w-10/12">
+        <h2 className="text-center text-3xl font-bold">Account Verification</h2>
         {isSuccess ? <OtpSuccess /> : <OtpForm onSetIsSuccess={setIsSuccess} />}
       </div>
     </AuthContainer>

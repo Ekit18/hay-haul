@@ -14,11 +14,11 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
   const { control, watch } = useFormContext<T>();
   const currentValue = watch(fieldName);
   return (
-    <div className="flex flex-col w-full justify-end">
+    <div className="flex w-full flex-col justify-end">
       <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
         {title}
       </p>
-      <div className="grid mt-3 grid-cols-[1fr_min-content_1fr] text-center">
+      <div className="mt-3 grid grid-cols-[1fr_min-content_1fr] text-center">
         <FormField
           control={control}
           name={fieldName}
@@ -54,7 +54,7 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
             </FormItem>
           )}
         />
-        <span className="text-3xl px-2">-</span>
+        <span className="px-2 text-3xl">-</span>
         <FormField
           control={control}
           name={fieldName}

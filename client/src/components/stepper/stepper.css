@@ -1,13 +1,13 @@
 .step-item {
-  @apply relative flex flex-col justify-center items-center w-36;
+  @apply relative flex w-36 flex-col items-center justify-center;
 }
 
 .step-item:not(:first-child):before {
-  @apply content-[''] bg-slate-200 absolute w-full h-[3px] right-2/4 top-1/4 -translate-y-2/4;
+  @apply absolute right-2/4 top-1/4 h-[3px] w-full -translate-y-2/4 bg-slate-200 content-[''];
 }
 
 .step {
-  @apply w-10 h-10 flex items-center justify-center z-10 relative bg-slate-700 rounded-full font-semibold text-white;
+  @apply relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 font-semibold text-white;
 }
 
 .active .step {
@@ -19,7 +19,7 @@
 }
 
 .complete p {
-  @apply text-black font-medium;
+  @apply font-medium text-black;
 }
 
 .complete:not(:first-child):before,

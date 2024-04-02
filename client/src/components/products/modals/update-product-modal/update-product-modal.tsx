@@ -48,8 +48,8 @@ export function UpdateProductModal({ product, open, updateCallback, handleOpenCh
           <DialogDescription>Update product related data here.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <div className="w-full flex flex-col justify-center items-center gap-10">
-            <div className="flex flex-col w-full gap-4 py-4">
+          <div className="flex w-full flex-col items-center justify-center gap-10">
+            <div className="flex w-full flex-col gap-4 py-4">
               <div className="w-full items-center ">
                 <FormField
                   control={form.control}
@@ -90,7 +90,7 @@ export function UpdateProductModal({ product, open, updateCallback, handleOpenCh
                 />
               </div>
             </div>
-            <DialogFooter className="flex justify-end w-full">
+            <DialogFooter className="flex w-full justify-end">
               <Button type="button" onClick={form.handleSubmit(onSubmit)} className="px-10">
                 Update
               </Button>

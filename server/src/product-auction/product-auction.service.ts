@@ -77,19 +77,22 @@ export class ProductAuctionService {
 
   async findOneById(id: string) {
     try {
-      const auction = await this.productAuctionRepository.findOne({
-        where: { id },
-        relations: {
-          photos: true,
-          product: { facilityDetails: true },
-          currentMaxBid: true,
-        },
-      });
+      const auction = await this.productAuctionRepository
+        .createQueryBuilder('auction')
+        .leftJoinAndSelect('auction.photos', 'photos')
+        .leftJoinAndSelect('auction.product', 'product')
+        .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
+        .leftJoin('facilityDetails.user', 'user')
+        .addSelect('user.id')
+        .where('auction.id = :id', { id })
+        .getOne();
+
       for await (const photo of auction.photos) {
         photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
       }
       return auction;
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         ProductAuctionErrorMessage.FailedFetchProductAuction,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -137,6 +140,8 @@ export class ProductAuctionService {
         .createQueryBuilder('productAuction')
         .leftJoinAndSelect('productAuction.product', 'product')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
+        .leftJoin('facilityDetails.user', 'user')
+        .addSelect('user.id')
         .leftJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
         .leftJoinAndSelect('productAuction.photos', 'photos');
 
@@ -226,22 +231,21 @@ export class ProductAuctionService {
         queryBuilder.orderBy('product.quantity', quantitySort);
       }
 
-      // if (!hasRoleBeChecked) {
-      //   queryBuilder.andWhere(
-      //     'productAuction.auctionStatus IN (:...auctionStatus)',
-      //     {
-      //       auctionStatus: [
-      //         ProductAuctionStatus.Active,
-      //         ProductAuctionStatus.EndSoon,
-      //       ],
-      //     },
-      //   );
-      // }
+      if (!hasRoleBeChecked) {
+        queryBuilder.andWhere(
+          'productAuction.auctionStatus IN (:...auctionStatus)',
+          {
+            auctionStatus: [
+              ProductAuctionStatus.Active,
+              ProductAuctionStatus.EndSoon,
+            ],
+          },
+        );
+      }
 
       if (hasRoleBeChecked) {
         switch (request.user.role) {
           case UserRole.Farmer:
-            queryBuilder.leftJoinAndSelect('facilityDetails.user', 'user');
             queryBuilder.andWhere('facilityDetails.userId = :userId', {
               userId,
             });

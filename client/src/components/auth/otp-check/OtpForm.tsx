@@ -54,13 +54,13 @@ export function OtpForm({ onSetIsSuccess }: Properties) {
   };
 
   return (
-    <div className="w-full flex flex-col justify-center items-center">
+    <div className="flex w-full flex-col items-center justify-center">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full flex flex-col justify-center items-center gap-10"
+          className="flex w-full flex-col items-center justify-center gap-10"
         >
-          <div className="text-base font-medium text-center ">
+          <div className="text-center text-base font-medium ">
             We have sent and OTP verification code to you email, please enter it here
           </div>
           <FormField
@@ -75,7 +75,7 @@ export function OtpForm({ onSetIsSuccess }: Properties) {
                     numInputs={4}
                     renderSeparator={<span> </span>}
                     renderInput={(props) => (
-                      <input name="otpValue" {...props} className="border-b-2 first:ml-0 ml-4 text-3xl" />
+                      <input name="otpValue" {...props} className="ml-4 border-b-2 text-3xl first:ml-0" />
                     )}
                   />
                 </FormControl>

@@ -8,7 +8,7 @@ export function MainInfo() {
   const { control } = useFormContext<SignUpFormValues>();
 
   return (
-    <div className="w-full h-full gap-4 flex flex-col">
+    <div className="flex h-full w-full flex-col gap-4">
       <FormField
         control={control}
         name="fullName"

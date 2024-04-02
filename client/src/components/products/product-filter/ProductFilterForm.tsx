@@ -41,7 +41,7 @@ export function ProductFilterForm() {
 
   return (
     <>
-      <div className=" flex gap-4 flex-col md:flex-row">
+      <div className=" flex flex-col gap-4 md:flex-row">
         <FilterSelect<ProductFilterFormValues, FacilityDetails[]>
           valueProperty="name"
           title="Farm"
@@ -68,11 +68,11 @@ export function ProductFilterForm() {
           />
         </div>
 
-        <div className="flex flex-col w-full justify-end">
+        <div className="flex w-full flex-col justify-end">
           <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             Quantity
           </p>
-          <div className="flex mt-3">
+          <div className="mt-3 flex">
             <FormField
               control={control}
               name="minQuantity"
@@ -99,7 +99,7 @@ export function ProductFilterForm() {
                 </FormItem>
               )}
             />
-            <span className="text-3xl px-2">-</span>
+            <span className="px-2 text-3xl">-</span>
             <FormField
               control={control}
               name="maxQuantity"

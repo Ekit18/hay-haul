@@ -12,15 +12,15 @@ export function SidebarLinks() {
   const userRole = user.role;
 
   return (
-    <div className="w-full pt-10 flex flex-col gap-5">
+    <div className="flex w-full flex-col gap-5 pt-10">
       {links[userRole].map((link) => (
         <Button
           variant="link"
-          className="w-full text-left hover:rounded-none justify-start text-white font-medium text-lg flex flex-row items-center gap-5 decoration-2 px-3 xl:px-4"
+          className="flex w-full flex-row items-center justify-start gap-5 px-3 text-left text-lg font-medium text-white decoration-2 hover:rounded-none xl:px-4"
           onClick={() => navigate(link.url)}
           key={link.title}
         >
-          <link.icon className="w-5 h-5 xl:w-6 xl:h-6" />
+          <link.icon className="h-5 w-5 xl:h-6 xl:w-6" />
           {link.title}
         </Button>
       ))}

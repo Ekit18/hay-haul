@@ -33,20 +33,20 @@ export function ChoseRole() {
   const { control } = useFormContext<SignUpFormValues>();
 
   return (
-    <div className="w-full h-full">
+    <div className="h-full w-full">
       <FormField
         control={control}
         name="role"
         render={({ field }) => (
           <FormItem className="space-y-3">
             <FormControl>
-              <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="gap-4 flex flex-col">
+              <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col gap-4">
                 {rolesInfo.map((role) => (
                   <FormItem
                     key={role.value}
                     className={cn(
-                      'flex flex-col items-start space-x-6 space-y-0 gap-2 border p-2 rounded-md border-secondary',
-                      field.value === role.value && 'shadow-custom border-primary'
+                      'flex flex-col items-start gap-2 space-x-6 space-y-0 rounded-md border border-secondary p-2',
+                      field.value === role.value && 'border-primary shadow-custom'
                     )}
                   >
                     <div className="flex gap-2">

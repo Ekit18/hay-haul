@@ -12,7 +12,7 @@ export function FacilityForm() {
   const selectedRole = watch('role');
 
   return (
-    <div className="w-full h-full gap-4 flex flex-col">
+    <div className="flex h-full w-full flex-col gap-4">
       {selectedRole === UserRole.Farmer && (
         <TagInput
           name="farmProductTypes"

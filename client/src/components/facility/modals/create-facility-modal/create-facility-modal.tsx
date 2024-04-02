@@ -57,7 +57,7 @@ export function CreateFacilityModal({ entityTitle }: CreateFacilityModalProps) {
   return (
     <Dialog open={open} onOpenChange={handleDeleteModalOpenChange}>
       <DialogTrigger asChild>
-        <Button className="flex gap-1 ml-auto" type="button" onClick={() => setOpen(true)}>
+        <Button className="ml-auto flex gap-1" type="button" onClick={() => setOpen(true)}>
           <Plus size={20} /> Create {entityTitle.toLowerCase()}
         </Button>
       </DialogTrigger>
@@ -68,8 +68,8 @@ export function CreateFacilityModal({ entityTitle }: CreateFacilityModalProps) {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="w-full flex flex-col justify-center items-center gap-10">
-              <div className="flex flex-col w-full gap-4 py-4">
+            <div className="flex w-full flex-col items-center justify-center gap-10">
+              <div className="flex w-full flex-col gap-4 py-4">
                 <div className="w-full items-center ">
                   <TagInput
                     name="farmProductTypes"
@@ -127,7 +127,7 @@ export function CreateFacilityModal({ entityTitle }: CreateFacilityModalProps) {
                   />
                 </div>
               </div>
-              <DialogFooter className="flex justify-end w-full">
+              <DialogFooter className="flex w-full justify-end">
                 <Button type="submit" className="px-10">
                   Create
                 </Button>

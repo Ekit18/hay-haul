@@ -11,7 +11,7 @@ export type FacilityCardProps = {
 };
 export function FacilityCard({ facilityDetails, onDeleteClick, onEditClick }: FacilityCardProps) {
   return (
-    <Card className="w-full flex flex-col justify-between">
+    <Card className="flex w-full flex-col justify-between">
       <CardHeader>
         <CardTitle>{facilityDetails.name}</CardTitle>
         <CardDescription>{facilityDetails.address}</CardDescription>

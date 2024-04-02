@@ -15,7 +15,7 @@ export function LogOutButton({ className }: { className?: string }) {
     <Button
       variant="link"
       className={cn(
-        'w-full text-left hover:rounded-none justify-start text-white font-medium text-lg flex flex-row items-center gap-5 decoration-2 mt-auto mb-5 px-3 xl:px-4',
+        'mb-5 mt-auto flex w-full flex-row items-center justify-start gap-5 px-3 text-left text-lg font-medium text-white decoration-2 hover:rounded-none xl:px-4',
         className
       )}
       onClick={() => {
@@ -25,7 +25,7 @@ export function LogOutButton({ className }: { className?: string }) {
       }}
       key="Logout"
     >
-      <LogOut className="w-5 h-5 xl:w-6 xl:h-6" />
+      <LogOut className="h-5 w-5 xl:h-6 xl:w-6" />
       Logout
     </Button>
   );

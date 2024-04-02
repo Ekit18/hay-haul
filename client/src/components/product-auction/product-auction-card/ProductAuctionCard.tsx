@@ -27,25 +27,25 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
   const navigate = useNavigate();
 
   return (
-    <div className="min-[1068px]:w-full w-full flex flex-col min-[1068px]:flex-row gap-4 justify-start items-center rounded-lg bg-white">
-      <div className="w-full min-[1068px]:h-full min-[1068px]:w-4/12 xl:w-3/12">
+    <div className="flex w-full flex-col items-center justify-start gap-4 rounded-lg bg-white min-[1068px]:w-full min-[1068px]:flex-row">
+      <div className="w-full min-w-[300px] min-[1068px]:h-full min-[1068px]:w-4/12 xl:w-3/12">
         <img
-          className="h-40 min-[1068px]:h-full w-full  object-cover min-[1068px]:rounded-l-lg rounded-t-lg min-[1068px]:rounded-tr-none"
+          className="h-40 w-full rounded-t-lg  object-cover min-[1068px]:h-full min-[1068px]:rounded-l-lg min-[1068px]:rounded-tr-none"
           src={productAuction?.photos[0]?.signedUrl}
           alt={productAuction.product.name}
         />
       </div>
-      <div className="w-full min-[1068px]:py-4 min-[1068px]:w-5/12 xl:w-6/12">
-        <div className="w-full flex flex-col min-[1068px]:pr-4 px-4 gap-4 min-[1068px]:border-r-2">
-          <div className="flex flex-row justify-start items-center gap-3">
-            <p className="font-semibold text-xl text-left w-max">
+      <div className="w-full min-[1068px]:w-5/12 min-[1068px]:py-4 xl:w-6/12">
+        <div className="flex w-full flex-col gap-4 px-4 min-[1068px]:border-r-2 min-[1068px]:pr-4">
+          <div className="flex flex-row items-center justify-start gap-3">
+            <p className="w-max text-left text-xl font-semibold">
               {capitalize(productAuction.product.name)} by {capitalize(productAuction.product.facilityDetails.name)}
               <br />
               {productAuction.id}
             </p>
             <p
               className={cn(
-                'w-max p-2 rounded-lg text-sm whitespace-nowrap',
+                'w-max whitespace-nowrap rounded-lg px-2 py-1 text-sm',
                 productAuctionStatus[productAuction.auctionStatus]
               )}
             >
@@ -53,7 +53,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
             </p>
           </div>
 
-          <div className="w-full flex flex-row justify-left gap-4">
+          <div className="justify-left flex w-full flex-row gap-4">
             <p>
               Start date:{' '}
               <span className="font-medium">{format(parseISO(productAuction.startDate), 'yyyy-MM-dd')}</span>
@@ -62,12 +62,12 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
               End date: <span className="font-medium">{format(parseISO(productAuction.endDate), 'yyyy-MM-dd')}</span>
             </p>
           </div>
-          <p className="bg-gray-100 rounded p-2 w-full text-base">
+          <p className="w-full rounded bg-gray-100 p-2 text-base">
             {productAuction.description.length > 100 ? (
               <>
                 {productAuction.description.substring(0, 100).trimEnd()}...
                 {/* TODO redirect user to auction */}
-                <Button className="text-base p-0 h-min" variant="link">
+                <Button className="h-min p-0 text-base" variant="link">
                   Learn more
                 </Button>
               </>
@@ -86,7 +86,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
           </p>
         </div>
       </div>
-      <div className="min-[1068px]:pr-4 px-4 pb-4 gap-4 flex flex-col min-[1068px]:py-4 min-[1068px]:pl-0 min-[1068px]:w-3/12 w-full">
+      <div className="flex w-full flex-col gap-4 px-4 pb-4 min-[1068px]:w-3/12 min-[1068px]:py-4 min-[1068px]:pl-0 min-[1068px]:pr-4">
         {(productAuction.auctionStatus === ProductAuctionStatus.Active ||
           productAuction.auctionStatus === ProductAuctionStatus.EndSoon) && (
           <div className="border-b-2 pb-4">
@@ -100,40 +100,50 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
             <Timer toDate={productAuction.startDate} className="text-blue-600" />
           </div>
         )}
-        <div className="w-full text-center flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 text-center">
           <p>Current price:</p>
-          <p className="font-bold text-2xl">
+          <p className="text-2xl font-bold">
             {productAuction.currentMaxBid?.price ? `${productAuction.currentMaxBid?.price} USD` : 'No bets'}
           </p>
         </div>
-        <div className="w-full text-center flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 text-center">
           {user?.role === UserRole.Businessman && (
             <>
-              <Button className="w-full text-primary border-primary border" variant="outline">
+              <Button className="w-full border border-primary text-primary" variant="outline">
                 Place a bet
               </Button>
               <Button className="w-full">Buy now for {productAuction.buyoutPrice}</Button>
             </>
           )}
-          {/* {user?.id === productAuction.product.facilityDetails.user?.id && ( */}
-          <>
-            <Button
-              type="button"
-              className="w-full"
-              disabled={
-                !(
-                  [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
-                ).includes(productAuction.auctionStatus)
-              }
-              onClick={() => navigate(`${AppRoute.Farmer.UpdateAuction}/${productAuction.id}`)}
-            >
-              Update
-            </Button>
-            <Button type="button" className="w-full" variant="destructive" onClick={onDeleteClick}>
-              Delete
-            </Button>
-          </>
-          {/* )} */}
+          {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
+            <>
+              <Button
+                type="button"
+                className="w-full"
+                disabled={
+                  !(
+                    [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
+                  ).includes(productAuction.auctionStatus)
+                }
+                onClick={() => navigate(`${AppRoute.Farmer.UpdateAuction}/${productAuction.id}`)}
+              >
+                Update
+              </Button>
+              <Button
+                disabled={
+                  !(
+                    [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
+                  ).includes(productAuction.auctionStatus)
+                }
+                type="button"
+                className="w-full"
+                variant="destructive"
+                onClick={onDeleteClick}
+              >
+                Delete
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

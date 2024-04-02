@@ -10,7 +10,7 @@ export type CarouselImagePreviewProps = {
 export function CarouselImageAdd({ onClick, isActive }: CarouselImagePreviewProps) {
   return (
     <Card
-      className={cn('w-16 h-16 cursor-pointer border-2 border-dashed border-gray-500', isActive && 'border-primary')}
+      className={cn('h-16 w-16 cursor-pointer border-2 border-dashed border-gray-500', isActive && 'border-primary')}
       onClick={onClick}
     >
       <CardContent className="flex aspect-square items-center justify-center p-0 ">

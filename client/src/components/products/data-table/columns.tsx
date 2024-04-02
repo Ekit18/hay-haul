@@ -40,7 +40,7 @@ export const columns: ColumnDef<Product>[] = [
       }, [sort]);
 
       return (
-        <div className="w-full flex justify-center">
+        <div className="flex w-full justify-center">
           <FormField
             control={control}
             name="nameSort"
@@ -55,7 +55,7 @@ export const columns: ColumnDef<Product>[] = [
                     }}
                   >
                     Name
-                    <div className="w-4 h-4">{sort && sortOrderToUI[sort]}</div>
+                    <div className="h-4 w-4">{sort && sortOrderToUI[sort]}</div>
                   </Button>
                 </FormControl>
               </FormItem>
@@ -81,7 +81,7 @@ export const columns: ColumnDef<Product>[] = [
       }, [sort]);
 
       return (
-        <div className="w-full flex justify-center">
+        <div className="flex w-full justify-center">
           <FormField
             control={control}
             name="quantitySort"
@@ -96,7 +96,7 @@ export const columns: ColumnDef<Product>[] = [
                     }}
                   >
                     Quantity
-                    <div className="w-4 h-4">{sort && sortOrderToUI[sort]}</div>
+                    <div className="h-4 w-4">{sort && sortOrderToUI[sort]}</div>
                   </Button>
                 </FormControl>
               </FormItem>
@@ -145,7 +145,7 @@ export const columns: ColumnDef<Product>[] = [
       }, [sort]);
 
       return (
-        <div className="w-full flex justify-center">
+        <div className="flex w-full justify-center">
           <FormField
             control={control}
             name="productTypeSort"
@@ -160,7 +160,7 @@ export const columns: ColumnDef<Product>[] = [
                     }}
                   >
                     Product type
-                    <div className="w-4 h-4">{sort && sortOrderToUI[sort]}</div>
+                    <div className="h-4 w-4">{sort && sortOrderToUI[sort]}</div>
                   </Button>
                 </FormControl>
               </FormItem>
@@ -184,7 +184,7 @@ export const columns: ColumnDef<Product>[] = [
         product.productAuction.auctionStatus === ProductAuctionStatus.StartSoon ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild className="flex">
-            <div className="h-full w-full flex justify-center">
+            <div className="flex h-full w-full justify-center">
               <div className="">
                 <Button variant="ghost" className="h-full w-full">
                   <span className="sr-only">Open menu</span>
@@ -215,7 +215,7 @@ export const columns: ColumnDef<Product>[] = [
       ) : (
         <p
           className={cn(
-            'w-max p-2 rounded-lg text-sm whitespace-nowrap',
+            'w-max whitespace-nowrap rounded-lg p-2 text-sm',
             productAuctionStatus[product.productAuction.auctionStatus]
           )}
         >

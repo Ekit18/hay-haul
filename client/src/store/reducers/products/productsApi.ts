@@ -14,14 +14,14 @@ export const productsApi = api.injectEndpoints({
         url: '/product/filter',
         params: searchParams
       }),
-      providesTags: [TagType.ProductAuction]
+      providesTags: [TagType.Product]
     }),
     getProductsNotInAuction: builder.query<DataWithCount<Product>, URLSearchParams>({
       query: (searchParams) => ({
         url: '/product/not-in-auction',
         params: searchParams
       }),
-      providesTags: [TagType.ProductAuction]
+      providesTags: [TagType.Product]
     }),
     createProduct: builder.mutation<Product, CreateProductFormValues>({
       query: ({ productTypeId, farmId, ...body }) => ({
@@ -32,14 +32,14 @@ export const productsApi = api.injectEndpoints({
         }),
         body
       }),
-      invalidatesTags: [TagType.ProductAuction]
+      invalidatesTags: [TagType.Product]
     }),
     deleteProduct: builder.mutation<void, string>({
       query: (id) => ({
         method: 'DELETE',
         url: generatePath(`/product/:id`, { id })
       }),
-      invalidatesTags: [TagType.ProductAuction]
+      invalidatesTags: [TagType.Product]
     }),
     updateProduct: builder.mutation<Product, UpdateProductDto>({
       query: ({ id, body }) => ({
@@ -47,7 +47,7 @@ export const productsApi = api.injectEndpoints({
         url: generatePath(`/product/:id`, { id }),
         body
       }),
-      invalidatesTags: [TagType.ProductAuction]
+      invalidatesTags: [TagType.Product]
     })
   })
 });

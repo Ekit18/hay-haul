@@ -3,7 +3,7 @@ import { ComparisonOperator } from '@/lib/enums/comparison-operator.enum';
 import { compareValues } from '@/lib/helpers/compareValues';
 import { RequiredDateRange } from '@/lib/types/types';
 import { addDays } from 'date-fns';
-import { AnyObject, ObjectSchema, date, mixed, number, object, string } from 'yup';
+import { AnyObject, ObjectSchema, array, date, number, object, string } from 'yup';
 import { dateRangeRequiredObjectSchema } from '../product-auction-filter/validation';
 
 export type CreateProductAuctionFormValues = {
@@ -76,6 +76,6 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
     description: string().required('Description is required').min(10, 'Description must be at least 10 characters'),
     productId: string().required('Product is required'),
     farmId: string().required('Farm is required'),
-    photos: mixed<FileObject[]>().required('Photos are required')
+    photos: array<FileObject>().min(1, 'At least one photo has to provided').required('Photos are required')
   });
 };

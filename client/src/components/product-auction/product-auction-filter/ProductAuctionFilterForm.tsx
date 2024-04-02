@@ -14,7 +14,7 @@ export function ProductAuctionFilterForm() {
 
   return (
     <>
-      <div className="mt-10 grid gap-4 flex-col md:flex-row md:grid-cols-3">
+      <div className="mt-10 grid flex-col gap-4 md:grid-cols-3 md:flex-row">
         <NumberInputWithRange<ProductAuctionFilterFormValues, 'startPrice'>
           fieldName="startPrice"
           title="Start Price"

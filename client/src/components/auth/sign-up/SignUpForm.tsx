@@ -121,7 +121,7 @@ export function SignUpForm() {
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="gap-6 mt-6 flex flex-col">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-6">
           <Stepper
             steps={steps}
             form={form}

@@ -3,10 +3,10 @@ import { UpdateProductAuctionForm } from '@/components/product-auction/update-pr
 export function UpdateAuction() {
   return (
     <div className="mt-6 h-full bg-gray-100">
-      <div className="p-4 pt-6 bg-white">
+      <div className="bg-white p-4 pt-6">
         <h2 className="text-3xl font-bold">Update auction</h2>
       </div>
-      <div className="px-4 w-full grid grid-cols-1 gap-4 pt-5 bg-gray-100">
+      <div className="grid w-full grid-cols-1 gap-4 bg-gray-100 px-4 pt-5">
         <UpdateProductAuctionForm />
       </div>
     </div>

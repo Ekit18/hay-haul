@@ -7,5 +7,5 @@ export function SidebarUserInfo() {
     return null;
   }
 
-  return <div className="w-full text-white text-center font-semibold text-xl">{user.name}</div>;
+  return <div className="w-full text-center text-xl font-semibold text-white">{user.name}</div>;
 }

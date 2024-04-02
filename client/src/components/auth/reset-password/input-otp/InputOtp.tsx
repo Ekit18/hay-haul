@@ -18,19 +18,19 @@ export function InputOtp() {
   };
 
   return (
-    <div className="w-full h-full flex justify-center">
+    <div className="flex h-full w-full justify-center">
       <FormField
         control={control}
         name="otpValue"
         render={({ field }) => (
-          <div className="w-full flex flex-col justify-center items-center gap-5">
+          <div className="flex w-full flex-col items-center justify-center gap-5">
             <OTPInput
               value={field.value}
               onChange={field.onChange}
               numInputs={4}
               renderSeparator={<span> </span>}
               renderInput={(props) => (
-                <input name="otpValue" {...props} className="border-b-2 first:ml-0 ml-4 text-3xl" />
+                <input name="otpValue" {...props} className="ml-4 border-b-2 text-3xl first:ml-0" />
               )}
             />
             <Button type="button" variant="link" className="text-blue-900" onClick={handleNewOtp}>

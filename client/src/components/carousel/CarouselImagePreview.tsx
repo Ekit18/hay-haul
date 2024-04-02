@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils';
-import { FileObject } from '../drag-and-drop/file-object.type';
 import { Card, CardContent } from '../ui/card';
+import { PreviewObject } from './FileInputCarousel';
 
 export type CarouselImagePreviewProps = {
   index: number;
-  photo: FileObject;
+  photo: PreviewObject;
   onClick: (index: number) => void;
   isActive: boolean;
 };
@@ -12,7 +12,7 @@ export type CarouselImagePreviewProps = {
 export function CarouselImagePreview({ index, photo, onClick, isActive }: CarouselImagePreviewProps) {
   return (
     <Card
-      className={cn('w-16 h-16 cursor-pointer p-2', isActive && 'border-2 border-primary')}
+      className={cn('h-16 w-16 cursor-pointer p-2', isActive && 'border-2 border-primary')}
       onClick={() => onClick(index)}
     >
       <CardContent className="flex aspect-square items-center justify-center p-0">

@@ -37,7 +37,7 @@ export function ProductAuctionSortSelect({}) {
     });
   }, [sortOrder]);
   return (
-    <div className="lg:ml-4 flex gap-4 flex-col md:flex-row ">
+    <div className="flex flex-col gap-4 md:flex-row lg:ml-4 ">
       <div className="w-full">
         <FormItem className="w-full">
           <FormLabel>Sort criterion</FormLabel>
@@ -48,7 +48,7 @@ export function ProductAuctionSortSelect({}) {
                   <SelectValue placeholder="Sort criterion" />
                 </SelectTrigger>
                 <Button
-                  className="border-s-0 rounded-s-none p-1 text-center"
+                  className="rounded-s-none border-s-0 p-1 text-center"
                   disabled={!sortKey}
                   type="button"
                   variant="outline"

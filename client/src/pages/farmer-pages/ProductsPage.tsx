@@ -76,9 +76,9 @@ export function ProductsPage() {
       <CurrentProductContextProvider>
         <div className="">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="gap-6 mt-6 flex flex-col">
-              <div className="p-4 bg-white">
-                <h2 className="text-3xl font-bold mb-9">Products</h2>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-6">
+              <div className="bg-white p-4">
+                <h2 className="mb-9 text-3xl font-bold">Products</h2>
                 <ProductsFilter />
               </div>
               <div className="px-4">

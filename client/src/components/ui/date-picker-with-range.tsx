@@ -38,7 +38,7 @@ export function DatePickerWithRange<T extends FieldValues, K extends Path<DateRa
         <Button
           variant="outline"
           className={cn(
-            'mb-[1px] flex h-auto w-full flex-row items-center justify-start bg-popover px-4 py-2 text-start xl:odd:border-r-[1px] border-0 last-of-type:border-0 sm:mb-0',
+            'mb-[1px] flex h-auto w-full flex-row items-center justify-start border-0 bg-popover px-4 py-2 text-start last-of-type:border-0 sm:mb-0 xl:odd:border-r-[1px]',
             !!errors[field] && 'shadow-[inset_0px_0px_8px_0px_#ff0000]'
           )}
         >

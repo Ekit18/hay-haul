@@ -54,16 +54,12 @@ export const productAuctionApi = api.injectEndpoints({
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]
     }),
-    getProductAuction: builder.query<ProductAuction, string>({
-      query: (id) => ({
-        url: generatePath(`/product-auction/:id`, { id })
-      })
-    }),
     filterFarmerProductAuctions: builder.query<DataWithCount<ProductAuction>, URLSearchParams>({
       query: (searchParams) => ({
         url: 'product-auction/filter/farmer',
         params: searchParams
       }),
+      keepUnusedDataFor: 0,
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]
     }),
@@ -72,7 +68,14 @@ export const productAuctionApi = api.injectEndpoints({
         url: 'product-auction/filter/businessman',
         params: searchParams
       }),
+      keepUnusedDataFor: 0,
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
+      providesTags: [TagType.ProductAuction]
+    }),
+    getProductAuction: builder.query<ProductAuction, string>({
+      query: (id) => ({
+        url: generatePath(`/product-auction/:id`, { id })
+      }),
       providesTags: [TagType.ProductAuction]
     }),
     createProductAuction: builder.mutation<ProductAuction, CreateProductAuctionFormValues>({
@@ -112,7 +115,7 @@ export const productAuctionApi = api.injectEndpoints({
     }),
     updateProductAuction: builder.mutation<ProductAuction, UpdateProductAuctionDto>({
       query: ({ id, ...body }) => {
-        const { photos, farmName, productName, ...rest } = body.body;
+        const { photos, farmName: _, productName: _2, ...rest } = body.body;
         const bodyFormData = new FormData();
         photos.forEach(async (photo) => {
           const arrayBuffer = await photo.arrayBuffer;

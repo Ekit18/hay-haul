@@ -35,9 +35,9 @@ export function Timer({ toDate, className }: TimerProps) {
   }, [toDate]);
 
   return (
-    <div className={cn('flex flex-row items-center gap-1 font-medium justify-center', className)}>
+    <div className={cn('flex flex-row items-center justify-center gap-1 font-medium', className)}>
       <Clock className="h-5" />{' '}
-      <span className={cn('min-w-32 h-6', !timeLeft && 'blur-sm')}>{timeLeft || '0d 00h 00m 00s'}</span>
+      <span className={cn('h-6 min-w-32', !timeLeft && 'blur-sm')}>{timeLeft || '0d 00h 00m 00s'}</span>
     </div>
   );
 }
