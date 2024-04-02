@@ -3,6 +3,7 @@ import { FacilityCard } from '@/components/facility/facility-card/facility-card'
 import { CreateFacilityModal } from '@/components/facility/modals/create-facility-modal/create-facility-modal';
 import { UpdateFacilityModal } from '@/components/facility/modals/update-facility-modal/update-facility-modal';
 import { UpdateFacilityFormValues } from '@/components/facility/modals/update-facility-modal/validation';
+import { toast } from '@/components/ui/use-toast';
 import { EntityTitle } from '@/lib/enums/entity-title.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -49,6 +50,13 @@ export function Farms() {
 
     updateFacility({ id: currentFacility.id, body })
       .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Farm was updated.',
+          description: 'Your farm has been updated successfully.'
+        });
+      })
       .finally(() => setIsUpdateModalOpen(false))
       .catch(handleRtkError);
   };
@@ -58,6 +66,13 @@ export function Farms() {
 
     deleteFacility(currentFacility.id)
       .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Farm was deleted.',
+          description: 'Your farm has been deleted successfully.'
+        });
+      })
       .finally(() => setIsDeleteModalOpen(false))
       .catch(handleRtkError);
   };

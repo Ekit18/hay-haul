@@ -6,7 +6,7 @@ import { DeleteModal } from '../delete-modal/delete-modal';
 import { columns } from './data-table/columns';
 import { DataTable } from './data-table/data-table';
 import { useDeleteModalCurrentProduct } from './hooks/delete-modal-current-product';
-import { useUpdateModalCurrentProduct } from './hooks/update-modal-current-product copy';
+import { useUpdateModalCurrentProduct } from './hooks/update-modal-current-product';
 import { UpdateProductModal } from './modals/update-product-modal/update-product-modal';
 
 export interface ProductsTableProps {

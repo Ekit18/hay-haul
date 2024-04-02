@@ -10,6 +10,7 @@ import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { productsApi } from '@/store/reducers/products/productsApi';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { skipToken } from '@reduxjs/toolkit/query';
 import debounce from 'debounce';
 import { useEffect, useRef } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -18,7 +19,9 @@ import { CurrentProductContextProvider } from './contexts/currentProductContext'
 export function ProductsPage() {
   const productFilterFormSchema = useProductFilterFormSchema();
 
-  const [filterProducts, { data, isLoading, isFetching, isUninitialized }] = productsApi.useLazyFilterProductsQuery();
+  const [filterProducts, { data, isLoading, isFetching, isUninitialized, originalArgs }] =
+    productsApi.useLazyFilterProductsQuery();
+  productsApi.useFilterProductsQuery(originalArgs || skipToken);
 
   const form = useForm<ProductFilterFormValues>({
     resolver: yupResolver(productFilterFormSchema),
@@ -76,9 +79,9 @@ export function ProductsPage() {
       <CurrentProductContextProvider>
         <div className="">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2">
               <div className="bg-white p-4">
-                <h2 className="mb-9 text-3xl font-bold">Products</h2>
+                <h2 className="mb-9 mt-6 text-3xl font-bold">Products</h2>
                 <ProductsFilter />
               </div>
               <div className="px-4">

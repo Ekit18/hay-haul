@@ -15,7 +15,7 @@ interface FileInputCarouselProps {
   hasAddButton?: boolean;
 }
 
-export function FileInputCarousel({ items, hasAddButton }: FileInputCarouselProps) {
+export function ImageCarousel({ items, hasAddButton }: FileInputCarouselProps) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -41,7 +41,7 @@ export function FileInputCarousel({ items, hasAddButton }: FileInputCarouselProp
   const CarouselItem = hasAddButton ? CarouselImageWithDelete : CarouselImageItem;
 
   return (
-    <div className="w-full flex-col items-center px-16">
+    <div className="w-full flex-col items-center sm:px-16">
       <div className="flex flex-col items-center">
         <Carousel setApi={setApi} className="w-full max-w-xs">
           <CarouselContent>

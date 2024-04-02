@@ -1,5 +1,6 @@
 import React from 'react';
 import { AppRoute } from './lib/constants/routes';
+import { AuctionDetailsPage } from './pages/AuctionDetailsPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
@@ -8,7 +9,7 @@ import { Warehouses } from './pages/businessman-pages/Warehouses';
 import { AllAuction } from './pages/farmer-pages/Auctions';
 import { CreateAuction } from './pages/farmer-pages/CreateAuction';
 import { Farms } from './pages/farmer-pages/Farms';
-import { MainPage } from './pages/farmer-pages/MainPage';
+import { MainPage as FarmerMainPage } from './pages/farmer-pages/MainPage';
 import { MyAuctions } from './pages/farmer-pages/MyAuctions';
 import { ProductsPage } from './pages/farmer-pages/ProductsPage';
 import { UpdateAuction } from './pages/farmer-pages/UpdateAuction';
@@ -17,6 +18,17 @@ type Route = {
   path: string;
   Component: () => React.ReactNode;
 };
+
+export const generalRoutes: Route[] = [
+  {
+    path: AppRoute.General.Auctions,
+    Component: AllAuction
+  },
+  {
+    path: AppRoute.General.AuctionDetails,
+    Component: AuctionDetailsPage
+  }
+];
 
 export const businessRoutes: Route[] = [
   {
@@ -32,11 +44,7 @@ export const businessRoutes: Route[] = [
 export const farmerRoutes: Route[] = [
   {
     path: AppRoute.General.Main,
-    Component: MainPage
-  },
-  {
-    path: AppRoute.General.Auctions,
-    Component: AllAuction
+    Component: FarmerMainPage
   },
   {
     path: AppRoute.Farmer.Products,
@@ -55,7 +63,7 @@ export const farmerRoutes: Route[] = [
     Component: CreateAuction
   },
   {
-    path: `${AppRoute.Farmer.UpdateAuction}/:id`,
+    path: AppRoute.Farmer.UpdateAuction,
     Component: UpdateAuction
   }
   // {

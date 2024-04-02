@@ -37,7 +37,7 @@ export function Timer({ toDate, className }: TimerProps) {
   return (
     <div className={cn('flex flex-row items-center justify-center gap-1 font-medium', className)}>
       <Clock className="h-5" />{' '}
-      <span className={cn('h-6 min-w-32', !timeLeft && 'blur-sm')}>{timeLeft || '0d 00h 00m 00s'}</span>
+      <span className={cn('h-6 min-w-32 text-nowrap', !timeLeft && 'blur-sm')}>{timeLeft || '0d 00h 00m 00s'}</span>
     </div>
   );
 }

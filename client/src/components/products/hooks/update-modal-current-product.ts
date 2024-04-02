@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/use-toast';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import {
   CurrentProductUsageContext,
@@ -28,6 +29,11 @@ export function useUpdateModalCurrentProduct(): UpdateModalProductHookResponse {
       await updateProduct({ id: currentProduct.id, body: data })
         .unwrap()
         .then(() => {
+          toast({
+            variant: 'success',
+            title: 'Product was updated successfully.',
+            description: 'Your product has been updated successfully.'
+          });
           setAllNulls();
         })
         .catch(handleRtkError);

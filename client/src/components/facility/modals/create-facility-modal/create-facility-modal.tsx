@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/use-toast';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { EntityTitleValues } from '@/lib/types/types';
@@ -47,6 +48,13 @@ export function CreateFacilityModal({ entityTitle }: CreateFacilityModalProps) {
   const onSubmit: SubmitHandler<CreateFacilityFormValues> = async (data) => {
     await createFacility({ ...data, userId: user.id })
       .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Farm was created',
+          description: 'Your farm has been created successfully.'
+        });
+      })
       .finally(() => {
         setOpen(false);
         form.reset();

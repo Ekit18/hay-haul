@@ -13,7 +13,7 @@ import { useAppSelector } from '@/lib/hooks/redux';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import capitalize from 'lodash.capitalize';
-import { useNavigate } from 'react-router-dom';
+import { generatePath, useNavigate } from 'react-router-dom';
 import { productAuctionStatus } from './ProductAuctionStatus.enum';
 
 type ProductAuctionCardProps = {
@@ -28,21 +28,28 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
 
   return (
     <div className="flex w-full flex-col items-center justify-start gap-4 rounded-lg bg-white min-[1068px]:w-full min-[1068px]:flex-row">
-      <div className="w-full min-w-[300px] min-[1068px]:h-full min-[1068px]:w-4/12 xl:w-3/12">
+      <Button
+        variant="link"
+        type="button"
+        onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
+        className="h-40 w-full min-w-[300px] min-[1068px]:h-full min-[1068px]:w-4/12 xl:w-3/12"
+      >
         <img
-          className="h-40 w-full rounded-t-lg  object-cover min-[1068px]:h-full min-[1068px]:rounded-l-lg min-[1068px]:rounded-tr-none"
+          className="h-full w-full rounded-t-lg  object-cover min-[1068px]:h-full min-[1068px]:rounded-l-lg min-[1068px]:rounded-tr-none"
           src={productAuction?.photos[0]?.signedUrl}
           alt={productAuction.product.name}
         />
-      </div>
+      </Button>
       <div className="w-full min-[1068px]:w-5/12 min-[1068px]:py-4 xl:w-6/12">
         <div className="flex w-full flex-col gap-4 px-4 min-[1068px]:border-r-2 min-[1068px]:pr-4">
           <div className="flex flex-row items-center justify-start gap-3">
-            <p className="w-max text-left text-xl font-semibold">
+            <Button
+              onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
+              variant="link"
+              className="h-auto w-max text-wrap p-0 text-left text-xl font-semibold text-black"
+            >
               {capitalize(productAuction.product.name)} by {capitalize(productAuction.product.facilityDetails.name)}
-              <br />
-              {productAuction.id}
-            </p>
+            </Button>
             <p
               className={cn(
                 'w-max whitespace-nowrap rounded-lg px-2 py-1 text-sm',
@@ -109,11 +116,26 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
         <div className="flex w-full flex-col gap-2 text-center">
           {user?.role === UserRole.Businessman && (
             <>
-              <Button className="w-full border border-primary text-primary" variant="outline">
+              <Button
+                onClick={() =>
+                  navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
+                }
+                className="w-full border border-primary text-primary"
+                variant="outline"
+              >
                 Place a bet
               </Button>
               <Button className="w-full">Buy now for {productAuction.buyoutPrice}</Button>
             </>
+          )}
+          {user?.id !== productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
+            <Button
+              onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
+              type="button"
+              className="w-full"
+            >
+              Learn more
+            </Button>
           )}
           {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
             <>
@@ -125,7 +147,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
                     [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
                   ).includes(productAuction.auctionStatus)
                 }
-                onClick={() => navigate(`${AppRoute.Farmer.UpdateAuction}/${productAuction.id}`)}
+                onClick={() => navigate(generatePath(AppRoute.Farmer.UpdateAuction, { auctionId: productAuction.id }))}
               >
                 Update
               </Button>
@@ -141,6 +163,15 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
                 onClick={onDeleteClick}
               >
                 Delete
+              </Button>
+              <Button
+                type="button"
+                className="w-full"
+                onClick={() =>
+                  navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
+                }
+              >
+                Learn more
               </Button>
             </>
           )}

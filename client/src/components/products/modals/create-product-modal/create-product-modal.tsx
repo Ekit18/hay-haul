@@ -11,6 +11,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/components/ui/use-toast';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { facilityDetailsApi } from '@/store/reducers/facility-details/facilityDetailsApi';
@@ -59,6 +60,13 @@ export function CreateProductModal() {
   const onSubmit: SubmitHandler<CreateProductFormValues> = async (data) => {
     await createProduct(data)
       .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Product created',
+          description: 'Product has been created successfully.'
+        });
+      })
       .finally(() => setOpen(false))
       .catch(handleRtkError);
   };
@@ -160,6 +168,7 @@ export function CreateProductModal() {
                         <Input
                           placeholder="Quantity"
                           {...field}
+                          value={field.value || ''}
                           onBlur={(e) => {
                             if (e.target.value === '') {
                               field.onChange(0);

@@ -1,5 +1,6 @@
 import { DeleteModal } from '@/components/delete-modal/delete-modal';
 import { Form } from '@/components/ui/form';
+import { toast } from '@/components/ui/use-toast';
 import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
 import { EntityTitle } from '@/lib/enums/entity-title.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
@@ -138,6 +139,13 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
 
     await deleteProductAuction(currentProductAuction.id)
       .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Auction deleted',
+          description: 'Your auction has been deleted successfully.'
+        });
+      })
       .finally(() => setIsDeleteModalOpen(false))
       .catch(handleRtkError);
   };

@@ -81,6 +81,7 @@ export class ProductAuctionService {
         .createQueryBuilder('auction')
         .leftJoinAndSelect('auction.photos', 'photos')
         .leftJoinAndSelect('auction.product', 'product')
+        .leftJoinAndSelect('product.productType', 'productType')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .leftJoin('facilityDetails.user', 'user')
         .addSelect('user.id')

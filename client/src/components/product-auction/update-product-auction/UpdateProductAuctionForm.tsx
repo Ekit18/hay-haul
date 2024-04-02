@@ -1,10 +1,11 @@
-import { FileInputCarousel } from '@/components/carousel/FileInputCarousel';
+import { ImageCarousel } from '@/components/carousel/FileInputCarousel';
 import { Button } from '@/components/ui/button';
 import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
 import { DropdownCalendar } from '@/components/ui/dropdown-calendar';
 import { FilterSelect } from '@/components/ui/filter-select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
@@ -15,7 +16,6 @@ import { ProductAuctionStatus, ProductAuctionStatusValues } from '@/lib/types/Pr
 import { cn } from '@/lib/utils';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 import { addDays, format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -27,7 +27,7 @@ import { UpdateProductAuctionFormValues, useProductAuctionUpdateFormSchema } fro
 export function UpdateProductAuctionForm() {
   const navigate = useNavigate();
 
-  const { id } = useParams();
+  const { auctionId: id } = useParams();
 
   if (!id || typeof id !== 'string') {
     return <Navigate to={AppRoute.General.MyAuctions} replace />;
@@ -102,7 +102,14 @@ export function UpdateProductAuctionForm() {
     }
     await updateProductAuction({ body: data, id })
       .unwrap()
-      .then(() => navigate(AppRoute.General.MyAuctions))
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Auction updated',
+          description: 'Your auction has been updated successfully.'
+        });
+        navigate(AppRoute.General.MyAuctions);
+      })
       .catch(handleRtkError);
   };
 
@@ -158,10 +165,10 @@ export function UpdateProductAuctionForm() {
           <h3 className="self-start text-2xl font-bold">{auction.product.name}</h3>
           <div className="flex w-full flex-col items-center justify-start xl:flex-row">
             <div className="flex w-full justify-center xl:w-6/12">
-              <FileInputCarousel items={photos} hasAddButton />
+              <ImageCarousel items={photos} hasAddButton />
             </div>
             <div className="w-full xl:w-6/12">
-              <div className="flex w-full flex-row gap-4 py-4">
+              <div className="flex w-full flex-col gap-4 py-4 md:flex-row">
                 <div className="flex w-full flex-col gap-4">
                   <FilterSelect
                     fieldName="farmName"
@@ -356,7 +363,7 @@ export function UpdateProductAuctionForm() {
                                 <Button
                                   variant="outline"
                                   className={cn(
-                                    'w-[240px] justify-start text-left font-normal',
+                                    'w-full justify-start text-left font-normal',
                                     !field.value && 'text-muted-foreground'
                                   )}
                                 >

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+
 import { Card, CardContent } from '../ui/card';
 import { PreviewObject } from './FileInputCarousel';
 
@@ -12,7 +13,10 @@ export type CarouselImagePreviewProps = {
 export function CarouselImagePreview({ index, photo, onClick, isActive }: CarouselImagePreviewProps) {
   return (
     <Card
-      className={cn('h-16 w-16 cursor-pointer p-2', isActive && 'border-2 border-primary')}
+      className={cn(
+        'h-16 w-16 cursor-pointer border-0 p-2 ring-1 ring-gray-200',
+        isActive && 'border-0 ring-2 ring-primary'
+      )}
       onClick={() => onClick(index)}
     >
       <CardContent className="flex aspect-square items-center justify-center p-0">

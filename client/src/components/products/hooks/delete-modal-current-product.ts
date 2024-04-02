@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/use-toast';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import {
   CurrentProductUsageContext,
@@ -27,6 +28,11 @@ export function useDeleteModalCurrentProduct(): DeleteModalProductHookResponse {
     await deleteProduct(currentProduct.id)
       .unwrap()
       .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Product was deleted',
+          description: 'Your product has been deleted successfully.'
+        });
         setAllNulls();
       })
       .catch(handleRtkError);

@@ -20,13 +20,14 @@ export const AppRoute = {
     OtpConfirm: '/otp-confirm',
     ResetPassword: '/reset-password',
     Auctions: '/auctions',
+    AuctionDetails: '/auction-details/:auctionId',
     MyAuctions: '/my-auctions'
   },
   Farmer: {
     Products: '/products',
     Farms: '/farms',
     CreateAuction: '/create-auction',
-    UpdateAuction: '/update-auction'
+    UpdateAuction: '/update-auction/:auctionId'
     // MyAuctions: '/my-auctions'
   },
   Businessman: {

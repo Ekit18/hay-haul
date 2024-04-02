@@ -1,7 +1,6 @@
 import { Trash } from 'lucide-react';
-import { useCallback } from 'react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
-import { CreateProductAuctionFormValues } from '../product-auction/create-product-auction/validation';
+import { useFormContext } from 'react-hook-form';
+import { FileObject } from '../drag-and-drop/file-object.type';
 import { Button } from '../ui/button';
 import { CarouselImageItem } from './CarouselImageItem';
 import { PreviewObject } from './FileInputCarousel';
@@ -11,16 +10,18 @@ interface CarouselImageInputItemProps {
 }
 
 export function CarouselImageWithDelete({ photo }: CarouselImageInputItemProps) {
-  const { control, clearErrors } = useFormContext<CreateProductAuctionFormValues>();
+  const { clearErrors, setValue, getValues } = useFormContext<{ photos: FileObject[] }>();
 
-  const { fields: photos, remove } = useFieldArray({ control, name: 'photos' });
+  const handleDeleteFile = () => {
+    const photos = getValues('photos');
 
-  const handleDeleteFile = useCallback(() => {
-    const index = photos.findIndex((item) => item.preview === photo.preview);
-    console.log(index);
-    remove(index);
+    setValue(
+      'photos',
+      photos.filter((item) => item.preview !== photo.preview)
+    );
+
     clearErrors('photos');
-  }, [remove, photos, clearErrors]);
+  };
 
   return (
     <CarouselImageItem photo={photo}>

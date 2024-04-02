@@ -1,4 +1,4 @@
-import { FileInputCarousel } from '@/components/carousel/FileInputCarousel';
+import { ImageCarousel } from '@/components/carousel/FileInputCarousel';
 import { Button } from '@/components/ui/button';
 import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
 import { DropdownCalendar } from '@/components/ui/dropdown-calendar';
@@ -7,6 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -67,12 +68,19 @@ export function CreateProductAuctionForm() {
   const onSubmit: SubmitHandler<CreateProductAuctionFormValues> = async (data) => {
     await createProductAuction(data)
       .unwrap()
-      .then(() => navigate(AppRoute.General.MyAuctions))
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Auction created',
+          description: 'Your auction has been successfully created.'
+        });
+        navigate(AppRoute.General.MyAuctions);
+      })
       .catch(handleRtkError);
   };
 
   const handleAddBuyoutPrice = (percent: number) => {
-    form.setValue('buyoutPrice', buyoutPrice + startPrice * percent);
+    form.setValue('buyoutPrice', Math.floor(buyoutPrice + startPrice * percent));
   };
 
   const handleAddStartEndDays = (days: number) => {
@@ -81,11 +89,13 @@ export function CreateProductAuctionForm() {
       form.setValue('startEndDate', { from: addDays(startDate, days), to: addDays(startDate, days + 1) });
       return;
     }
+
     if (!startEndDate.to) {
       const endDate = addDays(startEndDate.from, days);
       form.setValue('startEndDate', { from: startEndDate.from, to: endDate });
       return;
     }
+
     form.setValue('startEndDate', { from: startEndDate.from, to: addDays(startEndDate.to, days) });
   };
 
@@ -103,10 +113,10 @@ export function CreateProductAuctionForm() {
         <h3 className="min-h-8 self-start text-2xl font-bold">{selectedProductName}</h3>
         <div className="flex w-full flex-col items-center justify-start xl:flex-row">
           <div className="flex w-full justify-center xl:w-6/12">
-            <FileInputCarousel items={photos} hasAddButton />
+            <ImageCarousel items={photos} hasAddButton />
           </div>
           <div className="w-full xl:w-6/12">
-            <div className="flex w-full flex-row gap-4 py-4">
+            <div className="flex w-full flex-col gap-4 py-4 md:flex-row">
               <div className="flex w-full flex-col gap-4">
                 <FilterSelect
                   fieldName="farmId"
@@ -150,7 +160,10 @@ export function CreateProductAuctionForm() {
                                 return;
                               }
                               field.onChange(e.target.valueAsNumber);
-                              form.setValue('buyoutPrice', e.target.valueAsNumber + e.target.valueAsNumber * 0.25);
+                              form.setValue(
+                                'buyoutPrice',
+                                Math.floor(e.target.valueAsNumber + e.target.valueAsNumber * 0.25)
+                              );
                             }}
                             value={field.value || ''}
                             type="number"
@@ -198,7 +211,7 @@ export function CreateProductAuctionForm() {
                               if (e.target.valueAsNumber <= 0) {
                                 return;
                               }
-                              field.onChange(e.target.valueAsNumber);
+                              field.onChange(Math.floor(e.target.valueAsNumber));
                             }}
                             value={field.value || ''}
                             type="number"
@@ -301,7 +314,7 @@ export function CreateProductAuctionForm() {
                               <Button
                                 variant="outline"
                                 className={cn(
-                                  'w-[240px] justify-start text-left font-normal',
+                                  'w-full justify-start text-left font-normal',
                                   !field.value && 'text-muted-foreground'
                                 )}
                               >
