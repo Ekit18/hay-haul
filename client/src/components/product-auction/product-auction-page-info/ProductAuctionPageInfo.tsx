@@ -150,12 +150,6 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
       .catch(handleRtkError);
   };
 
-  // useEffect(() => {
-  //   if (!currentProductAuction) return;
-
-  //   setCurrentProductAuction(data?.find((facility) => facility.id === currentProductAuction.id));
-  // }, [data]);
-
   return (
     <div className="h-full bg-gray-100 pb-4">
       <Form {...form}>
@@ -183,6 +177,13 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
                 onDeleteClick={() => handleDeleteClick(productAuction)}
               />
             ))}
+
+            {data?.data.length === 0 && (
+              <div className="text-center">
+                <p className="text-2xl font-bold">0 Results found</p>
+                <p>Try changing the filters</p>
+              </div>
+            )}
           </div>
         </form>
       </Form>

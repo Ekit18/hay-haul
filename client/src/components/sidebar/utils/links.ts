@@ -75,6 +75,11 @@ export const links: Links = {
       title: 'Delivery',
       url: AppRoute.Businessman.Delivery,
       icon: Truck
+    },
+    {
+      title: 'Auctions',
+      url: AppRoute.General.Auctions,
+      icon: BadgeDollarSign
     }
   ],
   [UserRole.Carrier]: [],

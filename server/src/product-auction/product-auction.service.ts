@@ -4,6 +4,7 @@ import {
   DEFAULT_OFFSET,
   DEFAULT_PAGINATION_LIMIT,
 } from 'src/lib/constants/constants';
+import { formatAuctionDateHours } from 'src/lib/helpers/formatAuctionDatesHours';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductErrorMessage } from 'src/product/product-error-message.enum';
 import { ProductService } from 'src/product/product.service';
@@ -63,6 +64,9 @@ export class ProductAuctionService {
 
       return this.productAuctionRepository.save({
         ...dto,
+        paymentPeriod: formatAuctionDateHours(dto.paymentPeriod),
+        startDate: formatAuctionDateHours(dto.startDate),
+        endDate: formatAuctionDateHours(dto.endDate),
         productId,
         photos: fileEntities,
       });
@@ -77,23 +81,25 @@ export class ProductAuctionService {
 
   async findOneById(id: string) {
     try {
-      const auction = await this.productAuctionRepository
-        .createQueryBuilder('auction')
-        .leftJoinAndSelect('auction.photos', 'photos')
-        .leftJoinAndSelect('auction.product', 'product')
+      const productAuction = await this.productAuctionRepository
+        .createQueryBuilder('productAuction')
+        .leftJoinAndSelect('productAuction.photos', 'photos')
+        .leftJoinAndSelect('productAuction.product', 'product')
         .leftJoinAndSelect('product.productType', 'productType')
+        .leftJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .leftJoin('facilityDetails.user', 'user')
         .addSelect('user.id')
-        .where('auction.id = :id', { id })
+        .addSelect('user.fullName')
+        .where('productAuction.id = :id', { id })
         .getOne();
 
-      for await (const photo of auction.photos) {
+      for await (const photo of productAuction.photos) {
         photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
       }
-      return auction;
+
+      return { count: 1, data: [productAuction] };
     } catch (error) {
-      console.log(error);
       throw new HttpException(
         ProductAuctionErrorMessage.FailedFetchProductAuction,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -239,6 +245,7 @@ export class ProductAuctionService {
             auctionStatus: [
               ProductAuctionStatus.Active,
               ProductAuctionStatus.EndSoon,
+              ProductAuctionStatus.StartSoon,
             ],
           },
         );
@@ -269,10 +276,6 @@ export class ProductAuctionService {
           photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
         }
       }
-
-      // auctions.forEach((auction) => {
-      // this.socketService.socketServer.socketsJoin(auction.id);
-      // })
 
       return {
         data: auctions,

@@ -39,6 +39,8 @@ export class ProductAuctionBidService {
       'SERIALIZABLE',
       async (transactionalEntityManager) => {
         try {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+
           const candidateBid = await transactionalEntityManager.findOneBy(
             ProductAuctionBid,
             {
@@ -53,6 +55,18 @@ export class ProductAuctionBidService {
             .where('productAuction.id = :auctionId', { auctionId })
             .leftJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
             .getOne();
+
+          if (
+            ![
+              ProductAuctionStatus.Active,
+              ProductAuctionStatus.EndSoon,
+            ].includes(auction.auctionStatus)
+          ) {
+            throw new HttpException(
+              ProductAuctionBidErrorMessage.AuctionNotActive,
+              HttpStatus.BAD_REQUEST,
+            );
+          }
 
           if (price < auction.startPrice) {
             throw new HttpException(
@@ -142,14 +156,9 @@ export class ProductAuctionBidService {
               currentMaxBidId: currentMaxBidId,
             },
           );
-          console.log('emitted socket event');
 
-          //end s
           return res;
         } catch (error) {
-          console.log('===================');
-          console.log(error);
-          console.log('===================');
           if (error instanceof QueryFailedError) {
             const errorObject = error.driverError.precedingErrors[0];
 

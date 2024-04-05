@@ -13,6 +13,7 @@ import { useAppSelector } from '@/lib/hooks/redux';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import capitalize from 'lodash.capitalize';
+import { Crown } from 'lucide-react';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { productAuctionStatus } from './ProductAuctionStatus.enum';
 
@@ -71,13 +72,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
           </div>
           <p className="w-full rounded bg-gray-100 p-2 text-base">
             {productAuction.description.length > 100 ? (
-              <>
-                {productAuction.description.substring(0, 100).trimEnd()}...
-                {/* TODO redirect user to auction */}
-                <Button className="h-min p-0 text-base" variant="link">
-                  Learn more
-                </Button>
-              </>
+              <>{productAuction.description.substring(0, 100).trimEnd()}...</>
             ) : (
               productAuction.description
             )}
@@ -109,25 +104,58 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
         )}
         <div className="flex w-full flex-col gap-2 text-center">
           <p>Current price:</p>
-          <p className="text-2xl font-bold">
-            {productAuction.currentMaxBid?.price ? `${productAuction.currentMaxBid?.price} USD` : 'No bets'}
-          </p>
+          <div className="flex flex-col items-center">
+            <p className="text-2xl font-bold">
+              {productAuction.currentMaxBid?.price ? `${productAuction.currentMaxBid?.price} USD` : 'No bets'}
+            </p>
+            {productAuction.currentMaxBid?.userId === user?.id && (
+              <p className="flex gap-2">
+                (YOU) <Crown className="text-yellow-400" />
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex w-full flex-col gap-2 text-center">
-          {user?.role === UserRole.Businessman && (
-            <>
+          {user?.role === UserRole.Businessman &&
+            ([ProductAuctionStatus.Active, ProductAuctionStatus.EndSoon] as ProductAuctionStatusValues[]).includes(
+              productAuction.auctionStatus
+            ) && (
+              <>
+                <Button
+                  onClick={() =>
+                    navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
+                  }
+                  className="w-full border border-primary text-primary"
+                  variant="outline"
+                  type="button"
+                >
+                  Place a bet
+                </Button>
+                <Button
+                  className="w-full"
+                  type="button"
+                  onClick={() =>
+                    navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
+                  }
+                >
+                  Buy now for {productAuction.buyoutPrice}$
+                </Button>
+              </>
+            )}
+          {user?.role === UserRole.Businessman &&
+            !([ProductAuctionStatus.Active, ProductAuctionStatus.EndSoon] as ProductAuctionStatusValues[]).includes(
+              productAuction.auctionStatus
+            ) && (
               <Button
                 onClick={() =>
                   navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
                 }
-                className="w-full border border-primary text-primary"
-                variant="outline"
+                type="button"
+                className="w-full"
               >
-                Place a bet
+                Learn more
               </Button>
-              <Button className="w-full">Buy now for {productAuction.buyoutPrice}</Button>
-            </>
-          )}
+            )}
           {user?.id !== productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
             <Button
               onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
@@ -135,6 +163,15 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
               className="w-full"
             >
               Learn more
+            </Button>
+          )}
+          {productAuction.currentMaxBid?.userId === user?.id && (
+            <Button
+              onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
+              type="button"
+              className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+            >
+              Pay for the product
             </Button>
           )}
           {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (

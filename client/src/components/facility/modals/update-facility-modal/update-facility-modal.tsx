@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { FacilityDetails } from '@/lib/types/FacilityDetails/FacilityDetails.type';
@@ -82,19 +83,21 @@ export function UpdateFacilityModal({
         <Form {...form}>
           <div className="flex w-full flex-col items-center justify-center gap-10">
             <div className="flex w-full flex-col gap-4 py-4">
-              <div className="w-full items-center ">
-                <TagInput
-                  name="farmProductTypes"
-                  control={form.control}
-                  suggestions={farmProductTypesSuggestions}
-                  labelText="Select farm products"
-                  noOptionsText="No matching products"
-                  allowNew
-                  onAdd={handleAdd}
-                  onDelete={handleDelete}
-                  selectedFn={(item) => ({ value: item, label: item })}
-                />
-              </div>
+              {entityTitle === 'Farm' && user.role === UserRole.Farmer && (
+                <div className="w-full items-center ">
+                  <TagInput
+                    name="farmProductTypes"
+                    control={form.control}
+                    suggestions={farmProductTypesSuggestions}
+                    labelText="Select farm products"
+                    noOptionsText="No matching products"
+                    allowNew
+                    onAdd={handleAdd}
+                    onDelete={handleDelete}
+                    selectedFn={(item) => ({ value: item, label: item })}
+                  />
+                </div>
+              )}
               <div className="w-full items-center ">
                 <FormField
                   control={form.control}

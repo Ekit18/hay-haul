@@ -24,7 +24,7 @@ import { CustomImageValidationPipe } from './pipes/custom-image-validation-pipe'
 import { ProductAuctionService } from './product-auction.service';
 
 @UseGuards(JwtAuthGuard)
-@AllowedRoles(UserRole.Farmer)
+@AllowedRoles(UserRole.Farmer, UserRole.Businessman)
 @Controller('product-auction')
 export class ProductAuctionController {
   private static IMAGE_FIELD_NAME = 'photos';
@@ -56,7 +56,6 @@ export class ProductAuctionController {
 
   @Get('/:id')
   async getOne(@Param('id') id: string) {
-    console.log('id', id);
     return this.productAuctionService.findOneById(id);
   }
 

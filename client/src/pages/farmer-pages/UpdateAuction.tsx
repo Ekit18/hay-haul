@@ -1,7 +1,6 @@
 import { UpdateProductAuctionForm } from '@/components/product-auction/update-product-auction/UpdateProductAuctionForm';
 
 export function UpdateAuction() {
-  console.log('????');
   return (
     <div className="mt-6 h-full bg-gray-100">
       <div className="bg-white p-4 pt-6">

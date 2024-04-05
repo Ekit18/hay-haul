@@ -2,18 +2,17 @@ import ProductAuctionPageInfo from '@/components/product-auction/product-auction
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { skipToken } from '@reduxjs/toolkit/query';
 
-export function MyAuctions() {
+export function MyBids() {
   const [filterProductAuctions, { data: productAuctions, isLoading, isFetching, fulfilledTimeStamp, originalArgs }] =
-    productAuctionApi.useLazyFilterFarmerProductAuctionsQuery();
+    productAuctionApi.useLazyFilterBusinessmanProductAuctionsQuery();
 
-  productAuctionApi.useFilterFarmerProductAuctionsQuery(originalArgs || skipToken);
-
+  productAuctionApi.useFilterBusinessmanProductAuctionsQuery(originalArgs || skipToken);
   return (
     <ProductAuctionPageInfo
       trigger={filterProductAuctions}
       data={productAuctions}
       isLoading={isLoading}
-      pageLabel="My auctions"
+      pageLabel="My bids"
       isFetching={isFetching}
     />
   );

@@ -1,6 +1,8 @@
 import { ImageCarousel } from '@/components/carousel/FileInputCarousel';
 import { DeleteModal } from '@/components/delete-modal/delete-modal';
 import { productAuctionStatus } from '@/components/product-auction/product-auction-card/ProductAuctionStatus.enum';
+import { SetBidForm } from '@/components/product-auction/set-bid-form/SetBidForm';
+import { TimeProgress } from '@/components/time-progress/TimeProgress';
 import { Timer } from '@/components/timer/Timer';
 import {
   Breadcrumb,
@@ -11,7 +13,6 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { EntityTitle } from '@/lib/enums/entity-title.enum';
@@ -26,15 +27,20 @@ import {
 import { cn } from '@/lib/utils';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { format, parseISO } from 'date-fns';
+import { Crown } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, generatePath, useNavigate, useParams } from 'react-router-dom';
 
 export function AuctionDetailsPage() {
   const user = useAppSelector((state) => state.user.user);
+
   const { auctionId } = useParams();
   const navigate = useNavigate();
-  const [getProductAuction, { data: productAuction, isFetching, isError }] =
+
+  const [getProductAuction, { data: productAuctionWithCount, isFetching, isError }] =
     productAuctionApi.useLazyGetProductAuctionQuery();
+
+  const productAuction = productAuctionWithCount?.data[0];
 
   useEffect(() => {
     if (!auctionId) {
@@ -76,6 +82,10 @@ export function AuctionDetailsPage() {
     return <p>Loading...</p>;
   }
 
+  const isBidButtonsDisabled = !(
+    [ProductAuctionStatus.Active, ProductAuctionStatus.EndSoon] as ProductAuctionStatusValues[]
+  ).includes(productAuction.auctionStatus);
+
   return (
     <div className="h-full bg-white p-4">
       <div className="pt-10">
@@ -94,7 +104,7 @@ export function AuctionDetailsPage() {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbPage>
-                {productAuction.product.name} by {productAuction.product.facilityDetails.user?.name}
+                {productAuction.product.name} by {productAuction.product.facilityDetails.user?.fullName}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -135,32 +145,69 @@ export function AuctionDetailsPage() {
               Farm address: <span className="font-medium">{productAuction.product.facilityDetails.address}</span>
             </p>
             <p>
-              Owner name: <span className="font-medium">{productAuction.product.facilityDetails.user?.name}</span>
+              Owner name: <span className="font-medium">{productAuction.product.facilityDetails.user?.fullName}</span>
             </p>
           </div>
-          <div className="flex w-60 flex-col items-center bg-gray-50 px-2 py-4">
+          <div className="flex h-fit w-60 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
             <p>Don&apos;t waste time!</p>
             <div className="pb-4 pt-2">
-              <p className="text-center">Ends in:</p>
-              <Timer className="pt-3" toDate={productAuction.endDate} />
+              {(productAuction.auctionStatus === ProductAuctionStatus.Active ||
+                productAuction.auctionStatus === ProductAuctionStatus.EndSoon) && (
+                <>
+                  <p className="text-center">Ends in:</p>
+                  <Timer toDate={productAuction.endDate} />
+                </>
+              )}
+              {productAuction.auctionStatus === ProductAuctionStatus.StartSoon && (
+                <>
+                  <p className="text-center">Starts in:</p>
+                  <Timer toDate={productAuction.startDate} className="text-blue-600" />
+                </>
+              )}
               <div className="pt-2">
-                <Progress className="h-2 bg-gray-200" value={33} />
+                {([ProductAuctionStatus.Active, ProductAuctionStatus.EndSoon] as ProductAuctionStatusValues[]).includes(
+                  productAuction.auctionStatus
+                ) && (
+                  <TimeProgress
+                    startDate={new Date(productAuction.startDate)}
+                    endDate={new Date(productAuction.endDate)}
+                  />
+                )}
+
                 <p className="pt-1">from: {format(parseISO(productAuction.startDate), 'dd.MM.yyyy hh:mm')}</p>
               </div>
             </div>
-            <div>
-              <p>Current price:</p>
-              <h2 className="mb-6 text-center text-3xl font-bold">
-                {productAuction.currentMaxBid ? `${productAuction.currentMaxBid?.price} USD` : 'No bets'}
-              </h2>
+            <div className="">
+              <p className="text-center">Current price:</p>
+              <div className="mb-6 flex flex-col items-center gap-2">
+                <h2 className=" text-center text-3xl font-bold">
+                  {productAuction.currentMaxBid ? `${productAuction.currentMaxBid?.price} USD` : 'No bets'}
+                </h2>
+                {productAuction.currentMaxBid?.userId === user?.id && (
+                  <p className="flex gap-2">
+                    (YOU) <Crown className="text-yellow-400" />
+                  </p>
+                )}
+              </div>
             </div>
             <div className="flex w-3/4 flex-col gap-y-3">
               {user?.role === UserRole.Businessman && (
                 <>
-                  <Button onClick={() => {}} className="w-full border border-primary text-primary" variant="outline">
-                    Place a bet (add number input)
+                  <SetBidForm
+                    isDisabled={
+                      !(
+                        [ProductAuctionStatus.Active, ProductAuctionStatus.EndSoon] as ProductAuctionStatusValues[]
+                      ).includes(productAuction.auctionStatus)
+                    }
+                    auctionId={auctionId}
+                    currentMaxBid={productAuction.currentMaxBid?.price}
+                    startPrice={productAuction.startPrice}
+                    bidStep={productAuction.bidStep}
+                  />
+
+                  <Button type="button" disabled={isBidButtonsDisabled} className="w-full">
+                    Buy now for {productAuction.buyoutPrice}$
                   </Button>
-                  <Button className="w-full">Buy now for {productAuction.buyoutPrice} USD</Button>
                 </>
               )}
               {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
@@ -168,11 +215,7 @@ export function AuctionDetailsPage() {
                   <Button
                     type="button"
                     className="w-full"
-                    disabled={
-                      !(
-                        [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
-                      ).includes(productAuction.auctionStatus)
-                    }
+                    disabled={isBidButtonsDisabled}
                     onClick={() =>
                       navigate(generatePath(AppRoute.Farmer.UpdateAuction, { auctionId: productAuction.id }))
                     }

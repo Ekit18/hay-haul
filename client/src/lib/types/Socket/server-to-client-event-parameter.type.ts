@@ -19,6 +19,7 @@ type ServerToClientEventParameter = {
     auctionId: ProductAuction['id'];
     currentMaxBid: ProductAuctionBid['price'];
     currentMaxBidId: ProductAuction['currentMaxBidId'];
+    auctionStatus?: ProductAuction['auctionStatus'];
   }) => void;
   [ServerToClientEventName.BaseEvent]: (payload: unknown) => void;
   [ServerToClientEventName.Notification]: (payload: NotificationMessage) => void;

@@ -13,6 +13,8 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
+import { EntityTitle } from '@/lib/enums/entity-title.enum';
+import { UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { EntityTitleValues } from '@/lib/types/types';
@@ -78,17 +80,20 @@ export function CreateFacilityModal({ entityTitle }: CreateFacilityModalProps) {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex w-full flex-col items-center justify-center gap-10">
               <div className="flex w-full flex-col gap-4 py-4">
-                <div className="w-full items-center ">
-                  <TagInput
-                    name="farmProductTypes"
-                    control={form.control}
-                    suggestions={farmProductTypesSuggestions}
-                    labelText="Select farm products"
-                    noOptionsText="No matching products"
-                    allowNew
-                    selectedFn={(item) => ({ value: item, label: item })}
-                  />
-                </div>
+                {entityTitle === EntityTitle.Farm && user.role === UserRole.Farmer && (
+                  <div className="w-full items-center ">
+                    <TagInput
+                      name="farmProductTypes"
+                      control={form.control}
+                      suggestions={farmProductTypesSuggestions}
+                      labelText="Select farm products"
+                      noOptionsText="No matching products"
+                      allowNew
+                      selectedFn={(item) => ({ value: item, label: item })}
+                    />
+                  </div>
+                )}
+
                 <div className="w-full items-center ">
                   <FormField
                     control={form.control}

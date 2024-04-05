@@ -59,7 +59,7 @@ export class TokenService {
         email: user.email,
         id: user.id,
         isVerified: user.isVerified,
-        name: user.fullName,
+        fullName: user.fullName,
         role: user.role,
       };
 

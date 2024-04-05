@@ -1,12 +1,13 @@
 import React from 'react';
 import { AppRoute } from './lib/constants/routes';
+import { AllAuction } from './pages/AllAuctions';
 import { AuctionDetailsPage } from './pages/AuctionDetailsPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { Depots } from './pages/businessman-pages/Depots';
 import { MainPage as BusinessmanMainPage } from './pages/businessman-pages/MainPage';
-import { Warehouses } from './pages/businessman-pages/Warehouses';
-import { AllAuction } from './pages/farmer-pages/Auctions';
+import { MyBids } from './pages/businessman-pages/MyBids';
 import { CreateAuction } from './pages/farmer-pages/CreateAuction';
 import { Farms } from './pages/farmer-pages/Farms';
 import { MainPage as FarmerMainPage } from './pages/farmer-pages/MainPage';
@@ -37,7 +38,11 @@ export const businessRoutes: Route[] = [
   },
   {
     path: AppRoute.Businessman.Depots,
-    Component: Warehouses
+    Component: Depots
+  },
+  {
+    path: AppRoute.Businessman.Bids,
+    Component: MyBids
   }
 ];
 

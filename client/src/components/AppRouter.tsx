@@ -9,6 +9,7 @@ import { SidebarLayout } from './layouts/SidebarLayout';
 
 export function AppRouter() {
   const user = useAppSelector((state) => state.user.user);
+
   return (
     <Routes>
       {!user && authRoutes.map(({ path, Component }) => <Route key={path} path={path} element={<Component />} />)}
@@ -30,9 +31,11 @@ export function AppRouter() {
               <Route key={path + UserRole.Businessman} path={path} element={<Component />} />
             ))}
           </Route>
-          {generalRoutes.map(({ path, Component }) => (
-            <Route key={path} path={path} element={<Component />} />
-          ))}
+          <Route element={<AuthLayout allowedRoles={Object.values(UserRole)} />}>
+            {generalRoutes.map(({ path, Component }) => (
+              <Route key={path} path={path} element={<Component />} />
+            ))}
+          </Route>
           <Route path="*" element={<Navigate to={AppRoute.General.Main} replace />} />
         </Route>
       )}

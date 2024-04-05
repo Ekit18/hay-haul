@@ -40,7 +40,6 @@ class SocketService {
       }
 
       if (true) {
-        console.log('first');
         // store.dispatch(api.endpoints.auth.refresh().initiate({}));
       }
       this.io = io(this.baseUrl, {

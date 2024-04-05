@@ -14,11 +14,11 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import OtpInput from 'react-otp-input';
 import { OtpFormValues, otpDefaultValues, useOtpFormSchema } from './validation';
 
-type Properties = {
+interface OtpFormProps {
   onSetIsSuccess: React.Dispatch<React.SetStateAction<boolean>>;
-};
+}
 
-export function OtpForm({ onSetIsSuccess }: Properties) {
+export function OtpForm({ onSetIsSuccess }: OtpFormProps) {
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((state) => state.user.user as User);

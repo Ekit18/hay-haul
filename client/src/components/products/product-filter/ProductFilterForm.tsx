@@ -35,7 +35,7 @@ export function ProductFilterForm() {
       productTypesByFarmId.find((product) => product.id === productTypeId[0])
     )
       return;
-    console.log('a');
+
     setValue('productTypeId', []);
   }, [farmId]);
 

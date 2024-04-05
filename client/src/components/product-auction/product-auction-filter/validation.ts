@@ -1,4 +1,5 @@
 import { ComparisonOperator } from '@/lib/enums/comparison-operator.enum';
+import { SortOrder } from '@/lib/enums/sort-order.enum';
 import { compareValues } from '@/lib/helpers/compareValues';
 import { ProductAuctionStatus, ProductAuctionStatusValues } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { DateRange, NumberRange, SortOrderValues } from '@/lib/types/types';
@@ -11,6 +12,7 @@ export const productAuctionSortKeyToLabelMap: Record<ProductAuctionSortKeys, str
   [productAuctionSortKeys[1]]: 'End date',
   [productAuctionSortKeys[2]]: 'Start date'
 };
+
 export type ProductAuctionFilterFormValues = {
   limit?: number;
   offset?: number;
@@ -42,7 +44,7 @@ export const productAuctionFilterFormDefaultValues: ProductAuctionFilterFormValu
   endDateSort: undefined,
   startDateSort: undefined,
   innerSortKey: undefined,
-  innerSortOrder: undefined
+  innerSortOrder: SortOrder.ASC
 };
 
 export const dateRangeRequiredObjectSchema = {
@@ -110,7 +112,7 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
         if (numberRange.from === undefined && numberRange?.to === undefined) {
           return true;
         }
-        console.log('here');
+
         if (compareValues(numberRange.from, 0, ComparisonOperator.LESS_THAN_OR_EQUAL)) {
           return context.createError({ message: 'Min start price must be greater than 0' });
         }

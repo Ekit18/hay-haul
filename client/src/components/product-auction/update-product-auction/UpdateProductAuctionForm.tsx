@@ -36,7 +36,9 @@ export function UpdateProductAuctionForm() {
   const [loading, setLoading] = useState(true);
 
   const user = useAppSelector((state) => state.user.user);
-  const [getProductAuction, { data: auction }] = productAuctionApi.useLazyGetProductAuctionQuery();
+  const [getProductAuction, { data: auctionWithCount }] = productAuctionApi.useLazyGetProductAuctionQuery();
+
+  const auction = auctionWithCount?.data[0];
 
   const productAuctionFormSchema = useProductAuctionUpdateFormSchema();
 
@@ -57,14 +59,15 @@ export function UpdateProductAuctionForm() {
   useEffect(() => {
     getProductAuction(id)
       .unwrap()
-      .then((auction) => {
+      .then(({ data }) => {
+        const auction = data[0];
+
         Promise.all(
           auction.photos.map((photo) =>
             convertSrcToFile({ fileName: photo.name, mimeType: photo.contentType, url: photo.signedUrl, id: photo.id })
           )
         )
           .then((photos) => {
-            console.log(photos);
             setAuctionInitialValues({
               startPrice: auction.startPrice,
               buyoutPrice: auction.buyoutPrice,

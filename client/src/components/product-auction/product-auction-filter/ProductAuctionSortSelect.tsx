@@ -2,40 +2,39 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SortOrder } from '@/lib/enums/sort-order.enum';
-import { SortOrderValues } from '@/lib/types/types';
 import { MoveDown, MoveUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ProductAuctionFilterFormValues, productAuctionSortKeyToLabelMap, productAuctionSortKeys } from './validation';
 
 const sortOrderToUI = {
-  [SortOrder.DESC.toLowerCase()]: <MoveDown className="mx-1 h-4 w-4" />,
-  [SortOrder.ASC.toLowerCase()]: <MoveUp className="mx-1 h-4 w-4" />
+  [SortOrder.DESC]: <MoveDown className="mx-1 h-4 w-4" />,
+  [SortOrder.ASC]: <MoveUp className="mx-1 h-4 w-4" />
 } as const;
 
 export type ProductAuctionSortSelectInputProps = {};
 export function ProductAuctionSortSelect({}) {
-  const { setValue } = useFormContext<ProductAuctionFilterFormValues>();
+  const { setValue, watch } = useFormContext<ProductAuctionFilterFormValues>();
 
-  const [sortKey, setSortKey] = useState<ProductAuctionFilterFormValues['innerSortKey']>();
+  const sortKey = watch('innerSortKey');
+
   const onSortKeyChange = (value: string) => {
-    setSortKey(value as ProductAuctionFilterFormValues['innerSortKey']);
-  };
-  useEffect(() => {
-    setValue('innerSortKey', sortKey, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
-  }, [sortKey]);
-
-  const [sortOrder, setSortOrder] = useState<SortOrderValues>(SortOrder.ASC);
-  const onSortOrderToggle = () => {
-    setSortOrder((prev) => (prev === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC));
-  };
-  useEffect(() => {
-    setValue('innerSortOrder', sortOrder, {
+    setValue('innerSortKey', value as ProductAuctionFilterFormValues['innerSortKey'], {
       shouldDirty: true,
       shouldTouch: true,
       shouldValidate: true
     });
-  }, [sortOrder]);
+  };
+
+  const sortOrder = watch('innerSortOrder');
+
+  const onSortOrderToggle = () => {
+    setValue('innerSortOrder', sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4 md:flex-row lg:ml-4 ">
       <div className="w-full">
@@ -54,7 +53,7 @@ export function ProductAuctionSortSelect({}) {
                   variant="outline"
                   onClick={onSortOrderToggle}
                 >
-                  {sortOrderToUI[sortOrder.toLowerCase()]}
+                  {sortOrderToUI[sortOrder || SortOrder.ASC]}
                 </Button>
               </div>
             </FormControl>

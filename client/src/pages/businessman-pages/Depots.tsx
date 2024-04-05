@@ -11,7 +11,7 @@ import { FacilityDetails } from '@/lib/types/FacilityDetails/FacilityDetails.typ
 import { facilityDetailsApi } from '@/store/reducers/facility-details/facilityDetailsApi';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-export function Warehouses() {
+export function Depots() {
   const user = useAppSelector((state) => state.user.user);
 
   if (!user) return null;
@@ -85,10 +85,10 @@ export function Warehouses() {
     <>
       <div className="mt-6">
         <div className="bg-white p-4">
-          <h2 className="mb-9 text-3xl font-bold">Warehouse</h2>
+          <h2 className="mb-9 text-3xl font-bold">Depots</h2>
         </div>
         <div className="px-4">
-          <CreateFacilityModal entityTitle={EntityTitle.Warehouse} />
+          <CreateFacilityModal entityTitle={EntityTitle.Depots} />
         </div>
         <div className="grid w-full grid-cols-1 gap-4 px-4 pt-5 sm:grid-cols-2 lg:grid-cols-3">
           {data?.map((facility) => (
@@ -105,7 +105,7 @@ export function Warehouses() {
       {currentFacility && (
         <>
           <UpdateFacilityModal
-            entityTitle={EntityTitle.Warehouse}
+            entityTitle={EntityTitle.Depots}
             facility={currentFacility}
             handleOpenChange={handleUpdateModalOpenChange}
             open={isUpdateModalOpen}
@@ -115,7 +115,7 @@ export function Warehouses() {
             handleOpenChange={handleDeleteModalOpenChange}
             open={isDeleteModalOpen}
             name={deleteModalConfirmName}
-            entityTitle={EntityTitle.Warehouse}
+            entityTitle={EntityTitle.Depots}
             deleteCallback={deleteCallback}
           />
         </>

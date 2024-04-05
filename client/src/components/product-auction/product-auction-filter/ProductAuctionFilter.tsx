@@ -10,7 +10,6 @@ import { useFormContext } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { SearchInput } from '../../ui/search-input';
 import { ProductAuctionFilterForm } from './ProductAuctionFilterForm';
-import './styles.module.css';
 import { ProductAuctionFilterFormValues } from './validation';
 
 export function ProductAuctionFilter() {
@@ -64,7 +63,7 @@ export function ProductAuctionFilter() {
             Clear filter
           </Button>
         </div>
-        {user?.role === UserRole.Farmer && (
+        {user?.role === UserRole.Farmer ? (
           <Button
             className="flex gap-1 sm:ml-auto sm:w-60 md:w-auto"
             type="button"
@@ -72,6 +71,8 @@ export function ProductAuctionFilter() {
           >
             <Plus size={20} /> Create Auction
           </Button>
+        ) : (
+          <div className="sm:ml-auto"></div>
         )}
       </div>
       <div className="">{filterOpen && <ProductAuctionFilterForm />}</div>

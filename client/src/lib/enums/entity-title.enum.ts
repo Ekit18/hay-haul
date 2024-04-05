@@ -1,6 +1,6 @@
 export const EntityTitle = {
   Product: 'Product',
-  Warehouse: 'Warehouse',
+  Depots: 'Depots',
   ProductAuction: 'Product auction',
   Farm: 'Farm'
 } as const;

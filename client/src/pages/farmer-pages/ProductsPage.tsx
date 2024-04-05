@@ -57,14 +57,12 @@ export function ProductsPage() {
     const debouncedFunction = debounce(getFunction, DEBOUNCE_DELAY);
 
     if (firstRender.current) {
-      console.log(2);
       getFunction();
       firstRender.current = false;
       return;
     }
 
     const watchSubscription = form.watch(() => {
-      console.log(1);
       debouncedFunction();
     });
 

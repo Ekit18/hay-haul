@@ -7,7 +7,6 @@ import { ProductAuctionSortSelect } from './ProductAuctionSortSelect';
 import { ProductAuctionFilterFormValues } from './validation';
 
 const STATUSES = Object.entries(ProductAuctionStatus);
-// console.log(STATUSES);
 
 export function ProductAuctionFilterForm() {
   const { control } = useFormContext<ProductAuctionFilterFormValues>();
@@ -39,9 +38,9 @@ export function ProductAuctionFilterForm() {
           control={control}
           noOptionsText="No matching auctions"
           name="statuses"
-          suggestions={STATUSES.map(([k, v]) => ({
-            label: v,
-            value: k
+          suggestions={STATUSES.map(([key, value]) => ({
+            label: value,
+            value: key
           }))}
           selectedFn={(item: string) => ({
             label: (ProductAuctionStatus as ProductAuctionStatusDict)[item],
