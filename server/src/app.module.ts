@@ -25,6 +25,8 @@ import { S3ClientModule } from './s3-client/s3-client.module';
 import { S3File } from './s3-file/s3-file.entity';
 import { S3FileModule } from './s3-file/s3-file.module';
 import { SocketModule } from './socket/socket.module';
+import { StripeEntry } from './stripe/stripe.entity';
+import { StripeModule } from './stripe/stripe.module';
 import { Token } from './token/token.entity';
 import { TokenModule } from './token/token.module';
 import { TriggerService } from './trigger/trigger.service';
@@ -73,6 +75,7 @@ import { UserModule } from './user/user.module';
           ProductAuction,
           Notification,
           S3File,
+          StripeEntry,
         ],
         // logger: 'simple-console',
         // logging: true,
@@ -99,6 +102,7 @@ import { UserModule } from './user/user.module';
     SocketModule,
     ProductsAuctionGatewayModule,
     S3FileModule,
+    StripeModule,
   ],
   providers: [TriggerService, FunctionService],
 })

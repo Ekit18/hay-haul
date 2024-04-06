@@ -1,4 +1,4 @@
-import { ImageCarousel } from '@/components/carousel/FileInputCarousel';
+import { ImageCarousel } from '@/components/carousel/ImageCarousel';
 import { Button } from '@/components/ui/button';
 import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
 import { DropdownCalendar } from '@/components/ui/dropdown-calendar';

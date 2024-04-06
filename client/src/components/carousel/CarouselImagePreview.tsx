@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
 import { Card, CardContent } from '../ui/card';
-import { PreviewObject } from './FileInputCarousel';
+import { PreviewObject } from './ImageCarousel';
 
 export type CarouselImagePreviewProps = {
   index: number;

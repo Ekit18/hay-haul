@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { NotificationService } from './notification.service';
 import {
   NotificationsListResponse,
@@ -17,8 +18,9 @@ export class NotificationController {
   @Get('/:userId')
   getNotificationsHistory(
     @Param('userId') userId: string,
+    @Req() req: AuthenticatedRequest,
   ): Promise<NotificationsListResponse> {
-    return this.notificationService.getNotifications(userId);
+    return this.notificationService.getNotifications(userId, req);
   }
 
   @Get('/unread/:userId')

@@ -213,14 +213,16 @@ export const columns: ColumnDef<Product>[] = [
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <p
-          className={cn(
-            'w-max whitespace-nowrap rounded-lg p-2 text-sm',
-            productAuctionStatus[product.productAuction.auctionStatus]
-          )}
-        >
-          {ProductAuctionStatusText[product.productAuction.auctionStatus]}
-        </p>
+        <div className="flex w-full justify-center">
+          <p
+            className={cn(
+              'w-max whitespace-nowrap rounded-lg p-2 text-sm',
+              productAuctionStatus[product.productAuction.auctionStatus]
+            )}
+          >
+            {ProductAuctionStatusText[product.productAuction.auctionStatus]}
+          </p>
+        </div>
       );
     }
   }

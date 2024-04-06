@@ -1,4 +1,4 @@
-import { ImageCarousel } from '@/components/carousel/FileInputCarousel';
+import { ImageCarousel } from '@/components/carousel/ImageCarousel';
 import { Button } from '@/components/ui/button';
 import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
 import { DropdownCalendar } from '@/components/ui/dropdown-calendar';
@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { addDays, format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -138,7 +138,12 @@ export function UpdateProductAuctionForm() {
     form.setValue('paymentPeriod', addDays(paymentPeriod, days));
   };
 
-  if (loading) return null;
+  if (loading)
+    return (
+      <div className="flex justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    );
   if (!auction) return <Navigate to={AppRoute.General.MyAuctions} replace />;
   if (user?.id !== auction.product.facilityDetails.user?.id) {
     toast({

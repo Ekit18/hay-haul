@@ -41,8 +41,9 @@ export class AuthController {
   async login(
     @Body() userDto: Login,
     @Res({ passthrough: true }) response: Response,
+    @Req() request: Request,
   ) {
-    const data = await this.authService.login(userDto, response);
+    const data = await this.authService.login(userDto, response, request);
     response.json(data);
   }
 
@@ -61,8 +62,13 @@ export class AuthController {
   async registration(
     @Body() userDto: RegisterUserDto,
     @Res({ passthrough: true }) response: Response,
+    @Req() request: Request,
   ) {
-    const data = await this.authService.registration(userDto, response);
+    const data = await this.authService.registration(
+      userDto,
+      response,
+      request,
+    );
     response.json(data);
   }
 

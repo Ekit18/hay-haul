@@ -7,6 +7,14 @@ export interface TokenResponse {
   accessToken: string;
 }
 
+export type LoginResponseDto = TokenResponse & {
+  stripeAccountLinkUrl: string;
+};
+
+export type RegistrationResponseDto = TokenResponse & {
+  stripeAccountLinkUrl: string;
+};
+
 export interface CheckUserEmailResponse {
   userExist: boolean;
 }
@@ -39,14 +47,14 @@ export type ResetPasswordDto = Pick<User, 'email'> & {
 
 export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<TokenResponse, SignRequest>({
+    login: builder.mutation<LoginResponseDto, SignRequest>({
       query: (body) => ({
         body,
         url: '/auth/login',
         method: 'POST'
       })
     }),
-    registration: builder.mutation<TokenResponse, SignRequest>({
+    registration: builder.mutation<RegistrationResponseDto, SignRequest>({
       query: (body) => ({
         body,
         url: '/auth/registration',

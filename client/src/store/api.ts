@@ -66,7 +66,8 @@ export const baseQueryWithReAuth: BaseQueryFn<
 export const TagType = {
   Product: 'Product',
   Facility: 'Facility',
-  ProductAuction: 'ProductAuction'
+  ProductAuction: 'ProductAuction',
+  Notification: 'Notification'
 } as const;
 
 export const api = createApi({

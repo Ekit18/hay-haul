@@ -87,7 +87,7 @@ export function Farms() {
     <>
       <div className="mt-6">
         <div className="bg-white p-4">
-          <h2 className="mb-9 text-3xl font-bold">Farm</h2>
+          <h2 className="mb-9 text-3xl font-bold">Farms</h2>
         </div>
         <div className="px-4">
           <CreateFacilityModal entityTitle={EntityTitle.Farm} />

@@ -7,6 +7,7 @@ import { productBidApi } from '@/store/reducers/product-auction-bid/productAucti
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Loader2 } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { addBidStepsRatios } from '../create-product-auction/constants';
 import { SetBidFormValues, useSetBidFormSchema } from './validation';
 
 interface SetBidFormProps {
@@ -46,6 +47,12 @@ export function SetBidForm({ auctionId, currentMaxBid, bidStep, startPrice, isDi
       })
       .catch(handleRtkError);
   };
+  const price = form.watch('price');
+
+  const handleAddPrice = (value: number) => {
+    console.log(price);
+    form.setValue('price', price + bidStep * value);
+  };
 
   return (
     <>
@@ -55,6 +62,19 @@ export function SetBidForm({ auctionId, currentMaxBid, bidStep, startPrice, isDi
           name="price"
           render={({ field }) => (
             <FormItem className="w-full">
+              <div className="flex w-full flex-row justify-center gap-1">
+                {addBidStepsRatios.map((ratio) => (
+                  <Button
+                    onClick={() => handleAddPrice(ratio.value)}
+                    disabled={isDisabled}
+                    type="button"
+                    className="h-5 w-16 text-xs"
+                    key={ratio.label}
+                  >
+                    +{ratio.label}
+                  </Button>
+                ))}
+              </div>
               <FormControl>
                 <Input
                   placeholder="Enter start price"

@@ -3,7 +3,7 @@ import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 import { Card, CardContent } from '../ui/card';
 import { CarouselItem } from '../ui/carousel';
-import { PreviewObject } from './FileInputCarousel';
+import { PreviewObject } from './ImageCarousel';
 
 interface CarouselImageItemProps {
   photo: PreviewObject;
@@ -13,7 +13,7 @@ interface CarouselImageItemProps {
 export function CarouselImageItem({ photo, children }: CarouselImageItemProps) {
   return (
     <CarouselItem key={photo.preview}>
-      <Card>
+      <Card className="h-full">
         <CardContent className="relative mb-4 flex aspect-square items-center justify-center p-6">
           <PhotoProvider
             speed={() => 150}

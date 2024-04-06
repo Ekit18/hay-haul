@@ -11,4 +11,5 @@ export enum AuthErrorMessage {
   OtpNotFound = 'OTP not found',
   UserAlreadyVerified = 'User already verified',
   SomethingWentWrong = 'Something went wrong',
+  UserNotFoundInToken = 'User not found in token',
 }

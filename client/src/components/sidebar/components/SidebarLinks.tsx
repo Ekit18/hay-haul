@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
+import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { useNavigate } from 'react-router-dom';
 import { links } from '../utils/links';
+import { NotificationLink } from './NotificationLink';
 
 export function SidebarLinks() {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ export function SidebarLinks() {
           {link.title}
         </Button>
       ))}
+      {[UserRole.Farmer, UserRole.Businessman].includes(userRole) && <NotificationLink />}
     </div>
   );
 }

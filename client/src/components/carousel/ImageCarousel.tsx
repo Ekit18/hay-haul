@@ -48,8 +48,10 @@ export function ImageCarousel({ items, hasAddButton }: FileInputCarouselProps) {
             {items?.map((item) => <CarouselItem key={item.preview} photo={item} />)}
             {hasAddButton && items.length < 5 && <DragAndDropCarouselItem />}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <div className="hidden sm:block">
+            <CarouselPrevious />
+            <CarouselNext />
+          </div>
         </Carousel>
       </div>
       <div className="mt-4 flex justify-center gap-4">

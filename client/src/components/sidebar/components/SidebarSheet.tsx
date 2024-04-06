@@ -1,11 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTrigger } from '@/components/ui/sheet';
+import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { links } from '../utils/links';
 import { LogOutButton } from './LogOutButton';
+import { NotificationLink } from './NotificationLink';
 import { SidebarUserInfo } from './SidebarUserInfo';
 
 export function SidebarSheet() {
@@ -39,6 +41,7 @@ export function SidebarSheet() {
               {link.title}
             </Button>
           ))}
+          {[UserRole.Farmer, UserRole.Businessman].includes(userRole) && <NotificationLink />}
           <LogOutButton className="mb-7" />
         </div>
       </SheetContent>

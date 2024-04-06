@@ -14,10 +14,12 @@ import { FacilityDetailsService } from 'src/facility-details/facility-details.se
 import { OtpType } from 'src/lib/enums/enums';
 import { TokenPayload } from 'src/lib/types/token-payload.type';
 import { ProductTypeService } from 'src/product-type/product-type.service';
+import { StripeErrorMessage } from 'src/stripe/stripe-error-message.enum';
+import { StripeService } from 'src/stripe/stripe.service';
 import { TokenTypeEnum } from 'src/token/token-type.enum';
 import { TokenService } from 'src/token/token.service';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
-import { User } from 'src/user/user.entity';
+import { User, UserRole } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { AuthErrorMessage } from './auth-error-message.enum';
@@ -25,7 +27,7 @@ import { CheckUserEmailDto } from './dto/check-user-email.dto';
 import { ConfirmResetPasswordDto } from './dto/confirm-reset-password.dto';
 import { Login } from './dto/login.dto';
 import { NewOtpDto } from './dto/new-otp.dto';
-import { RegistrationResponseDto } from './dto/registration-response.dto';
+import { TokenResponse } from './dto/token-response.dto';
 import { generateOtpCode } from './helpers/generate-otp-code.helper';
 import { getCookieExpireDate } from './helpers/get-cookie-expire-date';
 import { Otp } from './otp.entity';
@@ -45,6 +47,7 @@ export class AuthService {
   );
 
   constructor(
+    private readonly stripeService: StripeService,
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
     private readonly facilityDetailsService: FacilityDetailsService,
@@ -54,7 +57,11 @@ export class AuthService {
     @InjectRepository(Otp) private readonly otpRepository: Repository<Otp>,
   ) {}
 
-  async login(userDto: Login, response: Response) {
+  async login(
+    userDto: Login,
+    response: Response,
+    request: Request,
+  ): Promise<TokenResponse> {
     const user = await this.validateRegularUser(userDto);
 
     const { refreshToken, accessToken } =
@@ -65,6 +72,21 @@ export class AuthService {
       sameSite: 'none',
       expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
     });
+
+    if ([UserRole.Farmer, UserRole.Carrier].includes(user.role)) {
+      let stripeEntry = await this.stripeService.findOneByUserId(user.id);
+      if (!stripeEntry) {
+        throw new UnauthorizedException({
+          message: StripeErrorMessage.SellerStripeEntryNotFound,
+        });
+      }
+      if (
+        !stripeEntry.payoutsEnabled &&
+        stripeEntry.linkExpiresAt <= new Date()
+      ) {
+        await this.stripeService.recreateLinkByUserId(user.id, request);
+      }
+    }
 
     return { accessToken };
   }
@@ -104,14 +126,14 @@ export class AuthService {
       sameSite: 'none',
       expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
     });
-
     return { accessToken };
   }
 
   async registration(
     registerUserDto: RegisterUserDto,
     response: Response,
-  ): Promise<RegistrationResponseDto> {
+    request: Request,
+  ): Promise<TokenResponse> {
     const candidate = await this.userService.getUserByEmail(
       registerUserDto.email,
     );
@@ -162,6 +184,30 @@ export class AuthService {
       isVerified: false,
       type: OtpType.REGISTER,
     });
+
+    if ([UserRole.Farmer, UserRole.Carrier].includes(user.role)) {
+      const stripeAccount = await this.stripeService.createAccount({
+        params: { type: 'standard', email: user.email },
+      });
+
+      const stripeAccountLink = await this.stripeService.linkAccount({
+        params: {
+          account: stripeAccount.id,
+          return_url: `${request.headers.origin}/return/${stripeAccount.id}`,
+          refresh_url: `${request.headers.origin}/refresh/${stripeAccount.id}`,
+          type: 'account_onboarding',
+        },
+      });
+
+      await this.stripeService.createEntry({
+        userId: user.id,
+        accountId: stripeAccount.id,
+        linkExpiresAt: new Date(stripeAccountLink.expires_at * 1000),
+        linkUrl: stripeAccountLink.url,
+      });
+
+      return { accessToken };
+    }
 
     // await this.emailService.sendEmail({
     //   to: user.email,

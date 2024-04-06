@@ -94,6 +94,13 @@ export class ProductAuctionService {
         .where('productAuction.id = :id', { id })
         .getOne();
 
+      if (!productAuction) {
+        throw new HttpException(
+          ProductAuctionErrorMessage.AuctionNotFound,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
       for await (const photo of productAuction.photos) {
         photo.signedUrl = await this.s3FileService.getUrlByKey(photo.key);
       }

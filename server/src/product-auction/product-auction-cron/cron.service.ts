@@ -41,7 +41,6 @@ export class ProductAuctionCronService {
 
       const auctionsToUpdate = await this.productAuctionRepository
         .createQueryBuilder('productAuction')
-        .select()
         .where('productAuction.auctionStatus IN (:...statuses)', {
           statuses: [
             ProductAuctionStatus.Inactive,
@@ -95,7 +94,6 @@ export class ProductAuctionCronService {
               }
             }
             break;
-          // TODO: add waiting payment
           case ProductAuctionStatus.WaitingPayment:
             if (isPast(auction.paymentPeriod)) {
               auction.auctionStatus = ProductAuctionStatus.Unpaid;

@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
 import { TokenPayload } from 'src/lib/types/token-payload.type';
-import { User } from 'src/user/user.entity';
+import { User, UserRole } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { TokenErrorMessage } from './token-error-message.enum';
 import { TokenTypeEnum } from './token-type.enum';
@@ -61,6 +61,10 @@ export class TokenService {
         isVerified: user.isVerified,
         fullName: user.fullName,
         role: user.role,
+        ...([UserRole.Farmer, UserRole.Carrier].includes(user.role) &&
+        user?.stripeEntry
+          ? { payoutsEnabled: user.stripeEntry.payoutsEnabled }
+          : {}),
       };
 
       const accessToken = this.jwtService.sign(payload, {

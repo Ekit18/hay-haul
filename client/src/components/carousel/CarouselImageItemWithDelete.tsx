@@ -3,7 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { FileObject } from '../drag-and-drop/file-object.type';
 import { Button } from '../ui/button';
 import { CarouselImageItem } from './CarouselImageItem';
-import { PreviewObject } from './FileInputCarousel';
+import { PreviewObject } from './ImageCarousel';
 
 interface CarouselImageInputItemProps {
   photo: PreviewObject;

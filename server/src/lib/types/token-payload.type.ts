@@ -6,4 +6,5 @@ export type TokenPayload = {
   isVerified: boolean;
   fullName: string;
   role: UserRole;
+  payoutsEnabled?: boolean;
 };

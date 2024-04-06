@@ -33,7 +33,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
         variant="link"
         type="button"
         onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
-        className="h-40 w-full min-w-[300px] min-[1068px]:h-full min-[1068px]:w-4/12 xl:w-3/12"
+        className="h-40 w-full min-w-[300px] p-0 min-[1068px]:h-full min-[1068px]:w-4/12 xl:w-3/12"
       >
         <img
           className="h-full w-full rounded-t-lg  object-cover min-[1068px]:h-full min-[1068px]:rounded-l-lg min-[1068px]:rounded-tr-none"

@@ -18,10 +18,14 @@ export const AppRoute = {
     SignIn: '/sign-in',
     SignUp: '/sign-up',
     OtpConfirm: '/otp-confirm',
+    StripeRegister: '/stripe/register',
+    StripeRefresh: '/stripe/refresh',
+    StripeReturn: '/stripe/return',
     ResetPassword: '/reset-password',
     Auctions: '/auctions',
     AuctionDetails: '/auction-details/:auctionId',
-    MyAuctions: '/my-auctions'
+    MyAuctions: '/my-auctions',
+    Notifications: '/notifications'
   },
   Farmer: {
     Products: '/products',

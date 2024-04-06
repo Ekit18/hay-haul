@@ -2,9 +2,13 @@ import React from 'react';
 import { AppRoute } from './lib/constants/routes';
 import { AllAuction } from './pages/AllAuctions';
 import { AuctionDetailsPage } from './pages/AuctionDetailsPage';
+import { Notifications } from './pages/Notifications';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { StripeRefreshPage } from './pages/StripeRefreshPage';
+import { StripeRegisterPage } from './pages/StripeRegisterPage';
+import { StripeReturnPage } from './pages/StripeReturnPage';
 import { Depots } from './pages/businessman-pages/Depots';
 import { MainPage as BusinessmanMainPage } from './pages/businessman-pages/MainPage';
 import { MyBids } from './pages/businessman-pages/MyBids';
@@ -28,6 +32,22 @@ export const generalRoutes: Route[] = [
   {
     path: AppRoute.General.AuctionDetails,
     Component: AuctionDetailsPage
+  },
+  {
+    path: AppRoute.General.Notifications,
+    Component: Notifications
+  },
+  {
+    path: AppRoute.General.StripeRefresh,
+    Component: StripeRefreshPage
+  },
+  {
+    path: AppRoute.General.StripeRegister,
+    Component: StripeRegisterPage
+  },
+  {
+    path: AppRoute.General.StripeReturn,
+    Component: StripeReturnPage
   }
 ];
 

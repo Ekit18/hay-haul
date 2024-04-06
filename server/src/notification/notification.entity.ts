@@ -51,8 +51,4 @@ export class Notification {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'receiverId' })
   receiver: User;
-
-  // @ManyToOne(() => User)
-  // @JoinColumn({ name: 'senderId' })
-  // sender: User;
 }

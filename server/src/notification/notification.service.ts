@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ServerEventName } from 'src/lib/enums/enums';
+import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { SocketService } from 'src/socket/socket.service';
 import { EntityManager, Repository } from 'typeorm';
+import { NotificationErrorMessage } from './enums/notification-error-message.enum';
 import { NotificationMessage } from './enums/notification-message.enum';
 import { Notification } from './notification.entity';
 import {
@@ -18,22 +20,27 @@ export class NotificationService {
     private readonly socketService: SocketService,
   ) {}
 
-  async getNotifications(userId: string): Promise<NotificationsListResponse> {
-    const notifications = await this.notificationRepository
+  async getNotifications(
+    userId: string,
+    req: AuthenticatedRequest,
+  ): Promise<NotificationsListResponse> {
+    const requestUserId = req.user.id;
+
+    if (requestUserId !== userId) {
+      throw new HttpException(
+        NotificationErrorMessage.Unauthorized,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const [data, count] = await this.notificationRepository
       .createQueryBuilder('notification')
-      .select([
-        'notification.id AS id',
-        'productAuction.id AS productAuction',
-        'notification.message AS status',
-        `CONCAT(sender.firstName, ' ', sender.lastName) AS user`,
-      ])
       .innerJoin('notification.receiver', 'receiver')
-      .innerJoin('notification.productAuction', 'productAuction')
       .where('receiver.id = :userId', { userId })
       .orderBy('notification.createdAt', 'DESC')
-      .getRawMany();
+      .getManyAndCount();
 
-    return { data: notifications, count: notifications.length };
+    return { data, count };
   }
 
   public async createNotification(

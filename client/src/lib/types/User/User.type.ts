@@ -6,6 +6,7 @@ export type User = {
   fullName: string;
   role: UserRole;
   isVerified: boolean;
+  payoutsEnabled?: boolean;
 };
 
 export type UserToken = User & {

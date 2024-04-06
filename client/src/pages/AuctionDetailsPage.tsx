@@ -1,4 +1,4 @@
-import { ImageCarousel } from '@/components/carousel/FileInputCarousel';
+import { ImageCarousel } from '@/components/carousel/ImageCarousel';
 import { DeleteModal } from '@/components/delete-modal/delete-modal';
 import { productAuctionStatus } from '@/components/product-auction/product-auction-card/ProductAuctionStatus.enum';
 import { SetBidForm } from '@/components/product-auction/set-bid-form/SetBidForm';
@@ -27,7 +27,7 @@ import {
 import { cn } from '@/lib/utils';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { format, parseISO } from 'date-fns';
-import { Crown } from 'lucide-react';
+import { Crown, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, generatePath, useNavigate, useParams } from 'react-router-dom';
 
@@ -37,7 +37,7 @@ export function AuctionDetailsPage() {
   const { auctionId } = useParams();
   const navigate = useNavigate();
 
-  const [getProductAuction, { data: productAuctionWithCount, isFetching, isError }] =
+  const [getProductAuction, { data: productAuctionWithCount, isFetching, isError, isLoading }] =
     productAuctionApi.useLazyGetProductAuctionQuery();
 
   const productAuction = productAuctionWithCount?.data[0];
@@ -48,11 +48,8 @@ export function AuctionDetailsPage() {
     }
     getProductAuction(auctionId);
   }, [auctionId]);
-  const [deleteProductAuction] = productAuctionApi.useDeleteProductAuctionMutation();
 
-  if (!auctionId || isError) {
-    return <Navigate to={generatePath(AppRoute.General.Main)} />;
-  }
+  const [deleteProductAuction] = productAuctionApi.useDeleteProductAuctionMutation();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const handleDeleteModalOpenChange = useCallback((open: boolean) => setIsDeleteModalOpen(open), []);
@@ -78,8 +75,15 @@ export function AuctionDetailsPage() {
       .catch(handleRtkError);
   };
 
-  if (isFetching || !productAuction) {
-    return <p>Loading...</p>;
+  if (!auctionId || isError) {
+    return <Navigate to={generatePath(AppRoute.General.Auctions)} />;
+  }
+  if (isFetching || isLoading || !productAuction) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    );
   }
 
   const isBidButtonsDisabled = !(
@@ -112,11 +116,11 @@ export function AuctionDetailsPage() {
       </div>
       <div className="pt-10">
         <h2 className="mb-9 text-3xl font-bold">Auction details ({auctionId})</h2>
-        <div className="grid h-full w-full flex-col gap-4 md:grid-cols-[1fr_2fr_1fr] md:flex-row">
+        <div className="flex h-full w-full flex-col items-center gap-4 xl:grid xl:grid-cols-[1fr_2fr_1fr] xl:flex-row">
           <div className="w-[500px]">
             <ImageCarousel items={productAuction.photos.map((photo) => ({ preview: photo.signedUrl }))} />
           </div>
-          <div className="justify-left flex w-full flex-col gap-4">
+          <div className=" xl:justify-left flex w-full flex-col items-center justify-center gap-4 xl:items-start">
             <p>
               Product type: <span className="font-medium">{productAuction.product.productType.name}</span>
             </p>
@@ -146,6 +150,9 @@ export function AuctionDetailsPage() {
             </p>
             <p>
               Owner name: <span className="font-medium">{productAuction.product.facilityDetails.user?.fullName}</span>
+            </p>
+            <p>
+              Bid step: <span className="font-medium">{productAuction.bidStep} USD</span>
             </p>
           </div>
           <div className="flex h-fit w-60 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
@@ -194,11 +201,7 @@ export function AuctionDetailsPage() {
               {user?.role === UserRole.Businessman && (
                 <>
                   <SetBidForm
-                    isDisabled={
-                      !(
-                        [ProductAuctionStatus.Active, ProductAuctionStatus.EndSoon] as ProductAuctionStatusValues[]
-                      ).includes(productAuction.auctionStatus)
-                    }
+                    isDisabled={isBidButtonsDisabled}
                     auctionId={auctionId}
                     currentMaxBid={productAuction.currentMaxBid?.price}
                     startPrice={productAuction.startPrice}
@@ -215,7 +218,11 @@ export function AuctionDetailsPage() {
                   <Button
                     type="button"
                     className="w-full"
-                    disabled={isBidButtonsDisabled}
+                    disabled={
+                      !(
+                        [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
+                      ).includes(productAuction.auctionStatus)
+                    }
                     onClick={() =>
                       navigate(generatePath(AppRoute.Farmer.UpdateAuction, { auctionId: productAuction.id }))
                     }
@@ -255,5 +262,3 @@ export function AuctionDetailsPage() {
     </div>
   );
 }
-
-// className="h-80 w-80 rounded-lg  object-cover min-[1068px]:h-full"

@@ -1,4 +1,4 @@
-export type RegistrationResponseDto = {
+export type LoginResponseDto = {
   accessToken: string;
   stripeAccountLinkUrl?: string;
 };
