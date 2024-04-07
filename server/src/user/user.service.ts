@@ -33,6 +33,7 @@ export class UserService {
         .createQueryBuilder('user')
         .where('user.id = :id', { id })
         .leftJoinAndSelect('user.token', 'token')
+        .leftJoinAndSelect('user.stripeEntry', 'stripeEntry')
         .getOne();
       return user;
     } catch (error) {

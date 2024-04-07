@@ -34,6 +34,7 @@ export class S3FileService {
           await this.s3ClientService.deleteObject(key);
           await this.cacheManager.del(key);
         }
+
         await transactionalEntityManager.getRepository(S3File).delete({
           key: In(keys),
         });
@@ -45,7 +46,9 @@ export class S3FileService {
     const file = await this.s3FileRepository.findOne({
       where: { id },
     });
+
     await this.s3ClientService.deleteObject(file.key);
+
     return await this.s3FileRepository.delete({
       id,
     });

@@ -49,15 +49,16 @@ export class NotificationService {
     message: NotificationMessage,
     transactionalEntityManager?: EntityManager,
   ): Promise<void> {
+    let notification;
     if (transactionalEntityManager) {
-      await transactionalEntityManager.save(Notification, {
+      notification = await transactionalEntityManager.save(Notification, {
         message,
         isRead: false,
         receiverId: userId,
         productAuctionId,
       });
     } else {
-      await this.notificationRepository.save({
+      notification = await this.notificationRepository.save({
         message,
         isRead: false,
         receiverId: userId,
@@ -66,7 +67,7 @@ export class NotificationService {
     }
     SocketService.SocketServer.to(userId).emit(
       ServerEventName.Notification,
-      message,
+      notification,
     );
   }
 
@@ -114,7 +115,16 @@ export class NotificationService {
       .update()
       .set({ isRead: true })
       .where('receiver.id = :userId', { userId })
-      .andWhere('!notification.isRead')
+      .andWhere('notification.isRead = 0')
+      .execute();
+  }
+
+  public async updateNotificationToRead(notificationId: string) {
+    return await this.notificationRepository
+      .createQueryBuilder('notification')
+      .update()
+      .set({ isRead: true })
+      .where('id = :notificationId', { notificationId })
       .execute();
   }
 }

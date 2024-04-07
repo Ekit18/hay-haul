@@ -37,6 +37,8 @@ function App() {
               const user = jwt_decode<UserToken>(accessToken);
 
               if (user) dispatch(setUser(user));
+              socket.removeAllListeners();
+              socket.connect(token);
             })
             .finally(() => {
               setIsLoading(false);
@@ -46,19 +48,14 @@ function App() {
         }
       } else {
         if (user) dispatch(setUser(user));
+        socket.removeAllListeners();
+        socket.connect(token);
         setIsLoading(false);
       }
     } catch (e) {
       console.log('error decoding token');
     }
   }, [dispatch, token]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      socket.removeAllListeners();
-      socket.connect(token);
-    }
-  }, [isLoading]);
 
   if (isLoading) {
     return <Loader2 className={cn('mr-2 hidden h-4 w-4 animate-spin')} />;

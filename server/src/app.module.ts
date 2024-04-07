@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { redisStore } from 'cache-manager-redis-store';
 import { AuthModule } from './auth/auth.module';
 import { Otp } from './auth/otp.entity';
+import { DeliveryOfferModule } from './delivery-offer/delivery-offer.module';
+import { DeliveryOrderModule } from './delivery-order/delivery-order.module';
 import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
 import { FacilityDetailsModule } from './facility-details/facility-details.module';
@@ -103,6 +105,8 @@ import { UserModule } from './user/user.module';
     ProductsAuctionGatewayModule,
     S3FileModule,
     StripeModule,
+    DeliveryOrderModule,
+    DeliveryOfferModule,
   ],
   providers: [TriggerService, FunctionService],
 })

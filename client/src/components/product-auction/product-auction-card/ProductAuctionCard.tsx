@@ -165,15 +165,18 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
               Learn more
             </Button>
           )}
-          {productAuction.currentMaxBid?.userId === user?.id && (
-            <Button
-              onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
-              type="button"
-              className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
-            >
-              Pay for the product
-            </Button>
-          )}
+          {productAuction.currentMaxBid?.userId === user?.id &&
+            productAuction.auctionStatus === ProductAuctionStatus.WaitingPayment && (
+              <Button
+                onClick={() =>
+                  navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
+                }
+                type="button"
+                className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+              >
+                Pay for the product
+              </Button>
+            )}
           {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
             <>
               <Button

@@ -13,6 +13,7 @@ import { ProductTypeServiceTest } from 'src/product-type/product-type.test';
 import { Product } from 'src/product/product.entity';
 import { ProductModule } from 'src/product/product.module';
 import { ProductServiceTest } from 'src/product/product.test';
+import { StripeEntry } from 'src/stripe/stripe.entity';
 import { UserModule } from 'src/user/user.module';
 
 const initNest = async (): Promise<INestApplication> => {
@@ -30,7 +31,11 @@ const initNest = async (): Promise<INestApplication> => {
             FacilityDetailsModule,
             UserModule,
             ProductTypeModule,
-            TypeOrmModule.forFeature([Product, FacilityDetails, ProductType]),
+            TypeOrmModule.forFeature([
+              Product,
+              FacilityDetails,
+              ProductType,
+            ]),
             ProductModule,
           ],
         ),

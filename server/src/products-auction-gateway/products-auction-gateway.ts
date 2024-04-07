@@ -58,7 +58,9 @@ export class ProductsAuctionGateway
     this.logger.log(
       `Client connected: ${client.id} (user id: ${client.user?.id})`,
     );
-    if (client.user.id) client.rooms.add(client.user.id);
+    if (client.user.id) {
+      client.join(client.user.id);
+    }
   }
 
   @SubscribeMessage(ClientToServerEventName.JOIN_PRODUCT_AUCTION_ROOMS)

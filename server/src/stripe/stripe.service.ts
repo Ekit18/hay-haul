@@ -95,8 +95,8 @@ export class StripeService {
     const newLink = await this.linkAccount({
       params: {
         account: stripeEntry.accountId,
-        return_url: `${request.headers.origin}/stripe/return/${stripeEntry.accountId}`,
-        refresh_url: `${request.headers.origin}/stripe/refresh/${stripeEntry.accountId}`,
+        return_url: `${request.headers.origin}/stripe/return`,
+        refresh_url: `${request.headers.origin}/stripe/refresh`,
         type: 'account_onboarding',
       },
     });
@@ -125,8 +125,8 @@ export class StripeService {
     const newLink = await this.linkAccount({
       params: {
         account: stripeEntry.accountId,
-        return_url: `${request.headers.origin}/return/${stripeEntry.accountId}`,
-        refresh_url: `${request.headers.origin}/refresh/${stripeEntry.accountId}`,
+        return_url: `${request.headers.origin}/return`,
+        refresh_url: `${request.headers.origin}/refresh`,
         type: 'account_onboarding',
       },
     });
@@ -172,21 +172,19 @@ export class StripeService {
     response: Response,
   ): Promise<TokenResponse> {
     const stripeEntry = await this.findOneByRequest(request);
-    if (stripeEntry.payoutsEnabled) {
-      return { accessToken: null };
-    }
-    const { payouts_enabled: payoutsEnabled } =
-      await this.stripe.accounts.retrieve(stripeEntry.accountId);
-    if (!payoutsEnabled) {
-      throw new BadRequestException({
-        message: StripeErrorMessage.AccountNotVerifiedYet,
+    if (!stripeEntry.payoutsEnabled) {
+      const { payouts_enabled: payoutsEnabled } =
+        await this.stripe.accounts.retrieve(stripeEntry.accountId);
+      if (!payoutsEnabled) {
+        throw new BadRequestException({
+          message: StripeErrorMessage.AccountNotVerifiedYet,
+        });
+      }
+      await this.stripeEntryRepository.save({
+        id: stripeEntry.id,
+        payoutsEnabled,
       });
     }
-    await this.stripeEntryRepository.save({
-      id: stripeEntry.id,
-      payoutsEnabled,
-    });
-
     const user = await this.userService.getUserById(request.user.id);
 
     const newTokens = await this.tokenService.generateTokens(user);
@@ -197,6 +195,8 @@ export class StripeService {
       sameSite: 'none',
       expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
     });
+
+    console.log('stripe verify new tokens', newTokens);
 
     return { accessToken: newTokens.accessToken };
   }

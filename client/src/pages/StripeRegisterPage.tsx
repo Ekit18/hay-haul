@@ -14,11 +14,12 @@ export function StripeRegisterPage() {
     if (!stripeLink) {
       return;
     }
-    navigate(stripeLink.stripeAccountLinkUrl);
+    console.log('stripe link', stripeLink.stripeAccountLinkUrl);
+    window.location.href = stripeLink.stripeAccountLinkUrl;
   };
   useEffect(() => {
     recreateLink();
-  });
+  }, []);
   const isLoading = status === QueryStatus.pending || status === QueryStatus.uninitialized;
 
   return (

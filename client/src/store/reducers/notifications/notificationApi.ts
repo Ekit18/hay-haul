@@ -1,8 +1,8 @@
-import { ClientToServerEventName } from '@/lib/enums/client-to-server-event-name.enum';
+import { notificationMessages } from '@/components/notifications/constants';
+import { toast } from '@/components/ui/use-toast';
 import { ServerToClientEventName } from '@/lib/enums/server-to-client-event-name.enum';
 import { socket } from '@/lib/helpers/socketService';
 import { Notification } from '@/lib/types/Notifications/Notifications.type';
-import { ProductAuction } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { DataWithCount } from '@/lib/types/types';
 import { TagType, api } from '@/store/api';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
@@ -20,142 +20,54 @@ export interface NotificationResponse {
 }
 
 async function onNotificationCacheEntryAdded(
-  arg: URLSearchParams | string,
+  arg: string,
   {
     updateCachedData,
     cacheDataLoaded,
     cacheEntryRemoved
-  }: QueryCacheLifecycleApi<URLSearchParams | string, BaseQueryFn, DataWithCount<ProductAuction>, 'api'>
+  }: QueryCacheLifecycleApi<string, BaseQueryFn, DataWithCount<Notification>, 'api'>
 ) {
   try {
-    const { data } = await cacheDataLoaded;
-    const auctionIds = data.data.map(({ id }) => id);
+    await cacheDataLoaded;
 
-    socket.emit({ event: ClientToServerEventName.JOIN_PRODUCT_AUCTION_ROOMS, eventPayload: auctionIds });
-    socket.addListener(
-      ServerToClientEventName.AuctionUpdated,
-      ({ auctionId, currentMaxBid, currentMaxBidId, auctionStatus }) => {
-        updateCachedData((draft) => {
-          const updatedAuction = draft.data.find((auction) => auction.id === auctionId);
-          if (!updatedAuction) return;
-
-          if (updatedAuction.currentMaxBid) {
-            updatedAuction.currentMaxBid.price = currentMaxBid;
-            updatedAuction.currentMaxBidId = currentMaxBidId;
-          }
-
-          if (auctionStatus) {
-            updatedAuction.auctionStatus = auctionStatus;
-          }
-        });
-      }
-    );
+    socket.addListener(ServerToClientEventName.Notification, (notification) => {
+      toast({
+        variant: 'default',
+        title: 'Notification',
+        description: notificationMessages[notification.message].message
+      });
+      updateCachedData((draft) => {
+        draft.data.unshift(notification);
+      });
+    });
   } catch (e) {
     console.log(e);
   }
+
   await cacheEntryRemoved;
-  socket.removeAllListeners(ServerToClientEventName.AuctionUpdated);
+  socket.removeAllListeners(ServerToClientEventName.Notification);
 }
 
 export const notificationApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    // filterProductAuctions: builder.query<DataWithCount<ProductAuction>, URLSearchParams>({
-    //   query: (searchParams) => ({
-    //     url: 'product-auction/filter',
-    //     params: searchParams
-    //   }),
-    //   keepUnusedDataFor: 0,
-    //   onCacheEntryAdded: onProductAuctionCacheEntryAdded,
-    //   providesTags: [TagType.ProductAuction]
-    // }),
-    // filterFarmerProductAuctions: builder.query<DataWithCount<ProductAuction>, URLSearchParams>({
-    //   query: (searchParams) => ({
-    //     url: 'product-auction/filter/farmer',
-    //     params: searchParams
-    //   }),
-    //   keepUnusedDataFor: 0,
-    //   onCacheEntryAdded: onProductAuctionCacheEntryAdded,
-    //   providesTags: [TagType.ProductAuction]
-    // }),
-    // filterBusinessmanProductAuctions: builder.query<DataWithCount<ProductAuction>, URLSearchParams>({
-    //   query: (searchParams) => ({
-    //     url: 'product-auction/filter/businessman',
-    //     params: searchParams
-    //   }),
-    //   keepUnusedDataFor: 0,
-    //   onCacheEntryAdded: onProductAuctionCacheEntryAdded,
-    //   providesTags: [TagType.ProductAuction]
-    // }),
-    // getProductAuction: builder.query<DataWithCount<ProductAuction>, string>({
-    //   query: (id) => ({
-    //     url: generatePath(`/product-auction/:id`, { id })
-    //   }),
-    //   onCacheEntryAdded: onProductAuctionCacheEntryAdded,
-    //   providesTags: [TagType.ProductAuction]
-    // }),
-    // createProductAuction: builder.mutation<ProductAuction, CreateProductAuctionFormValues>({
-    //   query: ({ farmId: _, productId, photos, ...body }) => {
-    //     const bodyFormData = new FormData();
-    //     photos.forEach(async (photo) => {
-    //       const arrayBuffer = await photo.arrayBuffer;
-    //       const blob = new Blob([new Uint8Array(arrayBuffer)], { type: photo.type });
-    //       const file = new File([blob], photo.name, { type: photo.type });
-    //       bodyFormData.append('photos', file);
-    //     });
-    //     Object.entries(body).forEach(([key, value]) => {
-    //       if (key === 'startEndDate' && typeof value === 'object' && 'from' in value && 'to' in value) {
-    //         bodyFormData.append('startDate', value.from.toString());
-    //         bodyFormData.append('endDate', value.to.toString());
-    //         return;
-    //       }
-    //       bodyFormData.append(key, value.toString());
-    //     });
-    //     return {
-    //       method: 'POST',
-    //       url: generatePath('/product-auction/product/:productId', {
-    //         productId
-    //       }),
-    //       body: bodyFormData
-    //     };
-    //   },
-    //   invalidatesTags: [TagType.ProductAuction]
-    // }),
-    // deleteProductAuction: builder.mutation<void, string>({
-    //   query: (id) => ({
-    //     method: 'DELETE',
-    //     url: generatePath(`/product-auction/:id`, { id })
-    //   }),
-    //   invalidatesTags: [TagType.ProductAuction]
-    // }),
-    // updateProductAuction: builder.mutation<ProductAuction, UpdateProductAuctionDto>({
-    //   query: ({ id, ...body }) => {
-    //     const { photos, farmName: _, productName: _2, ...rest } = body.body;
-    //     const bodyFormData = new FormData();
-    //     photos.forEach(async (photo) => {
-    //       const arrayBuffer = await photo.arrayBuffer;
-    //       const blob = new Blob([new Uint8Array(arrayBuffer)], { type: photo.type });
-    //       const file = new File([blob], photo.name, { type: photo.type });
-    //       bodyFormData.append('photos', file);
-    //     });
-    //     Object.entries(rest).forEach(([key, value]) => {
-    //       if (key === 'startEndDate' && typeof value === 'object' && 'from' in value && 'to' in value) {
-    //         bodyFormData.append('startDate', value.from.toString());
-    //         bodyFormData.append('endDate', value.to.toString());
-    //         return;
-    //       }
-    //       bodyFormData.append(key, value.toString());
-    //     });
-    //     return {
-    //       method: 'PUT',
-    //       url: generatePath(`/product-auction/:id`, { id }),
-    //       body: bodyFormData
-    //     };
-    //   },
-    //   invalidatesTags: [TagType.ProductAuction]
-    // })
     getNotifications: builder.query<NotificationResponse, string>({
       query: (userId) => ({ url: generatePath(`/notification/:userId`, { userId }) }),
-      providesTags: [TagType.Notification]
+      providesTags: [TagType.Notification],
+      onCacheEntryAdded: onNotificationCacheEntryAdded
+    }),
+    updateNotificationToRead: builder.mutation<Notification, string>({
+      query: (notificationId) => ({
+        url: generatePath(`/notification/unread-notification/:notificationId`, { notificationId }),
+        method: 'PATCH'
+      }),
+      invalidatesTags: [TagType.Notification]
+    }),
+    updateNotificationToReadAll: builder.mutation<Notification, string>({
+      query: (userId) => ({
+        url: generatePath(`/notification/unread/:userId`, { userId }),
+        method: 'PATCH'
+      }),
+      invalidatesTags: [TagType.Notification]
     })
   })
 });

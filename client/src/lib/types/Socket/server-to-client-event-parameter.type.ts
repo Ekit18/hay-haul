@@ -1,5 +1,5 @@
-import { NotificationMessage } from '@/lib/enums/notification-message.enum';
 import { ServerToClientEventName } from '@/lib/enums/server-to-client-event-name.enum';
+import { Notification } from '../Notifications/Notifications.type';
 import { ProductAuction } from '../ProductAuction/ProductAuction.type';
 import { ProductAuctionBid } from '../ProductAuctionBid/ProductAuctionBid.type';
 
@@ -19,9 +19,10 @@ type ServerToClientEventParameter = {
     auctionId: ProductAuction['id'];
     currentMaxBid: ProductAuctionBid['price'];
     currentMaxBidId: ProductAuction['currentMaxBidId'];
+    currentMaxBidUserId: ProductAuctionBid['userId'];
     auctionStatus?: ProductAuction['auctionStatus'];
   }) => void;
   [ServerToClientEventName.BaseEvent]: (payload: unknown) => void;
-  [ServerToClientEventName.Notification]: (payload: NotificationMessage) => void;
+  [ServerToClientEventName.Notification]: (payload: Notification) => void;
 };
 export { type ServerToClientEventParameter };

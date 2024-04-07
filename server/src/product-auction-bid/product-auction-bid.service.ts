@@ -39,7 +39,7 @@ export class ProductAuctionBidService {
       'SERIALIZABLE',
       async (transactionalEntityManager) => {
         try {
-          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
           const candidateBid = await transactionalEntityManager.findOneBy(
             ProductAuctionBid,
@@ -154,6 +154,7 @@ export class ProductAuctionBidService {
               auctionId: auction.id,
               currentMaxBid: price,
               currentMaxBidId: currentMaxBidId,
+              currentMaxBidUserId: userId,
             },
           );
 

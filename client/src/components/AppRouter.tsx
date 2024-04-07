@@ -13,6 +13,7 @@ import { SidebarLayout } from './layouts/SidebarLayout';
 export function AppRouter() {
   const user = useAppSelector((state) => state.user.user);
 
+  // console.log('router user', user);
   let routes = (
     <Route element={<SidebarLayout />}>
       <Route element={<AuthLayout allowedRoles={[UserRole.Farmer]} />}>

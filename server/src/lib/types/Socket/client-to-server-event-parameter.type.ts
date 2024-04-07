@@ -6,4 +6,5 @@ type ClientToServerEventParameter = {
     payload: string[],
   ) => void;
 };
+
 export { type ClientToServerEventParameter };

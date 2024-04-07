@@ -34,4 +34,9 @@ export class NotificationController {
   updateNotificationsToRead(@Param('userId') userId: string) {
     return this.notificationService.updateNotificationsToRead(userId);
   }
+
+  @Patch('/unread-notification/:notificationId')
+  updateNotificationToRead(@Param('notificationId') notificationId: string) {
+    return this.notificationService.updateNotificationToRead(notificationId);
+  }
 }

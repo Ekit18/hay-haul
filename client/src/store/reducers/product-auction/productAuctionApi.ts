@@ -27,13 +27,14 @@ async function onProductAuctionCacheEntryAdded(
     socket.emit({ event: ClientToServerEventName.JOIN_PRODUCT_AUCTION_ROOMS, eventPayload: auctionIds });
     socket.addListener(
       ServerToClientEventName.AuctionUpdated,
-      ({ auctionId, currentMaxBid, currentMaxBidId, auctionStatus }) => {
+      ({ auctionId, currentMaxBid, currentMaxBidId, auctionStatus, currentMaxBidUserId }) => {
         updateCachedData((draft) => {
           const updatedAuction = draft.data.find((auction) => auction.id === auctionId);
           if (!updatedAuction) return;
-
+          console.log({ auctionId, currentMaxBid, currentMaxBidId, auctionStatus, currentMaxBidUserId });
           if (updatedAuction.currentMaxBid) {
             updatedAuction.currentMaxBid.price = currentMaxBid;
+            updatedAuction.currentMaxBid.userId = currentMaxBidUserId;
             updatedAuction.currentMaxBidId = currentMaxBidId;
           }
 

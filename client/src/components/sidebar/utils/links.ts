@@ -82,6 +82,18 @@ export const links: Links = {
       icon: BadgeDollarSign
     }
   ],
-  [UserRole.Carrier]: [],
-  [UserRole.Driver]: []
+  [UserRole.Carrier]: [
+    {
+      title: 'Home',
+      url: AppRoute.General.Main,
+      icon: Home
+    }
+  ],
+  [UserRole.Driver]: [
+    {
+      title: 'Home',
+      url: AppRoute.General.Main,
+      icon: Home
+    }
+  ]
 };

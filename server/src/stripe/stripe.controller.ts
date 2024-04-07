@@ -8,7 +8,6 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
-import { TokenResponse } from 'src/auth/dto/token-response.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { getSwaggerResponseDescription } from 'src/lib/helpers/getSwaggerResponseDescription';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
@@ -59,8 +58,10 @@ export class StripeController {
   async sdf(
     @Req() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<TokenResponse> {
-    return await this.stripeService.verifyStripe(req, res);
+  ): Promise<void> {
+    console.log('verifying account');
+    const tokenDto = await this.stripeService.verifyStripe(req, res);
+    res.json(tokenDto);
   }
 
   @ApiOperation({ summary: 'Check stripe account verification status' })
