@@ -63,7 +63,10 @@ export class TokenService {
         role: user.role,
         ...([UserRole.Farmer, UserRole.Carrier].includes(user.role) &&
         user?.stripeEntry
-          ? { payoutsEnabled: user.stripeEntry.payoutsEnabled }
+          ? {
+              payoutsEnabled: user.stripeEntry.payoutsEnabled,
+              stripeAccountId: user.stripeEntry.accountId,
+            }
           : {}),
       };
 

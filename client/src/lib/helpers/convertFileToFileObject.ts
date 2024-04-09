@@ -1,4 +1,4 @@
-import { FileObject } from '@/components/drag-and-drop/file-object.type';
+import { FileObject } from '@/components/drag-and-drop/FileObject.type';
 
 export function convertFileToFileObject(file: File, id?: string): FileObject {
   return {

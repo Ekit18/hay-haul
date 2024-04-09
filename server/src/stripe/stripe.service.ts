@@ -10,6 +10,8 @@ import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
 import { TokenResponse } from 'src/auth/dto/token-response.dto';
 import { getCookieExpireDate } from 'src/auth/helpers/get-cookie-expire-date';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { ProductAuction } from 'src/product-auction/product-auction.entity';
+import { ProductAuctionService } from 'src/product-auction/product-auction.service';
 import { TokenService } from 'src/token/token.service';
 import { UserService } from 'src/user/user.service';
 import Stripe from 'stripe';
@@ -21,6 +23,7 @@ import { StripeEntry } from './stripe.entity';
 
 @Injectable()
 export class StripeService {
+  private static FEE_PERCENT = 0.15;
   private stripe: Stripe;
   private readonly jwtRefreshTokenExpire = this.configService.get<string>(
     'JWT_REFRESH_TOKEN_EXPIRE',
@@ -31,8 +34,40 @@ export class StripeService {
     private configService: ConfigService,
     private tokenService: TokenService,
     private userService: UserService,
+    private productAuctionService: ProductAuctionService,
   ) {
     this.stripe = new Stripe(configService.getOrThrow('STRIPE_SECRET_KEY'));
+  }
+
+  public async createProductPayment({
+    request,
+    auctionId,
+  }: {
+    request: AuthenticatedRequest;
+    auctionId: ProductAuction['id'];
+  }) {
+    const {
+      data: [auction],
+    } = await this.productAuctionService.findOneById(auctionId);
+    console.log('auction owner id', auction.product.facilityDetails.user.id);
+    const stripeEntry = await this.findOneByUserId(
+      auction.product.facilityDetails.user.id,
+    );
+    const { client_secret: clientSecret } =
+      await this.stripe.paymentIntents.create({
+        amount: auction.currentMaxBid.price,
+        currency: 'usd',
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        transfer_data: {
+          destination: stripeEntry.accountId,
+        },
+        application_fee_amount:
+          StripeService.FEE_PERCENT * auction.currentMaxBid.price,
+      });
+
+    return { clientSecret };
   }
 
   public createAccount({
@@ -157,14 +192,29 @@ export class StripeService {
     return stripeEntry;
   }
 
+  private wait(ms) {
+    return new Promise((res) => setTimeout(res, ms));
+  }
+
   public async checkAccountVerificationStatusByRequest(
     request: AuthenticatedRequest,
   ): Promise<GetAccountStatusResponseDto> {
     const stripeEntry = await this.findOneByRequest(request);
 
-    const { payouts_enabled: payoutsEnabled } =
-      await this.stripe.accounts.retrieve(stripeEntry.accountId);
-    return { payoutsEnabled };
+    return async function check(this: StripeService) {
+      let depth = 0;
+
+      const { payouts_enabled: payoutsEnabled } =
+        await this.stripe.accounts.retrieve(stripeEntry.accountId);
+
+      if (payoutsEnabled) {
+        return { payoutsEnabled };
+      }
+      if (depth <= 2) {
+        await this.wait(2 ** depth++ * 500);
+        return check.apply(this);
+      }
+    }.apply(this);
   }
 
   public async verifyStripe(

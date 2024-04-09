@@ -1,7 +1,7 @@
 import { DeleteModal } from '@/components/delete-modal/delete-modal';
-import { FacilityCard } from '@/components/facility/facility-card/facility-card';
-import { CreateFacilityModal } from '@/components/facility/modals/create-facility-modal/create-facility-modal';
-import { UpdateFacilityModal } from '@/components/facility/modals/update-facility-modal/update-facility-modal';
+import { FacilityCard } from '@/components/facility/facility-card/FacilityCard';
+import { CreateFacilityModal } from '@/components/facility/modals/create-facility-modal/CreateFacilityModal';
+import { UpdateFacilityModal } from '@/components/facility/modals/update-facility-modal/UpdateFacilityModal';
 import { UpdateFacilityFormValues } from '@/components/facility/modals/update-facility-modal/validation';
 import { toast } from '@/components/ui/use-toast';
 import { EntityTitle } from '@/lib/enums/entity-title.enum';
@@ -46,7 +46,7 @@ export function Farms() {
   const updateCallback = (data: UpdateFacilityFormValues) => {
     if (!currentFacility) return;
 
-    const { farmProductTypes: _, ...body } = data;
+    const { facilityProductTypes: _, ...body } = data;
 
     updateFacility({ id: currentFacility.id, body })
       .unwrap()

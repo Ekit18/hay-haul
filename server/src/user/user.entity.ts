@@ -1,4 +1,6 @@
 import { Otp } from 'src/auth/otp.entity';
+import { DeliveryOffer } from 'src/delivery-offer/delivery-offer.entity';
+import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
@@ -70,4 +72,10 @@ export class User extends Timestamps {
 
   @OneToMany(() => Otp, (otp) => otp.user)
   otp: Otp;
+
+  @OneToMany(() => DeliveryOrder, (deliveryOrder) => deliveryOrder.user)
+  deliveryOrders: DeliveryOrder[];
+
+  @OneToMany(() => DeliveryOffer, (deliveryOffer) => deliveryOffer.user)
+  deliveryOffers: DeliveryOffer[];
 }

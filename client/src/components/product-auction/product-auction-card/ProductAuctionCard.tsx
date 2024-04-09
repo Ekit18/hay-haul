@@ -7,6 +7,7 @@ import {
   ProductAuctionStatusValues
 } from '@/lib/types/ProductAuction/ProductAuction.type';
 
+import { CreateDeliveryOrderModalHOC } from '@/components/delivery-order/modals/create-delivery-order/CreateDeliveryOrderModal';
 import { AppRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -14,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import capitalize from 'lodash.capitalize';
 import { Crown } from 'lucide-react';
+import { useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
 import { productAuctionStatus } from './ProductAuctionStatus.enum';
 
@@ -26,6 +28,10 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
   const user = useAppSelector((state) => state.user.user);
 
   const navigate = useNavigate();
+
+  const isAuctionWinner = productAuction.currentMaxBid?.userId === user?.id;
+
+  const [isCreateDeliveryOrderModalOpen, setIsCreateDeliveryOrderModalOpen] = useState<boolean>(false);
 
   return (
     <div className="flex w-full flex-col items-center justify-start gap-4 rounded-lg bg-white min-[1068px]:w-full min-[1068px]:flex-row">
@@ -108,7 +114,7 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
             <p className="text-2xl font-bold">
               {productAuction.currentMaxBid?.price ? `${productAuction.currentMaxBid?.price} USD` : 'No bets'}
             </p>
-            {productAuction.currentMaxBid?.userId === user?.id && (
+            {isAuctionWinner && (
               <p className="flex gap-2">
                 (YOU) <Crown className="text-yellow-400" />
               </p>
@@ -165,18 +171,18 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
               Learn more
             </Button>
           )}
-          {productAuction.currentMaxBid?.userId === user?.id &&
-            productAuction.auctionStatus === ProductAuctionStatus.WaitingPayment && (
-              <Button
-                onClick={() =>
-                  navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
-                }
-                type="button"
-                className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
-              >
-                Pay for the product
-              </Button>
-            )}
+          {isAuctionWinner && productAuction.auctionStatus === ProductAuctionStatus.WaitingPayment && (
+            <Button
+              onClick={() => navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))}
+              type="button"
+              className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+            >
+              Pay for the product
+            </Button>
+          )}
+          {isAuctionWinner &&
+            productAuction.auctionStatus === ProductAuctionStatus.Paid &&
+            !productAuction.deliveryOrder && <CreateDeliveryOrderModalHOC auctionId={productAuction.id} />}
           {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
             <>
               <Button

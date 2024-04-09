@@ -1,4 +1,5 @@
 import { AuctionPhotoType } from '../AuctionPhoto/AuctionPhoto.type';
+import { DeliveryOrder } from '../DeliveryOrder/DeliveryOrder.type';
 import { Product } from '../Product/Product.type';
 import { ProductAuctionBid } from '../ProductAuctionBid/ProductAuctionBid.type';
 import { ValueOf } from '../types';
@@ -11,7 +12,8 @@ export const ProductAuctionStatus = {
   Ended: 'Ended',
   WaitingPayment: 'WaitingPayment',
   Closed: 'Closed',
-  Unpaid: 'Unpaid'
+  Unpaid: 'Unpaid',
+  Paid: 'Paid'
 } as const;
 
 export type ProductAuctionStatusDict = {
@@ -26,7 +28,8 @@ export const ProductAuctionStatusText = {
   [ProductAuctionStatus.Inactive]: 'Inactive',
   [ProductAuctionStatus.StartSoon]: 'Start soon',
   [ProductAuctionStatus.WaitingPayment]: 'Waiting payment',
-  [ProductAuctionStatus.Unpaid]: 'Unpaid'
+  [ProductAuctionStatus.Unpaid]: 'Unpaid',
+  [ProductAuctionStatus.Paid]: 'Paid'
 };
 
 export type ProductAuctionStatusValues = ValueOf<typeof ProductAuctionStatus>;
@@ -46,4 +49,5 @@ export type ProductAuction = {
   currentMaxBidId: string;
   auctionStatus: ProductAuctionStatusValues;
   photos: AuctionPhotoType[];
+  deliveryOrder: DeliveryOrder | null;
 };

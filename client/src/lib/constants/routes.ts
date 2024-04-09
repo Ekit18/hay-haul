@@ -35,6 +35,8 @@ export const AppRoute = {
     // MyAuctions: '/my-auctions'
   },
   Businessman: {
+    ProductAuctionPaymentPage: '/product-auction/payment/:auctionId',
+    ProductAuctionPaymentCompletedPage: '/product-auction/payment-completed',
     Depots: '/depots',
     Products: '/products',
     Bids: '/bids',

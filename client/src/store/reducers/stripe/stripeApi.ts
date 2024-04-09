@@ -9,8 +9,23 @@ export type GetAccountStatusResponseDto = {
   payoutsEnabled: boolean;
 };
 
+export type CreatePaymentRequestDto = {
+  auctionId: string;
+};
+
+export type CreatePaymentResponseDto = {
+  clientSecret: string;
+};
+
 export const stripeApi = api.injectEndpoints({
   endpoints: (builder) => ({
+    createPayment: builder.mutation<CreatePaymentResponseDto, CreatePaymentRequestDto>({
+      query: ({ auctionId }) => ({
+        url: '/stripe/payment',
+        method: 'POST',
+        body: { auctionId }
+      })
+    }),
     recreateStripeLink: builder.mutation<RecreateLinkResponseDto, void>({
       query: () => ({
         url: '/stripe/onboarding-link/recreate',

@@ -7,4 +7,5 @@ export type TokenPayload = {
   fullName: string;
   role: UserRole;
   payoutsEnabled?: boolean;
+  stripeAccountId?: string;
 };

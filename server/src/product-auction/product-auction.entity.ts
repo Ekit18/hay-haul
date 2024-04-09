@@ -1,3 +1,4 @@
+import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { Notification } from 'src/notification/notification.entity';
 import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
 import { Product } from 'src/product/product.entity';
@@ -21,6 +22,7 @@ export enum ProductAuctionStatus {
   WaitingPayment = 'WaitingPayment',
   Closed = 'Closed',
   Unpaid = 'Unpaid',
+  Paid = 'Paid',
 }
 
 const statuses = Object.values(ProductAuctionStatus)
@@ -64,6 +66,12 @@ export class ProductAuction {
   @OneToOne(() => ProductAuctionBid, { cascade: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'currentMaxBidId' })
   currentMaxBid: ProductAuctionBid;
+
+  @OneToOne(
+    () => DeliveryOrder,
+    (deliveryOrder) => deliveryOrder.productAuction,
+  )
+  deliveryOrder: DeliveryOrder;
 
   @Column({ nullable: true })
   currentMaxBidId: string;

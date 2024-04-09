@@ -8,7 +8,7 @@ import { Upload } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { FileError, useDropzone } from 'react-dropzone';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { FileObject } from './file-object.type';
+import { FileObject } from './FileObject.type';
 
 function fileDimensionsValidator(file: File): Promise<FileError | null> {
   return new Promise((resolve) => {

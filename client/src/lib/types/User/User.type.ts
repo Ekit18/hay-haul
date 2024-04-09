@@ -7,6 +7,7 @@ export type User = {
   role: UserRole;
   isVerified: boolean;
   payoutsEnabled?: boolean;
+  stripeAccountId?: string;
 };
 
 export type UserToken = User & {

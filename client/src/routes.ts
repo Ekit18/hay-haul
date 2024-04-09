@@ -9,9 +9,12 @@ import { SignUpPage } from './pages/SignUpPage';
 import { StripeRefreshPage } from './pages/StripeRefreshPage';
 import { StripeRegisterPage } from './pages/StripeRegisterPage';
 import { StripeReturnPage } from './pages/StripeReturnPage';
+import { DeliveryOrder } from './pages/businessman-pages/DeliveryOrder';
 import { Depots } from './pages/businessman-pages/Depots';
 import { MainPage as BusinessmanMainPage } from './pages/businessman-pages/MainPage';
 import { MyBids } from './pages/businessman-pages/MyBids';
+import { ProductAuctionPaymentCompletedPage } from './pages/businessman-pages/ProductAuctionPaymentCompletedPage';
+import { StripeProductAuctionPaymentPage } from './pages/businessman-pages/ProductAuctionPaymentPage';
 import { CreateAuction } from './pages/farmer-pages/CreateAuction';
 import { Farms } from './pages/farmer-pages/Farms';
 import { MainPage as FarmerMainPage } from './pages/farmer-pages/MainPage';
@@ -57,12 +60,24 @@ export const businessRoutes: Route[] = [
     Component: BusinessmanMainPage
   },
   {
+    path: AppRoute.Businessman.ProductAuctionPaymentCompletedPage,
+    Component: ProductAuctionPaymentCompletedPage
+  },
+  {
+    path: AppRoute.Businessman.ProductAuctionPaymentPage,
+    Component: StripeProductAuctionPaymentPage
+  },
+  {
     path: AppRoute.Businessman.Depots,
     Component: Depots
   },
   {
     path: AppRoute.Businessman.Bids,
     Component: MyBids
+  },
+  {
+    path: AppRoute.Businessman.Delivery,
+    Component: DeliveryOrder
   }
 ];
 

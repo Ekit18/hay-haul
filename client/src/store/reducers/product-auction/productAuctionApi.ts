@@ -89,6 +89,11 @@ export const productAuctionApi = api.injectEndpoints({
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]
     }),
+    getPaidProductAuctions: builder.query<DataWithCount<ProductAuction>, string>({
+      query: () => ({
+        url: 'product-auction/paid-auctions'
+      })
+    }),
     createProductAuction: builder.mutation<ProductAuction, CreateProductAuctionFormValues>({
       query: ({ farmId: _, productId, photos, ...body }) => {
         const bodyFormData = new FormData();

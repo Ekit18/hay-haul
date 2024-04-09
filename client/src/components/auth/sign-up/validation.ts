@@ -6,7 +6,7 @@ export type SignUpFormValues = {
   password: string;
   fullName: string;
   role: UserRole;
-  farmProductTypes?: string[];
+  facilityProductTypes?: string[];
   facilityName: string;
   facilityAddress: string;
   facilityOfficialCode: string;
@@ -20,7 +20,7 @@ export const useSignUpFormSchema = (): ObjectSchema<
     password: undefined;
     fullName: undefined;
     role: undefined;
-    farmProductTypes: '';
+    facilityProductTypes: '';
     facilityName: undefined;
     facilityAddress: undefined;
     facilityOfficialCode: undefined;
@@ -34,9 +34,9 @@ export const useSignUpFormSchema = (): ObjectSchema<
     role: string()
       .oneOf(Object.values(UserRole), `Role must be one of: ${Object.values(UserRole).join(',')}`)
       .required('Role is required'),
-    farmProductTypes: array()
+    facilityProductTypes: array()
       .of(string().required())
-      .test('farmProductTypes', 'Farm product types is required', (value, context) => {
+      .test('facilityProductTypes', 'Farm product types is required', (value, context) => {
         if (context.parent.role !== UserRole.Farmer) {
           return true;
         }
@@ -56,7 +56,7 @@ export const defaultSignUpFormValues: SignUpFormValues = {
   password: '',
   fullName: '',
   role: UserRole.Farmer,
-  farmProductTypes: [],
+  facilityProductTypes: [],
   facilityName: '',
   facilityAddress: '',
   facilityOfficialCode: ''

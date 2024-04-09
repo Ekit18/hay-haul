@@ -98,11 +98,12 @@ export function UpdateProductAuctionForm() {
   const buyoutPrice = form.watch('buyoutPrice');
   const startEndDate = form.watch('startEndDate');
   const paymentPeriod = form.watch('paymentPeriod');
-  // const { fields: photos } = useFieldArray({ control: form.control, name: 'photos' });
+
   const onSubmit: SubmitHandler<UpdateProductAuctionFormValues> = async (data) => {
     if (!id) {
       return;
     }
+
     await updateProductAuction({ body: data, id })
       .unwrap()
       .then(() => {
@@ -126,11 +127,13 @@ export function UpdateProductAuctionForm() {
       form.setValue('startEndDate', { from: addDays(startDate, days), to: addDays(startDate, days + 1) });
       return;
     }
+
     if (!startEndDate.to) {
       const endDate = addDays(startEndDate.from, days);
       form.setValue('startEndDate', { from: startEndDate.from, to: endDate });
       return;
     }
+
     form.setValue('startEndDate', { from: startEndDate.from, to: addDays(startEndDate.to, days) });
   };
 
@@ -151,6 +154,7 @@ export function UpdateProductAuctionForm() {
       title: 'Something went wrong',
       description: 'You can update only your own auctions.'
     });
+
     return <Navigate to={AppRoute.General.MyAuctions} replace />;
   }
   if (
@@ -163,6 +167,7 @@ export function UpdateProductAuctionForm() {
       title: 'Something went wrong',
       description: 'You can only update inactive or start soon auctions.'
     });
+
     return <Navigate to={AppRoute.General.MyAuctions} replace />;
   }
 

@@ -22,7 +22,7 @@ export function FacilityCard({ facilityDetails, onDeleteClick, onEditClick }: Fa
       </CardHeader>
       <CardContent>
         <p>Code: {facilityDetails.code}</p>
-        {user?.role === UserRole.Farmer && facilityDetails.productTypes && (
+        {user?.role !== UserRole.Carrier && facilityDetails.productTypes && (
           <EmptyTagInput selected={facilityDetails.productTypes} />
         )}
       </CardContent>

@@ -32,7 +32,7 @@ export class RegisterUserDto {
   @IsArray()
   @IsString({ each: true })
   @ValidateIf((o) => o.role === UserRole.Farmer)
-  readonly farmProductTypes?: string[];
+  readonly facilityProductTypes?: string[];
 
   @IsString()
   @IsNotEmpty()

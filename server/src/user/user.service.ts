@@ -82,6 +82,7 @@ export class UserService {
         .createQueryBuilder('user')
         .where('user.email = :email', { email })
         .leftJoinAndSelect('user.token', 'token')
+        .leftJoinAndSelect('user.stripeEntry', 'stripeEntry')
         .getOne();
 
       return user;

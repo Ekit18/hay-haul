@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
@@ -11,6 +21,8 @@ import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { getSwaggerResponseDescription } from 'src/lib/helpers/getSwaggerResponseDescription';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { ProductAuctionErrorMessage } from 'src/product-auction/product-auction-error-message.enum';
+import { CreatePaymentDto } from './dto/create-product-payment.dto';
 import { GetAccountStatusResponseDto } from './dto/get-account-status-response.dto';
 import { StripeErrorMessage } from './stripe-error-message.enum';
 import { StripeService } from './stripe.service';
@@ -34,9 +46,11 @@ export class StripeController {
       AuthErrorMessage.UserNotFoundInToken,
     ),
   })
+  @ApiInternalServerErrorResponse({
+    description: ProductAuctionErrorMessage.FailedFetchProductAuction,
+  })
   @Post('onboarding-link/recreate')
   async recreateStripeOnboardingLink(@Req() req: AuthenticatedRequest) {
-    //TODO: Stopped at stripe integration here. Create stripeApi at frontend, then link refetch logic on frontend, then "Register in Stripe" page
     return {
       stripeAccountLinkUrl: await this.stripeService.recreateLinkByRequest(req),
     };
@@ -55,12 +69,40 @@ export class StripeController {
     ),
   })
   @Post('account/verify')
-  async sdf(
+  async verifyAccount(
     @Req() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     console.log('verifying account');
     const tokenDto = await this.stripeService.verifyStripe(req, res);
+    res.json(tokenDto);
+  }
+
+  @ApiOperation({ summary: 'Create payment with intent' })
+  @ApiOkResponse({
+    description: 'Creation successful',
+  })
+  @ApiBadRequestResponse({
+    description: StripeErrorMessage.SellerStripeEntryNotFound,
+  })
+  @ApiUnauthorizedResponse({
+    description: getSwaggerResponseDescription(
+      AuthErrorMessage.UserNotFoundInToken,
+    ),
+  })
+  @ApiNotFoundResponse({
+    description: ProductAuctionErrorMessage.AuctionNotFound,
+  })
+  @Post('payment')
+  async sdf(
+    @Req() request: AuthenticatedRequest,
+    @Body() { auctionId }: CreatePaymentDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const tokenDto = await this.stripeService.createProductPayment({
+      request,
+      auctionId,
+    });
     res.json(tokenDto);
   }
 

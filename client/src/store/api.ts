@@ -67,7 +67,8 @@ export const TagType = {
   Product: 'Product',
   Facility: 'Facility',
   ProductAuction: 'ProductAuction',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  DeliveryOrder: 'DeliveryOrder'
 } as const;
 
 export const api = createApi({

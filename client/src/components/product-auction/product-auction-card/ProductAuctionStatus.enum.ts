@@ -12,5 +12,6 @@ export const productAuctionStatus: ProductAuctionStatusType = {
   [ProductAuctionStatus.EndSoon]: 'bg-orange-600 text-white ',
   [ProductAuctionStatus.Ended]: 'bg-red-500 text-white',
   [ProductAuctionStatus.Unpaid]: 'bg-purple-600 text-white',
-  [ProductAuctionStatus.WaitingPayment]: 'bg-yellow-400'
+  [ProductAuctionStatus.WaitingPayment]: 'bg-yellow-400',
+  [ProductAuctionStatus.Paid]: 'bg-green-700 text-white'
 };

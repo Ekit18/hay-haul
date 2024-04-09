@@ -48,9 +48,9 @@ export class FacilityDetailsService {
         code: facilityDetailsDto.code,
         user,
       });
-      if (facilityDetailsDto.farmProductTypes) {
+      if (facilityDetailsDto.facilityProductTypes) {
         await this.productTypeService.createMany(
-          facilityDetailsDto.farmProductTypes,
+          facilityDetailsDto.facilityProductTypes,
           facilityDetails,
         );
       }
@@ -102,7 +102,7 @@ export class FacilityDetailsService {
 
   public async update(
     id: string,
-    { farmProductTypes, ...facilityDetailsDto }: UpdateFacilityDetailsDto,
+    { facilityProductTypes, ...facilityDetailsDto }: UpdateFacilityDetailsDto,
   ): Promise<FacilityDetails> {
     try {
       await this.facilityDetailsRepository.update(id, facilityDetailsDto);

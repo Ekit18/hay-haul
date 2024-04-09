@@ -1,5 +1,6 @@
 import { AuthContainer } from '@/components/auth/AuthContainer';
 import { Button } from '@/components/ui/button';
+import { AppRoute } from '@/lib/constants/routes';
 import { cn } from '@/lib/utils';
 import { stripeApi } from '@/store/reducers/stripe/stripeApi';
 import { QueryStatus } from '@reduxjs/toolkit/query';
@@ -20,6 +21,14 @@ export function StripeRegisterPage() {
   useEffect(() => {
     recreateLink();
   }, []);
+
+  const { data: stripeStatus, status: requestStatus } = stripeApi.useCheckAccountStatusQuery();
+  useEffect(() => {
+    if (stripeStatus?.payoutsEnabled === true) {
+      navigate(AppRoute.General.StripeReturn);
+      return;
+    }
+  }, [stripeStatus?.payoutsEnabled]);
   const isLoading = status === QueryStatus.pending || status === QueryStatus.uninitialized;
 
   return (

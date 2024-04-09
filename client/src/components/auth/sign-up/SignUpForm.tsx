@@ -90,7 +90,7 @@ export function SignUpForm() {
           'facilityName',
           'facilityAddress',
           'facilityOfficialCode',
-          ...(selectedRole === UserRole.Farmer ? (['farmProductTypes'] as (keyof SignUpFormValues)[]) : [])
+          ...(selectedRole === UserRole.Farmer ? (['facilityProductTypes'] as (keyof SignUpFormValues)[]) : [])
         ]);
 
         return result;

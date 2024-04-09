@@ -162,7 +162,7 @@ export class AuthService {
     );
 
     await this.productTypeService.createMany(
-      registerUserDto.farmProductTypes,
+      registerUserDto.facilityProductTypes,
       facilityDetails,
     );
 

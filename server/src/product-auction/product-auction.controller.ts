@@ -54,6 +54,12 @@ export class ProductAuctionController {
     return this.productAuctionService.findAll(query, req);
   }
 
+  @AllowedRoles(UserRole.Businessman)
+  @Get('/paid-auctions')
+  async getPaidAuctions(@Req() req: AuthenticatedRequest) {
+    return this.productAuctionService.findAllPaidAuctions(req.user.id);
+  }
+
   @Get('/:id')
   async getOne(@Param('id') id: string) {
     return this.productAuctionService.findOneById(id);

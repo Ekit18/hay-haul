@@ -1,6 +1,6 @@
 import { Trash } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
-import { FileObject } from '../drag-and-drop/file-object.type';
+import { FileObject } from '../drag-and-drop/FileObject.type';
 import { Button } from '../ui/button';
 import { CarouselImageItem } from './CarouselImageItem';
 import { PreviewObject } from './ImageCarousel';

@@ -4,14 +4,14 @@ export type CreateFacilityFormValues = {
   name: string;
   address: string;
   code: string;
-  farmProductTypes?: string[];
+  facilityProductTypes?: string[];
 };
 
 export const createFacilityDefaultValues: CreateFacilityFormValues = {
   name: '',
   address: '',
   code: '',
-  farmProductTypes: []
+  facilityProductTypes: []
 };
 
 export const useFacilityCreateFormSchema = (): ObjectSchema<
@@ -21,7 +21,7 @@ export const useFacilityCreateFormSchema = (): ObjectSchema<
     name: undefined;
     address: undefined;
     code: undefined;
-    farmProductTypes: '';
+    facilityProductTypes: '';
   },
   ''
 > => {
@@ -31,6 +31,6 @@ export const useFacilityCreateFormSchema = (): ObjectSchema<
     code: string()
       .required('Must be valid EDRPOU is required')
       .matches(/^\d{8}$/, 'Must contain only numbers and be 8 characters long'),
-    farmProductTypes: array().of(string().required()).required()
+    facilityProductTypes: array().of(string().required()).required()
   });
 };

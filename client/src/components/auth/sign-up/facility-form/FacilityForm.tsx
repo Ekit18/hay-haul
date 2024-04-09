@@ -13,12 +13,12 @@ export function FacilityForm() {
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
-      {selectedRole === UserRole.Farmer && (
+      {selectedRole !== UserRole.Carrier && (
         <TagInput
-          name="farmProductTypes"
+          name="facilityProductTypes"
           control={control}
           suggestions={farmProductTypesSuggestions}
-          labelText="Select farm products"
+          labelText="Select facility products"
           noOptionsText="No matching products"
           allowNew
           selectedFn={(item) => ({ value: item, label: item })}

@@ -1,4 +1,5 @@
 import { toast } from '@/components/ui/use-toast';
+
 import { setSocketStatus } from '@/store/reducers/socket/socket-actions';
 import { AppStore } from '@/store/store';
 import { io, type Socket } from 'socket.io-client';
@@ -39,9 +40,6 @@ class SocketService {
         throw new Error('Socket API URL is missing');
       }
 
-      if (true) {
-        // store.dispatch(api.endpoints.auth.refresh().initiate({}));
-      }
       this.io = io(this.baseUrl, {
         transports: ['websocket', 'polling'],
         auth: {

@@ -1,4 +1,4 @@
-import { FileObject } from '@/components/drag-and-drop/file-object.type';
+import { FileObject } from '@/components/drag-and-drop/FileObject.type';
 import { ComparisonOperator } from '@/lib/enums/comparison-operator.enum';
 import { compareValues } from '@/lib/helpers/compareValues';
 import { RequiredDateRange } from '@/lib/types/types';

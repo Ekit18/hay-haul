@@ -1,7 +1,9 @@
 import { ImageCarousel } from '@/components/carousel/ImageCarousel';
+import { ConfirmModal } from '@/components/confirm-modal/ConfirmModal';
 import { DeleteModal } from '@/components/delete-modal/delete-modal';
 import { productAuctionStatus } from '@/components/product-auction/product-auction-card/ProductAuctionStatus.enum';
 import { SetBidForm } from '@/components/product-auction/set-bid-form/SetBidForm';
+import { SetBidFormValues } from '@/components/product-auction/set-bid-form/validation';
 import { TimeProgress } from '@/components/time-progress/TimeProgress';
 import { Timer } from '@/components/timer/Timer';
 import {
@@ -25,6 +27,7 @@ import {
   ProductAuctionStatusValues
 } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { cn } from '@/lib/utils';
+import { productBidApi } from '@/store/reducers/product-auction-bid/productAuctionBidApi';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { format, parseISO } from 'date-fns';
 import { Crown, Loader2 } from 'lucide-react';
@@ -75,6 +78,35 @@ export function AuctionDetailsPage() {
       .catch(handleRtkError);
   };
 
+  const [isBuyoutConfirmModalOpen, setIsBuyoutConfirmModalOpen] = useState<boolean>(false);
+  const handleBuyoutConfirmModalOpenChange = useCallback((open: boolean) => setIsBuyoutConfirmModalOpen(open), []);
+  const handleBuyoutClick = () => {
+    setIsBuyoutConfirmModalOpen(true);
+  };
+
+  const [sendBid] = productBidApi.useSetBidMutation();
+
+  const handleBuyoutBid = async () => {
+    if (!productAuction) {
+      return;
+    }
+
+    await sendBid({ auctionId: productAuction.id, price: productAuction.buyoutPrice } as SetBidFormValues)
+      .unwrap()
+      .finally(() => {
+        setIsBuyoutConfirmModalOpen(false);
+      })
+      .catch(handleRtkError);
+    navigate(AppRoute.Businessman.ProductAuctionPaymentPage);
+  };
+
+  const handleClickPay = () => {
+    if (!productAuction) {
+      return;
+    }
+    navigate(generatePath(AppRoute.Businessman.ProductAuctionPaymentPage, { auctionId: productAuction.id }));
+  };
+
   if (!auctionId || isError) {
     return <Navigate to={generatePath(AppRoute.General.Auctions)} />;
   }
@@ -89,6 +121,8 @@ export function AuctionDetailsPage() {
   const isBidButtonsDisabled = !(
     [ProductAuctionStatus.Active, ProductAuctionStatus.EndSoon] as ProductAuctionStatusValues[]
   ).includes(productAuction.auctionStatus);
+
+  const isAuctionWinner = productAuction.currentMaxBid?.userId === user?.id;
 
   return (
     <div className="h-full bg-white p-4">
@@ -198,22 +232,37 @@ export function AuctionDetailsPage() {
               </div>
             </div>
             <div className="flex w-3/4 flex-col gap-y-3">
-              {user?.role === UserRole.Businessman && (
-                <>
-                  <SetBidForm
-                    isDisabled={isBidButtonsDisabled}
-                    auctionId={auctionId}
-                    currentMaxBid={productAuction.currentMaxBid?.price}
-                    startPrice={productAuction.startPrice}
-                    bidStep={productAuction.bidStep}
-                  />
-
-                  <Button type="button" disabled={isBidButtonsDisabled} className="w-full">
-                    Buy now for {productAuction.buyoutPrice}$
+              {user?.role === UserRole.Businessman ? (
+                isAuctionWinner && productAuction.auctionStatus === ProductAuctionStatus.WaitingPayment ? (
+                  <Button
+                    onClick={handleClickPay}
+                    type="button"
+                    className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                  >
+                    Pay for the product
                   </Button>
-                </>
-              )}
-              {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
+                ) : (
+                  <>
+                    <SetBidForm
+                      isDisabled={isBidButtonsDisabled}
+                      auctionId={auctionId}
+                      currentMaxBid={productAuction.currentMaxBid?.price}
+                      startPrice={productAuction.startPrice}
+                      bidStep={productAuction.bidStep}
+                    />
+
+                    <Button
+                      type="button"
+                      disabled={isBidButtonsDisabled}
+                      onClick={handleBuyoutClick}
+                      className="w-full"
+                    >
+                      Buy now for {productAuction.buyoutPrice}$
+                    </Button>
+                  </>
+                )
+              ) : null}
+              {user?.role === UserRole.Farmer && user?.id === productAuction.product.facilityDetails.user?.id && (
                 <>
                   <Button
                     type="button"
@@ -258,6 +307,17 @@ export function AuctionDetailsPage() {
         name={deleteModalConfirmName}
         entityTitle={EntityTitle.ProductAuction}
         deleteCallback={handleDeleteProductAuction}
+      />
+      <ConfirmModal
+        confirmCallback={handleBuyoutBid}
+        handleOpenChange={handleBuyoutConfirmModalOpenChange}
+        open={isBuyoutConfirmModalOpen}
+        message={
+          <p>
+            Are you sure you want to buy this product for{' '}
+            <span className="font-bold">{productAuction.buyoutPrice} $</span>?
+          </p>
+        }
       />
     </div>
   );

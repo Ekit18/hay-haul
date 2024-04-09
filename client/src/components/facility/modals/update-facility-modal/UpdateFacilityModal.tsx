@@ -54,7 +54,7 @@ export function UpdateFacilityModal({
       name: facility.name,
       address: facility.address,
       code: facility.code,
-      farmProductTypes: facility?.productTypes?.map((item) => item.name) || []
+      facilityProductTypes: facility?.productTypes?.map((item) => item.name) || []
     },
     resolver: yupResolver(updateFacilityFormSchema)
   });
@@ -83,13 +83,13 @@ export function UpdateFacilityModal({
         <Form {...form}>
           <div className="flex w-full flex-col items-center justify-center gap-10">
             <div className="flex w-full flex-col gap-4 py-4">
-              {entityTitle === 'Farm' && user.role === UserRole.Farmer && (
+              {user.role !== UserRole.Carrier && (
                 <div className="w-full items-center ">
                   <TagInput
-                    name="farmProductTypes"
+                    name="facilityProductTypes"
                     control={form.control}
                     suggestions={farmProductTypesSuggestions}
-                    labelText="Select farm products"
+                    labelText="Select facility products"
                     noOptionsText="No matching products"
                     allowNew
                     onAdd={handleAdd}

@@ -5,7 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { redisStore } from 'cache-manager-redis-store';
 import { AuthModule } from './auth/auth.module';
 import { Otp } from './auth/otp.entity';
+import { DeliveryOffer } from './delivery-offer/delivery-offer.entity';
 import { DeliveryOfferModule } from './delivery-offer/delivery-offer.module';
+import { DeliveryOrder } from './delivery-order/delivery-order.entity';
 import { DeliveryOrderModule } from './delivery-order/delivery-order.module';
 import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
@@ -78,6 +80,8 @@ import { UserModule } from './user/user.module';
           Notification,
           S3File,
           StripeEntry,
+          DeliveryOrder,
+          DeliveryOffer,
         ],
         // logger: 'simple-console',
         // logging: true,

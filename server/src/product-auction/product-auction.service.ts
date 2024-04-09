@@ -79,6 +79,33 @@ export class ProductAuctionService {
     }
   }
 
+  async findAllPaidAuctions(userId: string) {
+    try {
+      const [data, count] = await this.productAuctionRepository
+        .createQueryBuilder('productAuction')
+        .innerJoinAndSelect('productAuction.product', 'product')
+        .innerJoin('product.facilityDetails', 'facilityDetails')
+        .leftJoinAndSelect('productAuction.deliveryOrder', 'deliveryOrder')
+        .innerJoin('productAuction.currentMaxBid', 'currentMaxBid')
+        .innerJoin('currentMaxBid.user', 'user')
+        .select('productAuction')
+        .where('user.id = :userId', { userId })
+        .andWhere('deliveryOrder.productAuctionId IS NULL')
+        .andWhere('productAuction.auctionStatus = :status', {
+          status: ProductAuctionStatus.Paid,
+        })
+        .getManyAndCount();
+
+      return { data, count };
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        ProductAuctionErrorMessage.FailedFetchProductAuction,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async findOneById(id: string) {
     try {
       const productAuction = await this.productAuctionRepository
@@ -264,10 +291,18 @@ export class ProductAuctionService {
             queryBuilder.andWhere('facilityDetails.userId = :userId', {
               userId,
             });
+
             break;
           case UserRole.Businessman:
             queryBuilder.innerJoinAndSelect('productAuction.bids', 'bids');
             queryBuilder.andWhere('bids.userId = :userId', { userId });
+            queryBuilder.leftJoinAndSelect(
+              'productAuction.deliveryOrder',
+              'deliveryOrder',
+              'deliveryOrder.userId = :userId',
+              { userId },
+            );
+
             break;
         }
       }

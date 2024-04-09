@@ -13,7 +13,6 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
-import { EntityTitle } from '@/lib/enums/entity-title.enum';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -80,14 +79,14 @@ export function CreateFacilityModal({ entityTitle }: CreateFacilityModalProps) {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex w-full flex-col items-center justify-center gap-10">
               <div className="flex w-full flex-col gap-4 py-4">
-                {entityTitle === EntityTitle.Farm && user.role === UserRole.Farmer && (
+                {user.role !== UserRole.Carrier && (
                   <div className="w-full items-center ">
                     <TagInput
-                      name="farmProductTypes"
+                      name="facilityProductTypes"
                       control={form.control}
                       suggestions={farmProductTypesSuggestions}
                       labelText="Select farm products"
-                      noOptionsText="No matching products"
+                      noOptionsText="No facilityhing products"
                       allowNew
                       selectedFn={(item) => ({ value: item, label: item })}
                     />

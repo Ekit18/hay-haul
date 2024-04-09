@@ -1,3 +1,4 @@
+import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { ProductType } from 'src/product-type/product-type.entity';
 import { Product } from 'src/product/product.entity';
@@ -39,4 +40,10 @@ export class FacilityDetails extends Timestamps {
     onDelete: 'CASCADE',
   })
   products: Product[];
+
+  @OneToMany(
+    () => DeliveryOrder,
+    (deliveryOrder) => deliveryOrder.facilityDetails,
+  )
+  deliveryOrders: DeliveryOrder[];
 }

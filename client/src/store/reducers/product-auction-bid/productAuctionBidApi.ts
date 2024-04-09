@@ -5,7 +5,7 @@ import { generatePath } from 'react-router-dom';
 export const productBidApi = api.injectEndpoints({
   endpoints: (build) => ({
     setBid: build.mutation<void, SetBidFormValues>({
-      query: ({ auctionId, price, ...rest }) => ({
+      query: ({ auctionId, price, ..._ }) => ({
         url: generatePath('product-auction-bid/auction/:auctionId', { auctionId }),
         method: 'POST',
         body: { price }

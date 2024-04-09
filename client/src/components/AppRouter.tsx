@@ -34,7 +34,7 @@ export function AppRouter() {
       <Route path="*" element={<Navigate to={AppRoute.General.Main} replace />} />
     </Route>
   );
-  if (user?.role && [UserRole.Farmer, UserRole.Carrier].includes(user.role) && user?.payoutsEnabled === false) {
+  if (user?.role && [UserRole.Farmer, UserRole.Carrier].includes(user.role) && !user?.payoutsEnabled) {
     routes = (
       <Route>
         <Route path={AppRoute.General.StripeRegister} element={<StripeRegisterPage />} />
