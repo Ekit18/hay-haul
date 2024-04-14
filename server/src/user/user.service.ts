@@ -34,6 +34,22 @@ export class UserService {
         .where('user.id = :id', { id })
         .leftJoinAndSelect('user.token', 'token')
         .leftJoinAndSelect('user.stripeEntry', 'stripeEntry')
+        .leftJoinAndSelect(
+          'user.productAuctionPaymentsAsBuyer',
+          'productAuctionPaymentsAsBuyer',
+        )
+        .leftJoinAndSelect(
+          'user.productAuctionPaymentsAsSeller',
+          'productAuctionPaymentsAsSeller',
+        )
+        .leftJoinAndSelect(
+          'productAuctionPaymentsAsBuyer.auction',
+          'auctionAsBuyer',
+        )
+        .leftJoinAndSelect(
+          'productAuctionPaymentsAsSeller.auction',
+          'auctionAsSeller',
+        )
         .getOne();
       return user;
     } catch (error) {

@@ -2,10 +2,12 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Post,
   Req,
   Res,
   UseGuards,
+  forwardRef,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -21,8 +23,9 @@ import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { getSwaggerResponseDescription } from 'src/lib/helpers/getSwaggerResponseDescription';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { PaymentFacadeService } from 'src/payment-facade/payment-facade.service';
 import { ProductAuctionErrorMessage } from 'src/product-auction/product-auction-error-message.enum';
-import { CreatePaymentDto } from './dto/create-product-payment.dto';
+import { CreateProductPaymentDto } from './dto/create-product-payment.dto';
 import { GetAccountStatusResponseDto } from './dto/get-account-status-response.dto';
 import { StripeErrorMessage } from './stripe-error-message.enum';
 import { StripeService } from './stripe.service';
@@ -30,7 +33,29 @@ import { StripeService } from './stripe.service';
 @UseGuards(JwtAuthGuard)
 @Controller('stripe')
 export class StripeController {
-  constructor(private stripeService: StripeService) {}
+  constructor(
+    private stripeService: StripeService,
+    @Inject(forwardRef(() => PaymentFacadeService))
+    private paymentFacadeService: PaymentFacadeService,
+  ) {}
+
+  @ApiOperation({
+    summary: 'Endpoint for Stripe Webhook on successful payment',
+  })
+  @ApiCreatedResponse({
+    description: 'Stripe payment record created successfully',
+  })
+  @Post('webhook/payment_succeeded')
+  webhookPaymentSucceeded(
+    @Body('payment_intent') paymentIntentId: string,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    console.log('payment_intent', paymentIntentId);
+    return this.paymentFacadeService.savePaymentByIntentId(
+      paymentIntentId,
+      request.user.id,
+    );
+  }
 
   @ApiOperation({ summary: 'Request new Stripe link' })
   @ApiCreatedResponse({
@@ -96,13 +121,14 @@ export class StripeController {
   @Post('payment')
   async sdf(
     @Req() request: AuthenticatedRequest,
-    @Body() { auctionId }: CreatePaymentDto,
+    @Body() { auctionId }: CreateProductPaymentDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     const tokenDto = await this.stripeService.createProductPayment({
       request,
       auctionId,
     });
+
     res.json(tokenDto);
   }
 

@@ -14,7 +14,6 @@ import { FacilityDetailsService } from 'src/facility-details/facility-details.se
 import { OtpType } from 'src/lib/enums/enums';
 import { TokenPayload } from 'src/lib/types/token-payload.type';
 import { ProductTypeService } from 'src/product-type/product-type.service';
-import { StripeErrorMessage } from 'src/stripe/stripe-error-message.enum';
 import { StripeService } from 'src/stripe/stripe.service';
 import { TokenTypeEnum } from 'src/token/token-type.enum';
 import { TokenService } from 'src/token/token.service';
@@ -73,12 +72,54 @@ export class AuthService {
       expires: getCookieExpireDate(this.jwtRefreshTokenExpire),
     });
 
+    // if ([UserRole.Farmer, UserRole.Carrier].includes(user.role)) {
+    // const stripeAccount = await this.stripeService.createAccount({
+    //   params: { type: 'standard', email: user.email },
+    // });
+
+    //   const stripeAccountLink = await this.stripeService.linkAccount({
+    //     params: {
+    //       account: stripeAccount.id,
+    //       return_url: `${request.headers.origin}/return/${stripeAccount.id}`,
+    //       refresh_url: `${request.headers.origin}/refresh/${stripeAccount.id}`,
+    //       type: 'account_onboarding',
+    //     },
+    //   });
+
+    //   await this.stripeService.createEntry({
+    //     userId: user.id,
+    //     accountId: stripeAccount.id,
+    //     linkExpiresAt: new Date(stripeAccountLink.expires_at * 1000),
+    //     linkUrl: stripeAccountLink.url,
+    //   });
+
+    //   return { accessToken };
+    // }
+
     if ([UserRole.Farmer, UserRole.Carrier].includes(user.role)) {
       let stripeEntry = await this.stripeService.findOneByUserId(user.id);
       if (!stripeEntry) {
-        throw new UnauthorizedException({
-          message: StripeErrorMessage.SellerStripeEntryNotFound,
+        const stripeAccount = await this.stripeService.createAccount({
+          params: { type: 'standard', email: user.email },
         });
+        const stripeAccountLink = await this.stripeService.linkAccount({
+          params: {
+            account: stripeAccount.id,
+            return_url: `${request.headers.origin}/return/${stripeAccount.id}`,
+            refresh_url: `${request.headers.origin}/refresh/${stripeAccount.id}`,
+            type: 'account_onboarding',
+          },
+        });
+
+        stripeEntry = await this.stripeService.createEntry({
+          userId: user.id,
+          accountId: stripeAccount.id,
+          linkExpiresAt: new Date(stripeAccountLink.expires_at * 1000),
+          linkUrl: stripeAccountLink.url,
+        });
+        // throw new UnauthorizedException({
+        //   message: StripeErrorMessage.SellerStripeEntryNotFound,
+        // });
       }
       if (
         !stripeEntry.payoutsEnabled &&
@@ -184,30 +225,6 @@ export class AuthService {
       isVerified: false,
       type: OtpType.REGISTER,
     });
-
-    if ([UserRole.Farmer, UserRole.Carrier].includes(user.role)) {
-      const stripeAccount = await this.stripeService.createAccount({
-        params: { type: 'standard', email: user.email },
-      });
-
-      const stripeAccountLink = await this.stripeService.linkAccount({
-        params: {
-          account: stripeAccount.id,
-          return_url: `${request.headers.origin}/return/${stripeAccount.id}`,
-          refresh_url: `${request.headers.origin}/refresh/${stripeAccount.id}`,
-          type: 'account_onboarding',
-        },
-      });
-
-      await this.stripeService.createEntry({
-        userId: user.id,
-        accountId: stripeAccount.id,
-        linkExpiresAt: new Date(stripeAccountLink.expires_at * 1000),
-        linkUrl: stripeAccountLink.url,
-      });
-
-      return { accessToken };
-    }
 
     // await this.emailService.sendEmail({
     //   to: user.email,

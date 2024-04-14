@@ -16,6 +16,11 @@ import {
 
 export enum DeliveryOrderStatus {
   Inactive = 'Inactive',
+  Active = 'Active',
+  WaitingPayment = 'WaitingPayment',
+  Paid = 'Paid',
+  Delivering = 'Delivering',
+  Delivered = 'Delivered',
 }
 
 const statuses = Object.values(DeliveryOrderStatus)

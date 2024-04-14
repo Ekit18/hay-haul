@@ -83,12 +83,12 @@ export class ProductAuctionService {
     try {
       const [data, count] = await this.productAuctionRepository
         .createQueryBuilder('productAuction')
-        .innerJoinAndSelect('productAuction.product', 'product')
-        .innerJoin('product.facilityDetails', 'facilityDetails')
+        .leftJoinAndSelect('productAuction.product', 'product')
+        .leftJoinAndSelect('product.productType', 'productType')
         .leftJoinAndSelect('productAuction.deliveryOrder', 'deliveryOrder')
         .innerJoin('productAuction.currentMaxBid', 'currentMaxBid')
         .innerJoin('currentMaxBid.user', 'user')
-        .select('productAuction')
+
         .where('user.id = :userId', { userId })
         .andWhere('deliveryOrder.productAuctionId IS NULL')
         .andWhere('productAuction.auctionStatus = :status', {
@@ -389,11 +389,10 @@ export class ProductAuctionService {
     auctionId,
     dto,
   }: {
-    photos: Express.Multer.File[];
+    photos?: Express.Multer.File[];
     auctionId: string;
     dto: UpdateProductAuctionDto;
   }) {
-    // TODO: check if auction is user's auction
     const auction = await this.productAuctionRepository.findOne({
       where: { id: auctionId },
       relations: {
@@ -402,6 +401,7 @@ export class ProductAuctionService {
         currentMaxBid: true,
       },
     });
+
     if (
       auction.auctionStatus !== ProductAuctionStatus.Inactive &&
       auction.auctionStatus !== ProductAuctionStatus.StartSoon
@@ -411,8 +411,11 @@ export class ProductAuctionService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    if (!photos?.length) {
+      return;
+    }
     try {
-      console.log(auction);
       const prevPhotosKeys = auction.photos.map((photo) => photo.key);
       await this.s3FileService.removeByKeys(prevPhotosKeys);
       const fileEntities = await this.s3FileService.create(

@@ -25,6 +25,7 @@ export type DeleteModalProps = {
 
 export function DeleteModal({ open, handleOpenChange, name, deleteCallback, entityTitle }: DeleteModalProps) {
   const user = useAppSelector((state) => state.user.user);
+
   if (!user) {
     return null;
   }
@@ -39,6 +40,7 @@ export function DeleteModal({ open, handleOpenChange, name, deleteCallback, enti
   });
 
   const onSubmit: SubmitHandler<DeleteFormValues> = async () => deleteCallback();
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">

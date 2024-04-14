@@ -14,6 +14,6 @@ export function AuthLayout({ allowedRoles }: { allowedRoles: UserRole[] }) {
   if (allowedRoles.includes(user.role)) {
     return <Outlet />;
   }
-
+  console.log('//////');
   return null;
 }

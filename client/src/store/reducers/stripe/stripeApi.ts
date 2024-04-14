@@ -1,4 +1,4 @@
-import { api } from '@/store/api';
+import { TagType, api } from '@/store/api';
 import { TokenResponse } from '../user/userApi';
 
 export type RecreateLinkResponseDto = {
@@ -19,6 +19,14 @@ export type CreatePaymentResponseDto = {
 
 export const stripeApi = api.injectEndpoints({
   endpoints: (builder) => ({
+    paymentSuccessHook: builder.mutation<void, string>({
+      query: (paymentIntentId: string) => ({
+        url: '/stripe/webhook/payment_succeeded',
+        method: 'POST',
+        body: { payment_intent: paymentIntentId }
+      }),
+      invalidatesTags: [TagType.ProductAuction]
+    }),
     createPayment: builder.mutation<CreatePaymentResponseDto, CreatePaymentRequestDto>({
       query: ({ auctionId }) => ({
         url: '/stripe/payment',

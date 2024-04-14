@@ -24,8 +24,8 @@ import { productAuctionApi } from '@/store/reducers/product-auction/productAucti
 import { yupResolver } from '@hookform/resolvers/yup';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { addDays, format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { useState } from 'react';
+import { CalendarIcon, InfoIcon } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
   CreateDeliveryOrderValues,
@@ -91,13 +91,34 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
       .then(() => {
         toast({
           variant: 'success',
-          title: 'Product created',
-          description: 'Product has been created successfully.'
+          title: 'Delivery order created',
+          description: 'Delivery order has been created successfully.'
         });
       })
       .finally(() => handleOpenChange(false))
       .catch(handleRtkError);
   };
+
+  const depotId = form.watch('depotId');
+  const productAuctionId = form.watch('auctionId');
+
+  const isSuitable = useMemo(() => {
+    const depot = depots?.find((depot) => depot.id === depotId);
+    const auction = paidAuctions?.data.find((auction) => auction.id === productAuctionId);
+
+    if (
+      !depotId ||
+      !productAuctionId ||
+      !depot ||
+      !auction ||
+      !depot?.productTypes ||
+      depot?.productTypes?.length === 0
+    )
+      return false;
+
+    const regex = new RegExp(auction.product.productType.name.toLowerCase());
+    return depot.productTypes.some((productType) => productType.name.toLowerCase().search(regex) !== -1);
+  }, [depotId, productAuctionId]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -122,6 +143,16 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
                 )}
               </div>
               <div className="w-full items-center ">
+                {!isSuitable && productAuctionId && depotId && (
+                  <div className=" flex gap-2 rounded bg-blue-500 p-4  text-white">
+                    <InfoIcon />
+                    <div>
+                      <h4 className="text-sm font-medium">This depot is not suitable for this product</h4>
+                      <p className="text-xs">Are you sure you want to use this depot for this product?</p>
+                    </div>
+                  </div>
+                )}
+
                 <FilterSelect<CreateDeliveryOrderValues, FacilityDetails[]>
                   fieldName="depotId"
                   title="Depot"
@@ -175,27 +206,30 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
                   name={'desiredPrice'}
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel className="block">Choose desired delivery price</FormLabel>
                       <FormControl>
                         <Input
                           className="w-full"
-                          placeholder="Min"
+                          placeholder="Desired price"
                           {...field}
                           onBlur={(e) => {
                             if (e.target.value === '') {
-                              field.onChange(e.target.value);
+                              field.onChange(undefined);
                               return;
                             }
-                            field.onChange(e.target.value);
+                            field.onChange(0);
                           }}
                           onChange={(e) => {
                             if (Number.isNaN(e.target.valueAsNumber)) {
-                              field.onChange(e.target.value);
+                              field.onChange(undefined);
                               return;
                             }
+
                             if (e.target.valueAsNumber <= 0) {
                               return;
                             }
-                            field.onChange(e.target.value);
+
+                            field.onChange(e.target.valueAsNumber);
                           }}
                           value={field.value || ''}
                           type="number"
@@ -208,7 +242,12 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
               </div>
             </div>
             <DialogFooter className="flex w-full justify-end">
-              <Button type="button" onClick={form.handleSubmit(onSubmit)} className="px-10">
+              <Button
+                type="button"
+                onClick={form.handleSubmit(onSubmit)}
+                className="px-10"
+                // disabled={!paidAuctions?.data.length}
+              >
                 Create
               </Button>
             </DialogFooter>

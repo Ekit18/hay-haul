@@ -1,6 +1,7 @@
 import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { Notification } from 'src/notification/notification.entity';
 import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
+import { ProductAuctionPayment } from 'src/product-auction-payment/product-auction-payment.entity';
 import { Product } from 'src/product/product.entity';
 import { S3File } from 'src/s3-file/s3-file.entity';
 import {
@@ -91,4 +92,7 @@ export class ProductAuction {
 
   @OneToMany(() => S3File, (file) => file.productAuction)
   photos: S3File[];
+
+  @OneToOne(() => ProductAuctionPayment, (payment) => payment.auction)
+  payment: ProductAuctionPayment;
 }

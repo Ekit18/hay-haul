@@ -15,8 +15,11 @@ import { FacilityDetailsModule } from './facility-details/facility-details.modul
 import { FunctionService } from './function/function.service';
 import { Notification } from './notification/notification.entity';
 import { NotificationModule } from './notification/notification.module';
+import { PaymentFacadeModule } from './payment-facade/payment-facade.module';
 import { ProductAuctionBid } from './product-auction-bid/product-auction-bid.entity';
 import { ProductAuctionBidModule } from './product-auction-bid/product-auction-bid.module';
+import { ProductAuctionPayment } from './product-auction-payment/product-auction-payment.entity';
+import { ProductAuctionPaymentModule } from './product-auction-payment/product-auction-payment.module';
 import { ProductAuctionCronModule } from './product-auction/product-auction-cron/cron.module';
 import { ProductAuction } from './product-auction/product-auction.entity';
 import { ProductAuctionModule } from './product-auction/product-auction.module';
@@ -81,6 +84,7 @@ import { UserModule } from './user/user.module';
           S3File,
           StripeEntry,
           DeliveryOrder,
+          ProductAuctionPayment,
           DeliveryOffer,
         ],
         // logger: 'simple-console',
@@ -111,6 +115,8 @@ import { UserModule } from './user/user.module';
     StripeModule,
     DeliveryOrderModule,
     DeliveryOfferModule,
+    ProductAuctionPaymentModule,
+    PaymentFacadeModule,
   ],
   providers: [TriggerService, FunctionService],
 })

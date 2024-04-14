@@ -7,7 +7,6 @@ import {
   ProductAuctionStatusValues
 } from '@/lib/types/ProductAuction/ProductAuction.type';
 
-import { CreateDeliveryOrderModalHOC } from '@/components/delivery-order/modals/create-delivery-order/CreateDeliveryOrderModal';
 import { AppRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -182,7 +181,17 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
           )}
           {isAuctionWinner &&
             productAuction.auctionStatus === ProductAuctionStatus.Paid &&
-            !productAuction.deliveryOrder && <CreateDeliveryOrderModalHOC auctionId={productAuction.id} />}
+            !productAuction.deliveryOrder && (
+              <Button
+                onClick={() =>
+                  navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: productAuction.id }))
+                }
+                type="button"
+                className="w-full bg-green-700"
+              >
+                Create delivery order
+              </Button>
+            )}
           {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
             <>
               <Button

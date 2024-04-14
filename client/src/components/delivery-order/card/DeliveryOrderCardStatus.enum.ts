@@ -5,5 +5,10 @@ export type DeliveryOrderStatusType = {
 };
 
 export const deliveryOrderStatus: DeliveryOrderStatusType = {
-  [DeliveryOrderStatus.Inactive]: 'bg-gray-400 text-white'
+  [DeliveryOrderStatus.Inactive]: 'bg-gray-400 text-white',
+  [DeliveryOrderStatus.Active]: 'bg-green-500 text-white',
+  [DeliveryOrderStatus.WaitingPayment]: 'bg-yellow-400',
+  [DeliveryOrderStatus.Paid]: 'bg-green-700 text-white',
+  [DeliveryOrderStatus.Delivering]: 'bg-purple-600 text-white',
+  [DeliveryOrderStatus.Delivered]: 'bg-blue-500 text-white'
 };

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { addHours, isPast, subHours } from 'date-fns';
+import { isPast, subHours } from 'date-fns';
 import { EmailService } from 'src/email/services/email.service';
 import { ServerEventName } from 'src/lib/enums/enums';
 import { NotificationService } from 'src/notification/notification.service';
@@ -37,7 +37,6 @@ export class ProductAuctionCronService {
       const now = new Date();
       now.setMilliseconds(0);
       now.setSeconds(0);
-      const oneHourFromNow = addHours(now, 1);
 
       const auctionsToUpdate = await this.productAuctionRepository
         .createQueryBuilder('productAuction')

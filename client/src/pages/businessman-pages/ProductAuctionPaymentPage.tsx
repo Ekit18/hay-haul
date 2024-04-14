@@ -1,4 +1,3 @@
-import { stripePromise } from '@/App';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
@@ -8,10 +7,13 @@ import { productAuctionApi } from '@/store/reducers/product-auction/productAucti
 import { stripeApi } from '@/store/reducers/stripe/stripeApi';
 import { QueryStatus } from '@reduxjs/toolkit/query';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { StripeElementsOptions } from '@stripe/stripe-js';
+import { StripeElementsOptions, StripeError, loadStripe } from '@stripe/stripe-js';
+import capitalize from 'lodash.capitalize';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+
+export const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export function StripeProductAuctionPaymentPage() {
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,7 @@ export function StripeProductAuctionPaymentPage() {
     stripeApi.useCreatePaymentMutation();
 
   const { auctionId } = useParams();
+
   useEffect(() => {
     if (!auctionId) {
       return;
@@ -40,18 +43,16 @@ export function StripeProductAuctionPaymentPage() {
     );
   }, [auctionQueryStatus, createPaymentMutationStatus]);
 
-  console.log(
-    'user?.stripeAccountId, import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY',
-    auction?.product.facilityDetails.user?.id,
-    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+  const options: StripeElementsOptions | null = useMemo(
+    () =>
+      createPaymentResponse?.clientSecret
+        ? {
+            clientSecret: createPaymentResponse?.clientSecret,
+            appearance: {}
+          }
+        : null,
+    [createPaymentResponse?.clientSecret]
   );
-
-  const options: StripeElementsOptions | null = createPaymentResponse?.clientSecret
-    ? {
-        clientSecret: createPaymentResponse?.clientSecret,
-        appearance: {}
-      }
-    : null;
 
   useEffect(() => {
     if (
@@ -94,6 +95,30 @@ export function StripeProductAuctionPaymentPage() {
         <div className="bg-white p-4">
           <h2 className="mb-9 mt-6 text-3xl font-bold">Payment page</h2>
         </div>
+        <div className="w-full p-4">
+          <div className="grid h-full w-full grid-cols-3 gap-4">
+            <div className="flex h-full flex-col justify-between border-b-2 text-center">
+              <span className="border-b-2 text-center">Auction image</span>
+              <img
+                className="m-auto w-[200px] rounded-t-lg  object-cover min-[1068px]:h-full min-[1068px]:rounded-l-lg min-[1068px]:rounded-tr-none"
+                src={auction?.photos[0]?.signedUrl}
+                alt={auction.product.name}
+              />
+            </div>
+            <div className="flex h-full flex-col justify-between border-b-2 text-center">
+              <span className="border-b-2">Auction name</span>
+              <div className="m-auto">
+                <span>
+                  {capitalize(auction.product.name)} by {capitalize(auction.product.facilityDetails.name)}
+                </span>
+              </div>
+            </div>
+            <div className="flex h-full flex-col border-b-2 text-center">
+              <span className="border-b-2">Charge amount</span>
+              <span className="m-auto text-2xl font-bold">{auction.currentMaxBid?.price} USD</span>
+            </div>
+          </div>
+        </div>
         {stripePromise !== null && options !== null && (
           <Elements stripe={stripePromise} options={options}>
             <CheckoutForm />
@@ -111,47 +136,16 @@ export function CheckoutForm() {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+  const { auctionId } = useParams();
+
   useEffect(() => {
-    if (!stripe) {
-      return;
+    if (errorMessage) {
+      toast({ variant: 'destructive', title: 'Stripe error', description: errorMessage });
     }
+  }, [errorMessage]);
 
-    // Retrieve the "payment_intent_client_secret" query parameter appended to
-    // your return_url by Stripe.js
-    const clientSecret = new URLSearchParams(window.location.search).get('payment_intent_client_secret');
-
-    // Retrieve the PaymentIntent
-    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
-      // Inspect the PaymentIntent `status` to indicate the status of the payment
-      // to your customer.
-      //
-      // Some payment methods will [immediately succeed or fail][0] upon
-      // confirmation, while others will first enter a `processing` state.
-      //
-      // [0]: https://stripe.com/docs/payments/payment-methods#payment-notification
-      switch (paymentIntent.status) {
-        case 'succeeded':
-          setMessage('Success! Payment received.');
-          break;
-
-        case 'processing':
-          setMessage("Payment processing. We'll update you when payment is received.");
-          break;
-
-        case 'requires_payment_method':
-          // Redirect your user back to your payment page to attempt collecting
-          // payment again
-          setMessage('Payment failed. Please try another payment method.');
-          break;
-
-        default:
-          setMessage('Something went wrong.');
-          break;
-      }
-    });
-  }, [stripe]);
-
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     // We don't want to let default form submission happen here,
     // which would refresh the page.
     event.preventDefault();
@@ -162,31 +156,42 @@ export function CheckoutForm() {
       return;
     }
 
-    const { error } = await stripe.confirmPayment({
-      //`Elements` instance that was used to create the Payment Element
-      elements,
-      confirmParams: {
-        //TODO: change return_url
-        return_url: 'localhost:5173/product-auction/payment-completed'
-      }
-    });
+    try {
+      const { error } = await stripe.confirmPayment({
+        //`Elements` instance that was used to create the Payment Element
+        elements,
+        confirmParams: {
+          //TODO: change return_url
+          // return_url: 'https://google.com'
+          return_url: `http://localhost:5173/auction-details/${auctionId ?? ''}`
+        }
+      });
 
-    if (error) {
-      // This point will only be reached if there is an immediate error when
-      // confirming the payment. Show error to your customer (for example, payment
-      // details incomplete)
-      setErrorMessage(error?.message || null);
-    } else {
-      // Your customer will be redirected to your `return_url`. For some payment
-      // methods like iDEAL, your customer will be redirected to an intermediate
-      // site first to authorize the payment, then redirected to the `return_url`.
+      if (error) {
+        console.log('just error', error);
+        // This point will only be reached if there is an immediate error when
+        // confirming the payment. Show error to your customer (for example, payment
+        // details incomplete)
+        setErrorMessage(error?.message || null);
+      } else {
+        // Your customer will be redirected to your `return_url`. For some payment
+        // methods like iDEAL, your customer will be redirected to an intermediate
+        // site first to authorize the payment, then redirected to the `return_url`.
+      }
+    } catch (error) {
+      console.log('real error', error);
+      setErrorMessage((error as StripeError)?.message || null);
     }
   };
 
   return (
-    <form>
-      <PaymentElement />
-      <Button>Submit</Button>
-    </form>
+    <div className="px-12">
+      <form onSubmit={handleSubmit}>
+        <PaymentElement />
+        <Button className="mt-8" type="submit">
+          Submit
+        </Button>
+      </form>
+    </div>
   );
 }

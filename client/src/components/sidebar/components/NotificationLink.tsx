@@ -33,7 +33,7 @@ export function NotificationLink() {
           </div>
         )}
       </div>
-      Notifs
+      Notifications
     </Button>
   );
 }

@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class CreatePaymentDto {
+export class CreateProductPaymentDto {
   @IsString()
   auctionId: string;
 }

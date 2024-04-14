@@ -9,6 +9,7 @@ import {
   PackageSearch,
   Tractor,
   Truck,
+  WalletCards,
   Warehouse
 } from 'lucide-react';
 
@@ -48,6 +49,11 @@ export const links: Links = {
       title: 'My auctions',
       url: AppRoute.General.MyAuctions,
       icon: ArrowRightLeft
+    },
+    {
+      title: 'Payments',
+      url: AppRoute.General.Payments,
+      icon: WalletCards
     }
   ],
   [UserRole.Businessman]: [
@@ -80,6 +86,11 @@ export const links: Links = {
       title: 'Auctions',
       url: AppRoute.General.Auctions,
       icon: BadgeDollarSign
+    },
+    {
+      title: 'Payments',
+      url: AppRoute.General.Payments,
+      icon: WalletCards
     }
   ],
   [UserRole.Carrier]: [
@@ -87,6 +98,16 @@ export const links: Links = {
       title: 'Home',
       url: AppRoute.General.Main,
       icon: Home
+    },
+    {
+      title: 'Delivery',
+      url: AppRoute.Businessman.Delivery,
+      icon: Truck
+    },
+    {
+      title: 'Payments',
+      url: AppRoute.General.Payments,
+      icon: WalletCards
     }
   ],
   [UserRole.Driver]: [

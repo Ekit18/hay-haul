@@ -6,26 +6,46 @@ import { StripeRefreshPage } from '@/pages/StripeRefreshPage';
 import { StripeRegisterPage } from '@/pages/StripeRegisterPage';
 import { StripeReturnPage } from '@/pages/StripeReturnPage';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { authRoutes, businessRoutes, farmerRoutes, generalRoutes } from '../routes';
+import { authRoutes, businessRoutes, carrierRoutes, farmerRoutes, generalRoutes } from '../routes';
 import { AuthLayout } from './layouts/AuthLayout';
 import { SidebarLayout } from './layouts/SidebarLayout';
+
+const roleToRoutes = {
+  [UserRole.Farmer]: farmerRoutes,
+  [UserRole.Businessman]: businessRoutes,
+  [UserRole.Carrier]: carrierRoutes,
+  [UserRole.Driver]: []
+};
 
 export function AppRouter() {
   const user = useAppSelector((state) => state.user.user);
 
-  // console.log('router user', user);
   let routes = (
     <Route element={<SidebarLayout />}>
-      <Route element={<AuthLayout allowedRoles={[UserRole.Farmer]} />}>
-        {farmerRoutes.map(({ path, Component }) => (
-          <Route key={path + UserRole.Farmer} path={path} element={<Component />} />
-        ))}
+      {user?.role && (
+        <Route element={<AuthLayout allowedRoles={[user.role]} />}>
+          {roleToRoutes[user.role].map(({ path, Component }) => {
+            return <Route key={path + user.role} path={path} element={<Component />} />;
+          })}
+        </Route>
+      )}
+      {/* <Route element={<AuthLayout allowedRoles={[UserRole.Farmer]} />}>
+        {farmerRoutes.map(({ path, Component }) => {
+          console.log('aaaaaaaaaaaa');
+          return <Route key={path + UserRole.Farmer} path={path} element={<Component />} />;
+        })}
       </Route>
       <Route element={<AuthLayout allowedRoles={[UserRole.Businessman]} />}>
-        {businessRoutes.map(({ path, Component }) => (
-          <Route key={path + UserRole.Businessman} path={path} element={<Component />} />
-        ))}
+        {businessRoutes.map(({ path, Component }) => {
+          return <Route key={path + UserRole.Businessman} path={path} element={<Component />} />;
+        })}
       </Route>
+      <Route element={<AuthLayout allowedRoles={[UserRole.Carrier]} />}>
+        {carrierRoutes.map(({ path, Component }) => (
+          <Route key={path + UserRole.Businessman} path={path} element={<Component />} />
+        ))} */}
+      {/* </Route> */}
+      {/* TODO: Remake the logic of general rotes so, for example only farmer and businessman can access auction route */}
       <Route element={<AuthLayout allowedRoles={Object.values(UserRole)} />}>
         {generalRoutes.map(({ path, Component }) => (
           <Route key={path} path={path} element={<Component />} />
@@ -54,7 +74,7 @@ export function AppRouter() {
   return (
     <Routes>
       {!user && authRoutes.map(({ path, Component }) => <Route key={path} path={path} element={<Component />} />)}
-      {routes}
+      {user && routes}
       <Route path="*" element={<Navigate to={AppRoute.General.SignIn} replace />} />
     </Routes>
   );

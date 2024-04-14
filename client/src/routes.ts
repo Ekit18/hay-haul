@@ -2,7 +2,9 @@ import React from 'react';
 import { AppRoute } from './lib/constants/routes';
 import { AllAuction } from './pages/AllAuctions';
 import { AuctionDetailsPage } from './pages/AuctionDetailsPage';
+import { DeliveryOrderDetails } from './pages/DeliveryOrderDetails';
 import { Notifications } from './pages/Notifications';
+import { PaymentsPage } from './pages/PaymentsPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
@@ -13,8 +15,8 @@ import { DeliveryOrder } from './pages/businessman-pages/DeliveryOrder';
 import { Depots } from './pages/businessman-pages/Depots';
 import { MainPage as BusinessmanMainPage } from './pages/businessman-pages/MainPage';
 import { MyBids } from './pages/businessman-pages/MyBids';
-import { ProductAuctionPaymentCompletedPage } from './pages/businessman-pages/ProductAuctionPaymentCompletedPage';
 import { StripeProductAuctionPaymentPage } from './pages/businessman-pages/ProductAuctionPaymentPage';
+import { MainPage as CarrierMainPage } from './pages/carrier-pages/MainPage';
 import { CreateAuction } from './pages/farmer-pages/CreateAuction';
 import { Farms } from './pages/farmer-pages/Farms';
 import { MainPage as FarmerMainPage } from './pages/farmer-pages/MainPage';
@@ -29,16 +31,12 @@ type Route = {
 
 export const generalRoutes: Route[] = [
   {
-    path: AppRoute.General.Auctions,
-    Component: AllAuction
-  },
-  {
-    path: AppRoute.General.AuctionDetails,
-    Component: AuctionDetailsPage
-  },
-  {
     path: AppRoute.General.Notifications,
     Component: Notifications
+  },
+  {
+    path: AppRoute.General.Payments,
+    Component: PaymentsPage
   },
   {
     path: AppRoute.General.StripeRefresh,
@@ -51,6 +49,21 @@ export const generalRoutes: Route[] = [
   {
     path: AppRoute.General.StripeReturn,
     Component: StripeReturnPage
+  },
+  {
+    path: AppRoute.General.DeliveryOrder,
+    Component: DeliveryOrderDetails
+  }
+];
+
+export const carrierRoutes: Route[] = [
+  {
+    path: AppRoute.General.Main,
+    Component: CarrierMainPage
+  },
+  {
+    path: AppRoute.Businessman.Delivery,
+    Component: DeliveryOrder
   }
 ];
 
@@ -58,10 +71,6 @@ export const businessRoutes: Route[] = [
   {
     path: AppRoute.General.Main,
     Component: BusinessmanMainPage
-  },
-  {
-    path: AppRoute.Businessman.ProductAuctionPaymentCompletedPage,
-    Component: ProductAuctionPaymentCompletedPage
   },
   {
     path: AppRoute.Businessman.ProductAuctionPaymentPage,
@@ -78,6 +87,14 @@ export const businessRoutes: Route[] = [
   {
     path: AppRoute.Businessman.Delivery,
     Component: DeliveryOrder
+  },
+  {
+    path: AppRoute.General.Auctions,
+    Component: AllAuction
+  },
+  {
+    path: AppRoute.General.AuctionDetails,
+    Component: AuctionDetailsPage
   }
 ];
 
@@ -105,6 +122,14 @@ export const farmerRoutes: Route[] = [
   {
     path: AppRoute.Farmer.UpdateAuction,
     Component: UpdateAuction
+  },
+  {
+    path: AppRoute.General.Auctions,
+    Component: AllAuction
+  },
+  {
+    path: AppRoute.General.AuctionDetails,
+    Component: AuctionDetailsPage
   }
   // {
   //   path: AppRoute.Farmer.Farms,

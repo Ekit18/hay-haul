@@ -6,15 +6,12 @@ import { useAppDispatch, useAppSelector } from './lib/hooks/redux';
 import { cn } from './lib/utils';
 import { setUser } from './store/reducers/user/userSlice';
 // eslint-disable-next-line camelcase
-import { Stripe, loadStripe } from '@stripe/stripe-js';
 import jwt_decode from 'jwt-decode';
 import { handleRtkError } from './lib/helpers/handleRtkError';
 import { socket } from './lib/helpers/socketService';
 import { UserToken } from './lib/types/User/User.type';
 import { setAccessToken } from './store/reducers/token/tokenSlice';
 import { userApi } from './store/reducers/user/userApi';
-
-export const stripePromise: Promise<Stripe | null> = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function App() {
   const token = useAppSelector((state) => state.accessToken.accessToken);

@@ -122,11 +122,6 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
 
   const handleDeleteModalOpenChange = useCallback((open: boolean) => setIsDeleteModalOpen(open), []);
 
-  const deleteModalConfirmName = useMemo<string>(
-    () => currentProductAuction?.product.name ?? '>',
-    [currentProductAuction]
-  );
-
   const handleDeleteClick = (facility: ProductAuction) => {
     setCurrentProductAuction(facility);
     setIsDeleteModalOpen(true);
@@ -150,6 +145,30 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
       .catch(handleRtkError);
   };
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const hasMore = useMemo(() => currentPage < data?.count, [currentPage, data?.count]);
+
+  const observer = useRef<IntersectionObserver>();
+  const lastProductAuctionRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (isLoading || isFetching) return;
+
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setCurrentPage((prev) => prev + 1);
+          form.setValue('offset', currentPage * 10);
+          // trigger(new URLSearchParams(form.getValues())).unwrap().catch(handleRtkError);
+          console.log('visible');
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, isFetching, hasMore]
+  );
+
   return (
     <div className="h-full bg-gray-100 pb-4">
       <Form {...form}>
@@ -160,7 +179,7 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
           </div>
           <div
             className={cn(
-              'grid w-full grid-cols-1 gap-4 bg-gray-100 px-4 pt-5',
+              'grid w-full grid-cols-1 gap-4 bg-gray-100 px-4 py-5',
               data?.data && data?.data.length >= 3 && 'pb-5'
             )}
           >
@@ -170,13 +189,15 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
                 <ProductAuctionCardSkeleton key={value} />
               ))}
 
-            {data?.data.map((productAuction) => (
-              <ProductAuctionCard
-                key={productAuction.id}
-                productAuction={productAuction}
-                onDeleteClick={() => handleDeleteClick(productAuction)}
-              />
-            ))}
+            {data?.data.map((productAuction) => {
+              return (
+                <ProductAuctionCard
+                  key={productAuction.id}
+                  productAuction={productAuction}
+                  onDeleteClick={() => handleDeleteClick(productAuction)}
+                />
+              );
+            })}
 
             {data?.data.length === 0 && (
               <div className="text-center">
@@ -184,6 +205,7 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
                 <p>Try changing the filters</p>
               </div>
             )}
+            <div ref={lastProductAuctionRef}>...</div>
           </div>
         </form>
       </Form>
@@ -192,7 +214,7 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
           <DeleteModal
             handleOpenChange={handleDeleteModalOpenChange}
             open={isDeleteModalOpen}
-            name={deleteModalConfirmName}
+            name={currentProductAuction?.product.name}
             entityTitle={EntityTitle.ProductAuction}
             deleteCallback={handleDeleteProductAuction}
           />

@@ -1,10 +1,12 @@
+import { IsEnum, IsString } from 'class-validator';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
+import { PaymentTargetType } from 'src/lib/enums/enums';
 import { User } from 'src/user/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -28,7 +30,18 @@ export class StripeEntry extends Timestamps {
   @Column({ unique: true })
   userId: string;
 
-  @OneToOne(() => User, (user) => user.stripeEntry)
+  @ManyToOne(() => User, (user) => user.stripeEntry)
   @JoinColumn({ name: 'userId' })
   user: User;
+}
+
+export class PaymentIntentMetadata {
+  @IsEnum(PaymentTargetType)
+  paymentTarget: PaymentTargetType;
+  @IsString()
+  targetId: string;
+  @IsString()
+  buyerId: string;
+  @IsString()
+  sellerId: string;
 }

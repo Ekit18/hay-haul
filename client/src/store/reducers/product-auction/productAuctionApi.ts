@@ -68,7 +68,34 @@ export const productAuctionApi = api.injectEndpoints({
       query: (searchParams) => ({
         url: 'product-auction/filter/farmer',
         params: searchParams
+        // forceRefetch({ currentArg, previousArg }) {
+        //   return currentArg.get('offset') !== previousArg.get('offset');
+        // },
+        // merge: (currentCache, newItems, { arg }) => {
+        //   console.log(newItems.results);
+        //   if (arg.get('offset') !== '0') {
+        //     currentCache.results.push(...newItems.results);
+        //   } else {
+        //     currentCache.results = newItems.results;
+        //   }
+        // },
+        // serializeQueryArgs: ({ endpointName }) => {
+        //   console.log(endpointName);
+        //   return endpointName;
+        // }
       }),
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
+      },
+      // Always merge incoming data to the cache entry
+      merge: (currentCache, newItems) => {
+        console.log(currentCache.data.data);
+        // currentCache.data.data.push(...newItems.data.data);
+      },
+      // Refetch when the page arg changes
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      },
       keepUnusedDataFor: 0,
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]
@@ -78,6 +105,7 @@ export const productAuctionApi = api.injectEndpoints({
         url: 'product-auction/filter/businessman',
         params: searchParams
       }),
+
       keepUnusedDataFor: 0,
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]

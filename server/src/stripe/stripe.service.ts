@@ -9,6 +9,7 @@ import { Request, Response } from 'express';
 import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
 import { TokenResponse } from 'src/auth/dto/token-response.dto';
 import { getCookieExpireDate } from 'src/auth/helpers/get-cookie-expire-date';
+import { PaymentTargetType } from 'src/lib/enums/enums';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { ProductAuctionService } from 'src/product-auction/product-auction.service';
@@ -19,7 +20,7 @@ import { Repository } from 'typeorm';
 import { CreateStripeEntryDto } from './dto/create-stripe-entry.dto';
 import { GetAccountStatusResponseDto } from './dto/get-account-status-response.dto';
 import { StripeErrorMessage } from './stripe-error-message.enum';
-import { StripeEntry } from './stripe.entity';
+import { PaymentIntentMetadata, StripeEntry } from './stripe.entity';
 
 @Injectable()
 export class StripeService {
@@ -39,6 +40,12 @@ export class StripeService {
     this.stripe = new Stripe(configService.getOrThrow('STRIPE_SECRET_KEY'));
   }
 
+  public async getPaymentIntentById(
+    id: string,
+  ): Promise<Stripe.Response<Stripe.PaymentIntent>> {
+    return await this.stripe.paymentIntents.retrieve(id);
+  }
+
   public async createProductPayment({
     request,
     auctionId,
@@ -53,18 +60,27 @@ export class StripeService {
     const stripeEntry = await this.findOneByUserId(
       auction.product.facilityDetails.user.id,
     );
+    const paymentIntentMetadata: Record<keyof PaymentIntentMetadata, string> = {
+      targetId: auction.id,
+      paymentTarget: PaymentTargetType.ProductAuction,
+      buyerId: request.user?.id,
+      sellerId: auction.product.facilityDetails.user.id,
+    };
     const { client_secret: clientSecret } =
       await this.stripe.paymentIntents.create({
-        amount: auction.currentMaxBid.price,
+        amount: auction.currentMaxBid.price * 100,
         currency: 'usd',
+        metadata: paymentIntentMetadata,
+        description: auction.product.name,
         automatic_payment_methods: {
           enabled: true,
         },
+        receipt_email: 'fieldlavender70@gmail.com',
         transfer_data: {
           destination: stripeEntry.accountId,
         },
         application_fee_amount:
-          StripeService.FEE_PERCENT * auction.currentMaxBid.price,
+          StripeService.FEE_PERCENT * auction.currentMaxBid.price * 100,
       });
 
     return { clientSecret };

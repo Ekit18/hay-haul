@@ -21,3 +21,8 @@ export enum ServerEventName {
   Notification = 'notification',
   AuctionUpdated = 'auction_updated',
 }
+
+export enum PaymentTargetType {
+  ProductAuction = 'product_auction',
+  DeliveryOrder = 'delivery_order',
+}

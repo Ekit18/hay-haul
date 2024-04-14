@@ -9,7 +9,7 @@ import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { FacilityDetails } from '@/lib/types/FacilityDetails/FacilityDetails.type';
 import { facilityDetailsApi } from '@/store/reducers/facility-details/facilityDetailsApi';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function Farms() {
   const user = useAppSelector((state) => state.user.user);
@@ -27,8 +27,6 @@ export function Farms() {
   const handleDeleteModalOpenChange = useCallback((open: boolean) => setIsDeleteModalOpen(open), []);
 
   const handleUpdateModalOpenChange = useCallback((open: boolean) => setIsUpdateModalOpen(open), []);
-
-  const deleteModalConfirmName = useMemo<string>(() => currentFacility?.name ?? '>', [currentFacility]);
 
   const handleEditClick = (facility: FacilityDetails) => {
     setCurrentFacility(facility);
@@ -116,7 +114,7 @@ export function Farms() {
           <DeleteModal
             handleOpenChange={handleDeleteModalOpenChange}
             open={isDeleteModalOpen}
-            name={deleteModalConfirmName}
+            name={currentFacility?.name}
             entityTitle={EntityTitle.Farm}
             deleteCallback={deleteCallback}
           />

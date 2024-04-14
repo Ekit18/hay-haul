@@ -1,6 +1,7 @@
 import { ImageCarousel } from '@/components/carousel/ImageCarousel';
 import { ConfirmModal } from '@/components/confirm-modal/ConfirmModal';
 import { DeleteModal } from '@/components/delete-modal/delete-modal';
+import { CreateDeliveryOrderModalHOC } from '@/components/delivery-order/modals/create-delivery-order/CreateDeliveryOrderModal';
 import { productAuctionStatus } from '@/components/product-auction/product-auction-card/ProductAuctionStatus.enum';
 import { SetBidForm } from '@/components/product-auction/set-bid-form/SetBidForm';
 import { SetBidFormValues } from '@/components/product-auction/set-bid-form/validation';
@@ -29,21 +30,98 @@ import {
 import { cn } from '@/lib/utils';
 import { productBidApi } from '@/store/reducers/product-auction-bid/productAuctionBidApi';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
+import { stripeApi } from '@/store/reducers/stripe/stripeApi';
+import { Stripe } from '@stripe/stripe-js';
 import { format, parseISO } from 'date-fns';
 import { Crown, Loader2 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Navigate, generatePath, useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Navigate, generatePath, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { stripePromise } from './businessman-pages/ProductAuctionPaymentPage';
 
 export function AuctionDetailsPage() {
   const user = useAppSelector((state) => state.user.user);
 
   const { auctionId } = useParams();
+
   const navigate = useNavigate();
 
   const [getProductAuction, { data: productAuctionWithCount, isFetching, isError, isLoading }] =
     productAuctionApi.useLazyGetProductAuctionQuery();
 
   const productAuction = productAuctionWithCount?.data[0];
+
+  const [hookPaymentSuccessful] = stripeApi.usePaymentSuccessHookMutation();
+
+  const [_, setSearchParams] = useSearchParams();
+
+  const [stripe, setStripe] = useState<Stripe | null>(null);
+
+  useEffect(() => {
+    stripePromise.then((stripe) => {
+      console.log('STRPE PROMISE');
+      setStripe(stripe);
+    });
+  }, [stripePromise]);
+
+  useEffect(() => {
+    console.log('stripe');
+    console.log(stripe);
+    if (!stripe) {
+      return;
+    }
+
+    // Retrieve the "payment_intent_client_secret" query parameter appended to
+    // your return_url by Stripe.js
+    const searchParams = new URLSearchParams(window.location.search);
+    const clientSecret = searchParams.get('payment_intent_client_secret');
+    const paymentIntentId = searchParams.get('payment_intent');
+
+    if (!clientSecret) {
+      return;
+    }
+
+    // Retrieve the PaymentIntent
+    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
+      if (!paymentIntent) {
+        return;
+      }
+      // Inspect the PaymentIntent `status` to indicate the status of the payment
+      // to your customer.
+      //
+      // Some payment methods will [immediately succeed or fail][0] upon
+      // confirmation, while others will first enter a `processing` state.
+      //
+      // [0]: https://stripe.com/docs/payments/payment-methods#payment-notification
+      switch (paymentIntent.status) {
+        case 'succeeded':
+          if (paymentIntentId) {
+            hookPaymentSuccessful(paymentIntentId)
+              .unwrap()
+              .catch(handleRtkError)
+              .finally(() => {
+                setSearchParams(() => new URLSearchParams());
+              });
+          }
+          toast({ variant: 'success', title: 'Success! Payment received.' });
+          break;
+
+        case 'processing':
+          toast({ variant: 'default', title: "Payment processing. We'll update you when payment is received." });
+          break;
+
+        case 'requires_payment_method':
+          // Redirect your user back to your payment page to attempt collecting
+          // payment again
+          toast({ variant: 'destructive', title: 'Payment failed. Please try another payment method.' });
+          navigate(`http://localhost:5173/product-auction/payment/${auctionId ?? ''}`);
+          break;
+
+        default:
+          toast({ variant: 'destructive', title: 'Something went wrong.' });
+          break;
+      }
+    });
+  }, [stripe]);
 
   useEffect(() => {
     if (!auctionId) {
@@ -56,7 +134,7 @@ export function AuctionDetailsPage() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const handleDeleteModalOpenChange = useCallback((open: boolean) => setIsDeleteModalOpen(open), []);
-  const deleteModalConfirmName = useMemo<string>(() => productAuction?.product.name ?? '>', [productAuction]);
+
   const handleDeleteClick = () => {
     setIsDeleteModalOpen(true);
   };
@@ -243,25 +321,32 @@ export function AuctionDetailsPage() {
                   </Button>
                 ) : (
                   <>
-                    <SetBidForm
-                      isDisabled={isBidButtonsDisabled}
-                      auctionId={auctionId}
-                      currentMaxBid={productAuction.currentMaxBid?.price}
-                      startPrice={productAuction.startPrice}
-                      bidStep={productAuction.bidStep}
-                    />
+                    {!isBidButtonsDisabled && (
+                      <>
+                        <SetBidForm
+                          isDisabled={isBidButtonsDisabled}
+                          auctionId={auctionId}
+                          currentMaxBid={productAuction.currentMaxBid?.price}
+                          startPrice={productAuction.startPrice}
+                          bidStep={productAuction.bidStep}
+                        />
 
-                    <Button
-                      type="button"
-                      disabled={isBidButtonsDisabled}
-                      onClick={handleBuyoutClick}
-                      className="w-full"
-                    >
-                      Buy now for {productAuction.buyoutPrice}$
-                    </Button>
+                        <Button
+                          type="button"
+                          disabled={isBidButtonsDisabled}
+                          onClick={handleBuyoutClick}
+                          className="w-full"
+                        >
+                          Buy now for {productAuction.buyoutPrice}$
+                        </Button>
+                      </>
+                    )}
                   </>
                 )
               ) : null}
+              {isAuctionWinner &&
+                productAuction.auctionStatus === ProductAuctionStatus.Paid &&
+                !productAuction.deliveryOrder && <CreateDeliveryOrderModalHOC auctionId={productAuction.id} />}
               {user?.role === UserRole.Farmer && user?.id === productAuction.product.facilityDetails.user?.id && (
                 <>
                   <Button
@@ -304,7 +389,7 @@ export function AuctionDetailsPage() {
       <DeleteModal
         handleOpenChange={handleDeleteModalOpenChange}
         open={isDeleteModalOpen}
-        name={deleteModalConfirmName}
+        name={productAuction?.product.name}
         entityTitle={EntityTitle.ProductAuction}
         deleteCallback={handleDeleteProductAuction}
       />

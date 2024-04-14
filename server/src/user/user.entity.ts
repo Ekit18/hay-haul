@@ -4,6 +4,7 @@ import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
+import { ProductAuctionPayment } from 'src/product-auction-payment/product-auction-payment.entity';
 import { StripeEntry } from 'src/stripe/stripe.entity';
 import { Token } from 'src/token/token.entity';
 import {
@@ -69,6 +70,18 @@ export class User extends Timestamps {
     (productAuctionBid) => productAuctionBid.user,
   )
   productAuctionBids: ProductAuctionBid[];
+
+  @OneToMany(
+    () => ProductAuctionPayment,
+    (productAuctionPayment) => productAuctionPayment.buyer,
+  )
+  productAuctionPaymentsAsBuyer: ProductAuctionPayment[];
+
+  @OneToMany(
+    () => ProductAuctionPayment,
+    (productAuctionPayment) => productAuctionPayment.seller,
+  )
+  productAuctionPaymentsAsSeller: ProductAuctionPayment[];
 
   @OneToMany(() => Otp, (otp) => otp.user)
   otp: Otp;
