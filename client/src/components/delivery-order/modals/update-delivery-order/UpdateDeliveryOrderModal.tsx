@@ -178,7 +178,6 @@ function UpdateDeliveryOrderModal({ deliveryOrder, open, handleOpenChange }: Upd
                               field.onChange(e.target.value);
                               return;
                             }
-                            field.onChange(e.target.value);
                           }}
                           onChange={(e) => {
                             if (Number.isNaN(e.target.valueAsNumber)) {

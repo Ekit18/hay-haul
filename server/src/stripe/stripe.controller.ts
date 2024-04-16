@@ -51,7 +51,7 @@ export class StripeController {
     @Req() request: AuthenticatedRequest,
   ) {
     console.log('payment_intent', paymentIntentId);
-    return this.paymentFacadeService.savePaymentByIntentId(
+    return this.paymentFacadeService.confirmPaymentByIntentId(
       paymentIntentId,
       request.user.id,
     );

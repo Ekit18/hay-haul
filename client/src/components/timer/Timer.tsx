@@ -7,9 +7,10 @@ import { ClassNameValue } from 'tailwind-merge';
 type TimerProps = {
   toDate: string;
   className?: ClassNameValue;
+  label: string;
 };
 
-export function Timer({ toDate, className }: TimerProps) {
+export function Timer({ toDate, className, label }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export function Timer({ toDate, className }: TimerProps) {
 
       if (diffInSeconds <= 0) {
         clearInterval(intervalId);
-        setTimeLeft('Auction ended');
+        setTimeLeft(label);
         return;
       }
 

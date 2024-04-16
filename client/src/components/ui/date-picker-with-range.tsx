@@ -15,11 +15,13 @@ const LOWEST_YEAR = 1900;
 interface DatePickerWithRangeProps<T extends FieldValues, K extends Path<DateRangeFields<T>>> {
   field: K;
   title: string;
+  disabled?: boolean;
 }
 
 export function DatePickerWithRange<T extends FieldValues, K extends Path<DateRangeFields<T>>>({
   field,
-  title
+  title,
+  disabled = false
 }: DatePickerWithRangeProps<T, K>) {
   const {
     control,
@@ -37,6 +39,7 @@ export function DatePickerWithRange<T extends FieldValues, K extends Path<DateRa
       >
         <Button
           variant="outline"
+          disabled={disabled}
           className={cn(
             'mb-[1px] flex h-auto w-full flex-row items-center justify-start border-0 bg-popover px-4 py-2 text-start last-of-type:border-0 sm:mb-0 xl:odd:border-r-[1px]',
             !!errors[field] && 'shadow-[inset_0px_0px_8px_0px_#ff0000]'

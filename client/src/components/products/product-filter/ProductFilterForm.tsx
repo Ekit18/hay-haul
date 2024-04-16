@@ -84,7 +84,7 @@ export function ProductFilterForm() {
                       {...field}
                       onBlur={(e) => {
                         if (e.target.value === '') {
-                          field.onChange(0);
+                          field.onChange(undefined);
                         }
                       }}
                       onChange={(e) => {
@@ -92,6 +92,7 @@ export function ProductFilterForm() {
 
                         trigger('maxQuantity');
                       }}
+                      value={field.value || ''}
                       type="number"
                     />
                   </FormControl>
@@ -111,7 +112,7 @@ export function ProductFilterForm() {
                       {...field}
                       onBlur={(e) => {
                         if (e.target.value === '') {
-                          field.onChange(0);
+                          field.onChange(undefined);
                         }
                       }}
                       onChange={(e) => {
@@ -119,6 +120,7 @@ export function ProductFilterForm() {
 
                         trigger('minQuantity');
                       }}
+                      value={field.value || ''}
                       type="number"
                     />
                   </FormControl>

@@ -28,9 +28,14 @@ export function Notifications() {
           <Button onClick={handleMarkAllAsRead}>Mark all as read</Button>
         </div>
         <div className="w-full px-4">
-          {notifications?.data.map((notification) => (
-            <NotificationItem key={notification.id} notification={notification} />
-          ))}
+          {notifications?.data && (
+            <>
+              {notifications.data.length === 0 && <p className="mt-4 text-center">No notifications</p>}
+              {notifications.data.map((notification) => (
+                <NotificationItem key={notification.id} notification={notification} />
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

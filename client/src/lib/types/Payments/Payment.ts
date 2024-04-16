@@ -1,9 +1,11 @@
+import { PaymentStatus } from '@/lib/enums/payment-status.enum';
 import { PaymentTargetType } from '@/lib/enums/payment-target-type.enum';
 import { DeliveryOrder } from '../DeliveryOrder/DeliveryOrder.type';
 import { ProductAuction } from '../ProductAuction/ProductAuction.type';
+import { Timestamps } from '../Timestamps/Timestamps';
 import { User } from '../User/User.type';
 
-export type Payment = {
+export type Payment = Timestamps & {
   id: string;
 
   buyerId: string;
@@ -16,7 +18,16 @@ export type Payment = {
 
   amount: number;
 
-  targetType: PaymentTargetType;
+  status: PaymentStatus;
+} & (
+    | {
+        targetType: PaymentTargetType.DeliveryOrder;
 
-  target: ProductAuction | DeliveryOrder;
-};
+        target: DeliveryOrder;
+      }
+    | {
+        targetType: PaymentTargetType.ProductAuction;
+
+        target: ProductAuction;
+      }
+  );

@@ -1,21 +1,35 @@
+import { productAuctionStatus } from '@/components/product-auction/product-auction-card/ProductAuctionStatus.enum';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 import { AppRoute } from '@/lib/constants/routes';
+import { PaymentStatus } from '@/lib/enums/payment-status.enum';
+import { PaymentTargetType } from '@/lib/enums/payment-target-type.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
+import useInfiniteScroll from '@/lib/hooks/useInfiniteScroll';
+import { ProductAuctionStatusText } from '@/lib/types/ProductAuction/ProductAuction.type';
+import { cn } from '@/lib/utils';
 import { paymentsApi } from '@/store/reducers/payments/paymentsApi';
+import { format, parseISO } from 'date-fns';
+import capitalize from 'lodash.capitalize';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { generatePath, useNavigate } from 'react-router-dom';
 
 export function PaymentsPage() {
-  const { data, isLoading, isError, error } = paymentsApi.useGetPaymentsByUserIdQuery();
+  const [getPaymentsByUserId, { data, isLoading, isError, error }] = paymentsApi.useLazyGetPaymentsByUserIdQuery();
+  const { loadMoreRef, page: currentPage } = useInfiniteScroll({ maxPage: data?.count });
+
   const navigate = useNavigate();
-  if (isLoading || data) {
-    return (
-      <div className="flex justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
-      </div>
-    );
-  }
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams();
+
+    if (currentPage) {
+      searchParams.append('offset', (currentPage * 10).toString());
+    }
+
+    getPaymentsByUserId(searchParams);
+  }, [currentPage]);
 
   useEffect(() => {
     if (isError) {
@@ -24,6 +38,99 @@ export function PaymentsPage() {
     }
   }, [isError, error]);
 
+  if (isLoading || !data) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    );
+  }
+
+  let content = null;
+  if (data.data.length === 0) {
+    content = <h2 className="text-xl font-bold">No payments</h2>;
+  } else {
+    content = (
+      <Accordion type="single" collapsible>
+        {data.data.map((payment) => {
+          let name = '';
+          let details = null;
+          if (payment.targetType === PaymentTargetType.DeliveryOrder) {
+            name = `${capitalize(payment.target.productAuction.product.name)} by ${capitalize(payment.target.productAuction.product.facilityDetails.name)}`;
+            details = (
+              <div className="grid w-full grid-cols-[min-content_1fr_min-content]">
+                {payment.status === PaymentStatus.WaitingPayment && (
+                  <Button
+                    onClick={() =>
+                      navigate(
+                        generatePath(AppRoute.General.AuctionDetails, { auctionId: payment.target.productAuction.id })
+                      )
+                    }
+                    type="button"
+                    className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                  >
+                    Pay for the product
+                  </Button>
+                )}
+              </div>
+            );
+          } else {
+            name = `${capitalize(payment.target.product.name)} by ${capitalize(payment.target.product.facilityDetails.name)}`;
+            details = (
+              <div className="flex w-full justify-between pt-4 ">
+                <div className="flex flex-row items-end">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: payment.target.id }))
+                    }
+                  >
+                    Auction details
+                  </Button>
+                </div>
+                {payment.status === PaymentStatus.WaitingPayment && (
+                  <Button
+                    onClick={() =>
+                      navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: payment.target.id }))
+                    }
+                    type="button"
+                    className=" bg-yellow-400 text-black hover:bg-yellow-500"
+                  >
+                    Pay for the product
+                  </Button>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <AccordionItem value={payment.id} key={payment.id}>
+              <AccordionTrigger>
+                <div className="flex w-full flex-row justify-between px-2">
+                  <div className="flex gap-8">
+                    <span>{name}</span>
+                    <span className="text-gray-500">
+                      ({format(parseISO(payment.updatedAt), 'dd-MM-yyyy HH:mm:ss')})
+                    </span>
+                  </div>
+                  <p
+                    className={cn(
+                      'w-max whitespace-nowrap rounded-lg px-2 py-1 text-sm',
+                      productAuctionStatus[payment.status]
+                    )}
+                  >
+                    {ProductAuctionStatusText[payment.status]}
+                  </p>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>{details}</AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    );
+  }
+
   return (
     <div className="">
       <div className="flex flex-col gap-2">
@@ -31,14 +138,8 @@ export function PaymentsPage() {
           <h2 className="mb-9 mt-6 text-3xl font-bold">Payments</h2>
         </div>
       </div>
-      <div>
-        <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Is it accessible?</AccordionTrigger>
-            <AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+      <div className="px-4">{content}</div>
+      {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5"></div>}
     </div>
   );
 }

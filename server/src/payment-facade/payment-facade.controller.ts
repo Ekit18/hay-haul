@@ -1,7 +1,12 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import {
+  DEFAULT_OFFSET,
+  DEFAULT_PAGINATION_LIMIT,
+} from 'src/lib/constants/constants';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
-import { GetPaymentsByUserIdResponseDto } from './dto/get-payments-by-user-id-response.dto';
+import { GetPaymentsByUserIdResponse } from './dto/get-payments-by-user-id-response';
+import { GetPaymentsByUserQueryDto } from './dto/get-payments-by-user-query.dto';
 import { PaymentFacadeService } from './payment-facade.service';
 
 @UseGuards(JwtAuthGuard)
@@ -11,8 +16,16 @@ export class PaymentFacadeController {
 
   @Get('payments/user')
   getAllPaymentsByUserId(
+    @Query()
+    {
+      offset = DEFAULT_OFFSET,
+      limit = DEFAULT_PAGINATION_LIMIT,
+    }: GetPaymentsByUserQueryDto,
     @Req() request: AuthenticatedRequest,
-  ): Promise<GetPaymentsByUserIdResponseDto> {
-    return this.paymentFacadeService.getAllPaymentsByUserId(request.user.id);
+  ): Promise<GetPaymentsByUserIdResponse> {
+    return this.paymentFacadeService.getAllPaymentsByUserId(
+      { offset, limit },
+      request.user.id,
+    );
   }
 }

@@ -175,7 +175,7 @@ export function AuctionDetailsPage() {
         setIsBuyoutConfirmModalOpen(false);
       })
       .catch(handleRtkError);
-    navigate(AppRoute.Businessman.ProductAuctionPaymentPage);
+    navigate(generatePath(AppRoute.Businessman.ProductAuctionPaymentPage, { auctionId: productAuction.id }));
   };
 
   const handleClickPay = () => {
@@ -211,7 +211,7 @@ export function AuctionDetailsPage() {
               <BreadcrumbLink
                 className="cursor-pointer"
                 onClick={() => {
-                  navigate('/auctions');
+                  navigate(-1);
                 }}
               >
                 Auctions
@@ -274,13 +274,13 @@ export function AuctionDetailsPage() {
                 productAuction.auctionStatus === ProductAuctionStatus.EndSoon) && (
                 <>
                   <p className="text-center">Ends in:</p>
-                  <Timer toDate={productAuction.endDate} />
+                  <Timer label="Auction ended" toDate={productAuction.endDate} />
                 </>
               )}
               {productAuction.auctionStatus === ProductAuctionStatus.StartSoon && (
                 <>
                   <p className="text-center">Starts in:</p>
-                  <Timer toDate={productAuction.startDate} className="text-blue-600" />
+                  <Timer label="Starts soon" toDate={productAuction.startDate} className="text-blue-600" />
                 </>
               )}
               <div className="pt-2">
@@ -349,33 +349,30 @@ export function AuctionDetailsPage() {
                 !productAuction.deliveryOrder && <CreateDeliveryOrderModalHOC auctionId={productAuction.id} />}
               {user?.role === UserRole.Farmer && user?.id === productAuction.product.facilityDetails.user?.id && (
                 <>
-                  <Button
-                    type="button"
-                    className="w-full"
-                    disabled={
-                      !(
-                        [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
-                      ).includes(productAuction.auctionStatus)
-                    }
-                    onClick={() =>
-                      navigate(generatePath(AppRoute.Farmer.UpdateAuction, { auctionId: productAuction.id }))
-                    }
-                  >
-                    Update
-                  </Button>
-                  <Button
-                    disabled={
-                      !(
-                        [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
-                      ).includes(productAuction.auctionStatus)
-                    }
-                    type="button"
-                    className="w-full"
-                    variant="destructive"
-                    onClick={handleDeleteClick}
-                  >
-                    Delete
-                  </Button>
+                  {(
+                    [
+                      ProductAuctionStatus.Inactive,
+                      ProductAuctionStatus.StartSoon,
+                      ProductAuctionStatus.Active
+                    ] as ProductAuctionStatusValues[]
+                  ).includes(productAuction.auctionStatus) && (
+                    <Button
+                      type="button"
+                      className="w-full"
+                      onClick={() =>
+                        navigate(generatePath(AppRoute.Farmer.UpdateAuction, { auctionId: productAuction.id }))
+                      }
+                    >
+                      Update
+                    </Button>
+                  )}
+                  {(
+                    [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
+                  ).includes(productAuction.auctionStatus) && (
+                    <Button type="button" className="w-full" variant="destructive" onClick={handleDeleteClick}>
+                      Delete
+                    </Button>
+                  )}
                 </>
               )}
             </div>

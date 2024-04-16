@@ -54,42 +54,50 @@ export class ProductAuctionBidService {
             .setLock('pessimistic_write')
             .where('productAuction.id = :auctionId', { auctionId })
             .leftJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
+            .innerJoinAndSelect('productAuction.product', 'product')
+            .innerJoinAndSelect('product.facilityDetails', 'facilityDetails')
+            .innerJoinAndSelect('facilityDetails.user', 'user')
             .getOne();
 
-          if (
-            ![
-              ProductAuctionStatus.Active,
-              ProductAuctionStatus.EndSoon,
-            ].includes(auction.auctionStatus)
-          ) {
+          const isAuctionEnded = ![
+            ProductAuctionStatus.Active,
+            ProductAuctionStatus.EndSoon,
+          ].includes(auction.auctionStatus);
+
+          if (isAuctionEnded) {
             throw new HttpException(
               ProductAuctionBidErrorMessage.AuctionNotActive,
               HttpStatus.BAD_REQUEST,
             );
           }
 
-          if (price < auction.startPrice) {
+          const isNewBidPriceLowerThanStartPrice = price < auction.startPrice;
+
+          if (isNewBidPriceLowerThanStartPrice) {
             throw new HttpException(
               ProductAuctionBidErrorMessage.BidAmountLessThanStartPrice,
               HttpStatus.BAD_REQUEST,
             );
           }
 
-          if (
+          const isNewPriceDifferenceLowerThanBidStep =
             auction?.currentMaxBid &&
-            price - auction.currentMaxBid.price < auction.bidStep
-          ) {
+            price - auction.currentMaxBid.price < auction.bidStep;
+
+          if (isNewPriceDifferenceLowerThanBidStep) {
             throw new HttpException(
               ProductAuctionBidErrorMessage.IncorrectBidAmountStep,
               HttpStatus.BAD_REQUEST,
             );
           }
 
-          let res: UpdateResult | ProductAuctionBid;
+          let newOrUpdatedUserBid: UpdateResult | ProductAuctionBid;
 
-          if (candidateBid && candidateBid.price === price) {
-            console.log('update');
-            res = await transactionalEntityManager.update(
+          const isUserAlreadyHasBidAndPostsSamePrice =
+            candidateBid && candidateBid.price === price;
+
+          if (isUserAlreadyHasBidAndPostsSamePrice) {
+            newOrUpdatedUserBid = await transactionalEntityManager.update(
               ProductAuctionBid,
               {
                 id: candidateBid.id,
@@ -101,34 +109,56 @@ export class ProductAuctionBidService {
               },
             );
           } else {
-            console.log('save');
-            res = await transactionalEntityManager.save(ProductAuctionBid, {
-              ...(candidateBid ? { id: candidateBid.id } : {}),
-              price,
-              auctionId,
-              userId,
-            });
+            newOrUpdatedUserBid = await transactionalEntityManager.save(
+              ProductAuctionBid,
+              {
+                ...(candidateBid ? { id: candidateBid.id } : {}),
+                price,
+                auctionId,
+                userId,
+              },
+            );
           }
 
-          console.log('res', res instanceof ProductAuctionBid);
-          const currentMaxBidId = 'id' in res ? res.id : candidateBid.id;
-          console.log('currentMaxBidId', currentMaxBidId);
-          const res2 = await transactionalEntityManager.update(
+          //if it's update result it won't have id in it, and we pick it from candidate (same bid entity essentially)
+          const currentMaxBidId =
+            'id' in newOrUpdatedUserBid
+              ? newOrUpdatedUserBid.id
+              : candidateBid.id;
+
+          await transactionalEntityManager.update(
             ProductAuction,
             { id: auctionId },
             {
               currentMaxBidId,
             },
           );
-          console.log('res2', res2);
 
-          if (price >= auction.buyoutPrice) {
+          const isBuyoutBid = price >= auction.buyoutPrice;
+
+          if (isBuyoutBid) {
             await transactionalEntityManager.update(
               ProductAuction,
               { id: auctionId },
               {
                 auctionStatus: ProductAuctionStatus.WaitingPayment,
               },
+            );
+
+            auction.auctionStatus = ProductAuctionStatus.WaitingPayment;
+
+            await this.notificationService.createNotification(
+              userId,
+              auction.id,
+              NotificationMessage.BusinessmanAuctionWon,
+              transactionalEntityManager,
+            );
+
+            await this.notificationService.createNotification(
+              auction.product.facilityDetails.user.id,
+              auction.id,
+              NotificationMessage.AuctionEndedWithBids,
+              transactionalEntityManager,
             );
             //TODO: send notification to user
           }
@@ -137,15 +167,13 @@ export class ProductAuctionBidService {
           //start
 
           const previousMaxBidderId = auction.currentMaxBid?.userId;
-          if (previousMaxBidderId) {
-            console.log('creating notification');
+          if (previousMaxBidderId && previousMaxBidderId !== userId) {
             await this.notificationService.createNotification(
-              previousMaxBidderId, // todo: check if current max bidder updated here
+              previousMaxBidderId,
               auction.id,
               NotificationMessage.BidOverbid,
               transactionalEntityManager,
             );
-            console.log('created notification');
           }
 
           SocketService.SocketServer.to(auction.id).emit(
@@ -155,11 +183,13 @@ export class ProductAuctionBidService {
               currentMaxBid: price,
               currentMaxBidId: currentMaxBidId,
               currentMaxBidUserId: userId,
+              auctionStatus: auction.auctionStatus,
             },
           );
 
-          return res;
+          return newOrUpdatedUserBid;
         } catch (error) {
+          console.log(error);
           if (error instanceof QueryFailedError) {
             const errorObject = error.driverError.precedingErrors[0];
 

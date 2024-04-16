@@ -62,8 +62,12 @@ export const carrierRoutes: Route[] = [
     Component: CarrierMainPage
   },
   {
-    path: AppRoute.Businessman.Delivery,
+    path: AppRoute.Carrier.DeliveryOrders,
     Component: DeliveryOrder
+  },
+  {
+    path: AppRoute.General.Notifications,
+    Component: Notifications
   }
 ];
 

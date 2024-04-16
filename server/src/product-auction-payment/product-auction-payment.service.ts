@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaymentTargetType } from 'src/lib/enums/enums';
-import { transformAndValidate } from 'src/lib/helpers/transformAndValidate';
 import {
-  ProductAuction,
-  ProductAuctionStatus,
-} from 'src/product-auction/product-auction.entity';
-import { PaymentIntentMetadata } from 'src/stripe/stripe.entity';
+  PaymentDirection,
+  PaymentStatus,
+  PaymentTargetType,
+} from 'src/lib/enums/enums';
+import { GetPaymentsByUserIdResponse } from 'src/payment-facade/dto/get-payments-by-user-id-response';
+import { GetPaymentsByUserQueryDto } from 'src/payment-facade/dto/get-payments-by-user-query.dto';
+import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { StripeService } from 'src/stripe/stripe.service';
-import Stripe from 'stripe';
 import { Repository } from 'typeorm';
+import { CreateProductAuctionPaymentDto } from './dto/create-product-auction-payment.dto';
 import { ProductAuctionPayment } from './product-auction-payment.entity';
 
 @Injectable()
@@ -22,33 +23,71 @@ export class ProductAuctionPaymentService {
     private productAuctionPaymentRepository: Repository<ProductAuctionPayment>,
   ) {}
 
-  async createByPaymentIntent(
-    paymentIntent: Stripe.Response<Stripe.PaymentIntent>,
-  ): Promise<ProductAuctionPayment> {
-    const metadata = await transformAndValidate(
-      paymentIntent.metadata,
-      PaymentIntentMetadata,
-    );
+  async findAllByUserId({
+    query,
+    userId,
+  }: {
+    query?: GetPaymentsByUserQueryDto;
+    userId: string;
+  }): Promise<GetPaymentsByUserIdResponse> {
+    const [data, count] =
+      await this.productAuctionPaymentRepository.findAndCount({
+        where: [{ buyerId: userId }, { sellerId: userId }],
+        relations: {
+          auction: { product: { facilityDetails: true } },
+        },
+        order: { status: 'DESC', createdAt: 'DESC' },
+        take: query?.limit,
+        skip: query?.offset,
+      });
+    return {
+      count,
+      data: data.map(({ auction, ...payment }) => ({
+        ...payment,
+        target: auction,
+        direction:
+          payment.sellerId === userId
+            ? PaymentDirection.Sale
+            : PaymentDirection.Purchase,
+      })),
+    };
+  }
+
+  async findOneById(id: string) {
+    return await this.productAuctionPaymentRepository.findOneBy({ id });
+  }
+
+  async create(dto: CreateProductAuctionPaymentDto) {
     let [payment] = await this.productAuctionPaymentRepository.find({
       where: {
-        buyerId: metadata.buyerId,
-        sellerId: metadata.sellerId,
-        auctionId: metadata.targetId,
+        buyerId: dto.buyerId,
+        sellerId: dto.sellerId,
+        auctionId: dto.targetId,
       },
     });
 
     if (!payment) {
       payment = await this.productAuctionPaymentRepository.save({
-        buyerId: metadata.buyerId,
-        sellerId: metadata.sellerId,
-        auctionId: metadata.targetId,
-        amount: paymentIntent.amount,
+        buyerId: dto.buyerId,
+        sellerId: dto.sellerId,
+        auctionId: dto.targetId,
+        amount: dto.amount,
         targetType: PaymentTargetType.ProductAuction,
-      });
-      await this.productAuctionRepository.update(metadata.targetId, {
-        auctionStatus: ProductAuctionStatus.Paid,
       });
     }
     return payment;
+  }
+
+  async setPaymentStatus({
+    paymentStatus,
+    productAuctionPaymentId,
+  }: {
+    productAuctionPaymentId: string;
+    paymentStatus: PaymentStatus;
+  }): Promise<ProductAuctionPayment> {
+    return await this.productAuctionPaymentRepository.save({
+      id: productAuctionPaymentId,
+      status: paymentStatus,
+    });
   }
 }

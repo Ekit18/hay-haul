@@ -99,8 +99,6 @@ export function DeliveryOrderCard({ deliveryOrder }: DeliveryOrderCardProps) {
           {deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Inactive && (
             <p className="pt-2">Delivery offers: {deliveryOrder.deliveryOffers.length}</p>
           )}
-          <p className="pt-2">Delivery offers: {deliveryOrder.deliveryOffers.length}</p>
-
           {/* todo: create counter of offers */}
         </CardContent>
         <CardFooter className="flex w-full flex-col items-center justify-center gap-5">

@@ -1,4 +1,5 @@
 import { CreateProductAuctionFormValues } from '@/components/product-auction/create-product-auction/validation';
+import { RestartProductAuctionFormValues } from '@/components/product-auction/modals/restart-auction-modal/validation';
 import { UpdateProductAuctionFormValues } from '@/components/product-auction/update-product-auction/validation';
 import { ClientToServerEventName } from '@/lib/enums/client-to-server-event-name.enum';
 import { ServerToClientEventName } from '@/lib/enums/server-to-client-event-name.enum';
@@ -11,6 +12,7 @@ import { QueryCacheLifecycleApi } from 'node_modules/@reduxjs/toolkit/dist/query
 import { generatePath } from 'react-router-dom';
 
 export type UpdateProductAuctionDto = UpdateRequestDto<UpdateProductAuctionFormValues>;
+export type RestartProductAuctionDto = UpdateRequestDto<RestartProductAuctionFormValues>;
 
 async function onProductAuctionCacheEntryAdded(
   arg: URLSearchParams | string,
@@ -60,6 +62,20 @@ export const productAuctionApi = api.injectEndpoints({
         url: 'product-auction/filter',
         params: searchParams
       }),
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        if (arg.get('offset') !== null) {
+          currentCache.data.push(...newItems.data);
+        } else {
+          currentCache.count = newItems.count;
+          currentCache.data = newItems.data;
+        }
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.get('offset') !== previousArg?.get('offset');
+      },
       keepUnusedDataFor: 0,
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]
@@ -68,33 +84,21 @@ export const productAuctionApi = api.injectEndpoints({
       query: (searchParams) => ({
         url: 'product-auction/filter/farmer',
         params: searchParams
-        // forceRefetch({ currentArg, previousArg }) {
-        //   return currentArg.get('offset') !== previousArg.get('offset');
-        // },
-        // merge: (currentCache, newItems, { arg }) => {
-        //   console.log(newItems.results);
-        //   if (arg.get('offset') !== '0') {
-        //     currentCache.results.push(...newItems.results);
-        //   } else {
-        //     currentCache.results = newItems.results;
-        //   }
-        // },
-        // serializeQueryArgs: ({ endpointName }) => {
-        //   console.log(endpointName);
-        //   return endpointName;
-        // }
       }),
       serializeQueryArgs: ({ endpointName }) => {
         return endpointName;
       },
-      // Always merge incoming data to the cache entry
-      merge: (currentCache, newItems) => {
-        console.log(currentCache.data.data);
-        // currentCache.data.data.push(...newItems.data.data);
+      merge: (currentCache, newItems, { arg }) => {
+        console.log(currentCache.data);
+        if (arg.get('offset') !== null) {
+          currentCache.data.push(...newItems.data);
+        } else {
+          currentCache.count = newItems.count;
+          currentCache.data = newItems.data;
+        }
       },
-      // Refetch when the page arg changes
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg !== previousArg;
+        return currentArg?.get('offset') !== previousArg?.get('offset');
       },
       keepUnusedDataFor: 0,
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
@@ -105,7 +109,21 @@ export const productAuctionApi = api.injectEndpoints({
         url: 'product-auction/filter/businessman',
         params: searchParams
       }),
-
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        console.log(currentCache.data);
+        if (arg.get('offset') !== null) {
+          currentCache.data.push(...newItems.data);
+        } else {
+          currentCache.count = newItems.count;
+          currentCache.data = newItems.data;
+        }
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.get('offset') !== previousArg?.get('offset');
+      },
       keepUnusedDataFor: 0,
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]
@@ -116,6 +134,19 @@ export const productAuctionApi = api.injectEndpoints({
       }),
       onCacheEntryAdded: onProductAuctionCacheEntryAdded,
       providesTags: [TagType.ProductAuction]
+    }),
+    restartProductAuction: builder.mutation<ProductAuction, RestartProductAuctionDto>({
+      query: ({ id, body }) => ({
+        method: 'POST',
+        url: generatePath(`/product-auction/restart/:id`, { id }),
+        body: {
+          startDate: body.startEndDate.from,
+          endDate: body.startEndDate.to,
+          paymentPeriod: body.paymentPeriod
+        }
+      }),
+      // onCacheEntryAdded: onProductAuctionRestartedCacheEntryAdded,
+      invalidatesTags: [TagType.ProductAuction]
     }),
     getPaidProductAuctions: builder.query<DataWithCount<ProductAuction>, string>({
       query: () => ({

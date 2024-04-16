@@ -26,3 +26,13 @@ export enum PaymentTargetType {
   ProductAuction = 'product_auction',
   DeliveryOrder = 'delivery_order',
 }
+
+export enum PaymentDirection {
+  Purchase = 'purchase',
+  Sale = 'sale',
+}
+
+export enum PaymentStatus {
+  WaitingPayment = 'WaitingPayment',
+  Paid = 'Paid',
+}

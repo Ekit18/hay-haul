@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaymentFacadeModule } from 'src/payment-facade/payment-facade.module';
+import { ProductAuctionPaymentModule } from 'src/product-auction-payment/product-auction-payment.module';
 import { ProductAuctionModule } from 'src/product-auction/product-auction.module';
 import { TokenModule } from 'src/token/token.module';
 import { UserModule } from 'src/user/user.module';
@@ -16,6 +17,7 @@ import { StripeService } from './stripe.service';
     TokenModule,
     UserModule,
     ProductAuctionModule,
+    forwardRef(() => ProductAuctionPaymentModule),
   ],
   exports: [StripeService],
   controllers: [StripeController],

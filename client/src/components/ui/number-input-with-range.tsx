@@ -34,7 +34,6 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
                       field.onChange({ ...currentValue, from: undefined });
                       return;
                     }
-                    field.onChange({ ...currentValue, from: 0 });
                   }}
                   onChange={(e) => {
                     if (Number.isNaN(e.target.valueAsNumber)) {
@@ -70,7 +69,6 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
                       field.onChange({ ...currentValue, to: undefined });
                       return;
                     }
-                    field.onChange({ ...currentValue, to: 0 });
                   }}
                   onChange={(e) => {
                     if (Number.isNaN(e.target.valueAsNumber)) {

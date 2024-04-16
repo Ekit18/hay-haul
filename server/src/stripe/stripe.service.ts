@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +13,7 @@ import { TokenResponse } from 'src/auth/dto/token-response.dto';
 import { getCookieExpireDate } from 'src/auth/helpers/get-cookie-expire-date';
 import { PaymentTargetType } from 'src/lib/enums/enums';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
+import { ProductAuctionPaymentService } from 'src/product-auction-payment/product-auction-payment.service';
 import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { ProductAuctionService } from 'src/product-auction/product-auction.service';
 import { TokenService } from 'src/token/token.service';
@@ -36,6 +39,8 @@ export class StripeService {
     private tokenService: TokenService,
     private userService: UserService,
     private productAuctionService: ProductAuctionService,
+    @Inject(forwardRef(() => ProductAuctionPaymentService))
+    private productAuctionPaymentService: ProductAuctionPaymentService,
   ) {
     this.stripe = new Stripe(configService.getOrThrow('STRIPE_SECRET_KEY'));
   }
@@ -56,15 +61,22 @@ export class StripeService {
     const {
       data: [auction],
     } = await this.productAuctionService.findOneById(auctionId);
-    console.log('auction owner id', auction.product.facilityDetails.user.id);
+
     const stripeEntry = await this.findOneByUserId(
       auction.product.facilityDetails.user.id,
     );
-    const paymentIntentMetadata: Record<keyof PaymentIntentMetadata, string> = {
+
+    const payment = await this.productAuctionPaymentService.create({
       targetId: auction.id,
       paymentTarget: PaymentTargetType.ProductAuction,
       buyerId: request.user?.id,
       sellerId: auction.product.facilityDetails.user.id,
+      amount: auction.currentMaxBid.price,
+    });
+
+    const paymentIntentMetadata: Record<keyof PaymentIntentMetadata, string> = {
+      paymentId: payment.id,
+      paymentTargetType: payment.targetType,
     };
     const { client_secret: clientSecret } =
       await this.stripe.paymentIntents.create({
@@ -79,8 +91,13 @@ export class StripeService {
         transfer_data: {
           destination: stripeEntry.accountId,
         },
-        application_fee_amount:
-          StripeService.FEE_PERCENT * auction.currentMaxBid.price * 100,
+        application_fee_amount: Number.parseInt(
+          (
+            StripeService.FEE_PERCENT *
+            auction.currentMaxBid.price *
+            100
+          ).toFixed(0),
+        ),
       });
 
     return { clientSecret };
@@ -222,12 +239,12 @@ export class StripeService {
 
       const { payouts_enabled: payoutsEnabled } =
         await this.stripe.accounts.retrieve(stripeEntry.accountId);
-
+      console.log('payoutsEnabled check: %s', payoutsEnabled);
       if (payoutsEnabled) {
         return { payoutsEnabled };
       }
       if (depth <= 2) {
-        await this.wait(2 ** depth++ * 500);
+        await this.wait(2 ** depth++ * 3000);
         return check.apply(this);
       }
     }.apply(this);
@@ -239,8 +256,8 @@ export class StripeService {
   ): Promise<TokenResponse> {
     const stripeEntry = await this.findOneByRequest(request);
     if (!stripeEntry.payoutsEnabled) {
-      const { payouts_enabled: payoutsEnabled } =
-        await this.stripe.accounts.retrieve(stripeEntry.accountId);
+      const { payoutsEnabled } =
+        await this.checkAccountVerificationStatusByRequest(request);
       if (!payoutsEnabled) {
         throw new BadRequestException({
           message: StripeErrorMessage.AccountNotVerifiedYet,

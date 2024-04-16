@@ -14,6 +14,7 @@ import { UserRole } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { CreateProductAuctionDto } from './dto/create-product-auction.dto';
 import { ProductAuctionQueryDto } from './dto/product-auction-query.dto';
+import { RestartProductAuctionDto } from './dto/restart-product-auction.dto';
 import { UpdateProductAuctionDto } from './dto/update-product-auction.dto';
 import { ProductAuctionErrorMessage } from './product-auction-error-message.enum';
 import { ProductAuction, ProductAuctionStatus } from './product-auction.entity';
@@ -136,6 +137,21 @@ export class ProductAuctionService {
     } catch (error) {
       throw new HttpException(
         ProductAuctionErrorMessage.FailedFetchProductAuction,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async restart(id: string, dto: RestartProductAuctionDto) {
+    try {
+      return await this.productAuctionRepository.save({
+        id,
+        ...dto,
+        auctionStatus: ProductAuctionStatus.Inactive,
+      });
+    } catch (error) {
+      throw new HttpException(
+        ProductAuctionErrorMessage.FailedToRestartAuction,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -404,7 +420,9 @@ export class ProductAuctionService {
 
     if (
       auction.auctionStatus !== ProductAuctionStatus.Inactive &&
-      auction.auctionStatus !== ProductAuctionStatus.StartSoon
+      auction.auctionStatus !== ProductAuctionStatus.StartSoon &&
+      auction.auctionStatus !== ProductAuctionStatus.Active &&
+      auction.auctionStatus !== ProductAuctionStatus.EndSoon
     ) {
       throw new HttpException(
         ProductAuctionErrorMessage.AuctionNotInactive,

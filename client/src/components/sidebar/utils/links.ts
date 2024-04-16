@@ -7,8 +7,11 @@ import {
   Home,
   LucideIcon,
   PackageSearch,
+  PercentSquare,
   Tractor,
+  TractorIcon,
   Truck,
+  Users,
   WalletCards,
   Warehouse
 } from 'lucide-react';
@@ -101,13 +104,28 @@ export const links: Links = {
     },
     {
       title: 'Delivery',
-      url: AppRoute.Businessman.Delivery,
-      icon: Truck
+      url: AppRoute.Carrier.DeliveryOrders,
+      icon: TractorIcon
+    },
+    {
+      title: 'Offers',
+      url: AppRoute.Carrier.DeliveryOffers,
+      icon: PercentSquare
     },
     {
       title: 'Payments',
       url: AppRoute.General.Payments,
       icon: WalletCards
+    },
+    {
+      title: 'Transport',
+      url: AppRoute.Carrier.Transport,
+      icon: Truck
+    },
+    {
+      title: 'Drivers',
+      url: AppRoute.Carrier.Drivers,
+      icon: Users
     }
   ],
   [UserRole.Driver]: [

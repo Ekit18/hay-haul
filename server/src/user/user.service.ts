@@ -29,6 +29,7 @@ export class UserService {
 
   async getUserById(id: string) {
     try {
+      console.log('===========================');
       const user = await this.userRepository
         .createQueryBuilder('user')
         .where('user.id = :id', { id })
@@ -50,9 +51,25 @@ export class UserService {
           'productAuctionPaymentsAsSeller.auction',
           'auctionAsSeller',
         )
+        .leftJoinAndSelect('auctionAsBuyer.product', 'auctionAsBuyerProduct')
+        .leftJoinAndSelect('auctionAsSeller.product', 'auctionAsSellerProduct')
+        .leftJoinAndSelect(
+          'auctionAsBuyerProduct.facilityDetails',
+          'auctionAsBuyerProductFacilityDetails',
+        )
+        .leftJoinAndSelect(
+          'auctionAsSellerProduct.facilityDetails',
+          'auctionAsSellerProductFacilityDetails',
+        )
         .getOne();
+
+      console.log(user);
+
+      console.log('===========================');
+
       return user;
     } catch (error) {
+      console.log(error);
       throw new HttpException(
         UserErrorMessage.FailedToGetUser,
         HttpStatus.BAD_REQUEST,

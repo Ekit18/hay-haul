@@ -2,9 +2,14 @@ import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { User } from 'src/user/user.entity';
 import { Column, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { PaymentTargetType } from '../enums/enums';
+import {
+  PaymentDirection,
+  PaymentStatus,
+  PaymentTargetType,
+} from '../enums/enums';
+import { Timestamps } from './timestamps.class';
 
-export abstract class Payment {
+export abstract class Payment extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -28,5 +33,13 @@ export abstract class Payment {
   @Column({ enum: Object.values(PaymentTargetType) })
   targetType: PaymentTargetType;
 
+  @Column({
+    enum: Object.values(PaymentStatus),
+    default: PaymentStatus.WaitingPayment,
+  })
+  status: PaymentStatus;
+
   target: ProductAuction | DeliveryOrder;
+
+  direction: PaymentDirection;
 }

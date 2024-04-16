@@ -217,7 +217,6 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
                               field.onChange(undefined);
                               return;
                             }
-                            field.onChange(0);
                           }}
                           onChange={(e) => {
                             if (Number.isNaN(e.target.valueAsNumber)) {

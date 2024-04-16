@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { isPast, subHours } from 'date-fns';
 import { EmailService } from 'src/email/services/email.service';
 import { ServerEventName } from 'src/lib/enums/enums';
+import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
 import { NotificationService } from 'src/notification/notification.service';
 import { SocketService } from 'src/socket/socket.service';
 import { Repository } from 'typeorm';
@@ -15,10 +16,6 @@ import {
 
 @Injectable()
 export class ProductAuctionCronService {
-  // private readonly seekerVirtualAssessmentDoneTemplateId =
-  //   this.configService.get<string>(
-  //     'SENDGRID_SEEKER_SUBMIT_CONTRACT_PROPOSAL_TEMPLATE_ID',
-  //   );
   private readonly logger = new Logger('ProductAuctionCronService');
 
   constructor(
@@ -52,6 +49,7 @@ export class ProductAuctionCronService {
         .innerJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .innerJoinAndSelect('facilityDetails.user', 'user')
         .leftJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
+        .leftJoinAndSelect('productAuction.bids', 'bids')
         .leftJoinAndSelect('currentMaxBid.user', 'maxBidder')
         .getMany();
 
@@ -62,32 +60,69 @@ export class ProductAuctionCronService {
           case ProductAuctionStatus.Inactive:
             if (isPast(subHours(auction.startDate, 1))) {
               // email/notification to farmer that his auction is about to start
+              await this.notificationService.createNotification(
+                auction.product.facilityDetails.user.id,
+                auction.id,
+                NotificationMessage.AuctionStartSoon,
+              );
               auction.auctionStatus = ProductAuctionStatus.StartSoon;
             }
             break;
           case ProductAuctionStatus.StartSoon:
             if (isPast(auction.startDate)) {
-              //websocket to bidders that auction is starting
               // email/notification to farmer that his auction is starting
+              await this.notificationService.createNotification(
+                auction.product.facilityDetails.user.id,
+                auction.id,
+                NotificationMessage.AuctionStarted,
+              );
               auction.auctionStatus = ProductAuctionStatus.Active;
             }
             break;
           case ProductAuctionStatus.Active:
             if (isPast(subHours(auction.endDate, 1))) {
-              //websocket to bidders that auction is about to end
               // email/notification to farmer that his auction is about to end
+              await this.notificationService.createNotification(
+                auction.product.facilityDetails.user.id,
+                auction.id,
+                NotificationMessage.FarmerAuctionEndSoon,
+              );
               // email/notification bidders that auction is about to end
+              auction.bids.forEach(async (bid) => {
+                await this.notificationService.createNotification(
+                  bid.user.id,
+                  auction.id,
+                  NotificationMessage.BusinessmanAuctionEndSoon,
+                );
+              });
+
               auction.auctionStatus = ProductAuctionStatus.EndSoon;
             }
             break;
           case ProductAuctionStatus.EndSoon:
             if (isPast(auction.endDate)) {
               if (!auction.currentMaxBidId) {
-                // websocket to bidders that auction is ended
                 // email/notification to farmer that his auction is ended
+                await this.notificationService.createNotification(
+                  auction.product.facilityDetails.user.id,
+                  auction.id,
+                  NotificationMessage.AuctionEndedNoBids,
+                );
+
                 auction.auctionStatus = ProductAuctionStatus.Ended;
               } else {
                 // email/notification winner that he won the auction
+                await this.notificationService.createNotification(
+                  auction.product.facilityDetails.user.id,
+                  auction.id,
+                  NotificationMessage.AuctionEndedWithBids,
+                );
+
+                await this.notificationService.createNotification(
+                  auction.currentMaxBid.user.id,
+                  auction.id,
+                  NotificationMessage.BusinessmanAuctionWon,
+                );
                 // set the winner of auction
                 auction.auctionStatus = ProductAuctionStatus.WaitingPayment;
               }
@@ -95,14 +130,30 @@ export class ProductAuctionCronService {
             break;
           case ProductAuctionStatus.WaitingPayment:
             if (isPast(auction.paymentPeriod)) {
+              // email/notification to winner that he has not paid
+              await this.notificationService.createNotification(
+                auction.currentMaxBid.user.id,
+                auction.id,
+                NotificationMessage.BusinessmanAuctionPaymentOverdue,
+              );
+              // email/notification to farmer that he has not received payment
+              await this.notificationService.createNotification(
+                auction.product.facilityDetails.user.id,
+                auction.id,
+                NotificationMessage.FarmerAuctionPaymentOverdue,
+              );
+
               auction.auctionStatus = ProductAuctionStatus.Unpaid;
             }
             break;
         }
-        // console.log(auction.auctionStatus);
+
         await this.productAuctionRepository.save(auction);
 
         if (initialStatus !== auction.auctionStatus) {
+          this.logger.log(
+            `Updating auction:${auction.id} to status: ${auction.auctionStatus}`,
+          );
           SocketService.SocketServer.to(auction.id).emit(
             ServerEventName.AuctionUpdated,
             {

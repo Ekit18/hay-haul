@@ -10,6 +10,8 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { AppRoute } from '@/lib/constants/routes';
+import { UserRole } from '@/lib/enums/user-role.enum';
+import { useAppSelector } from '@/lib/hooks/redux';
 import { DeliveryOrderStatusText } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { cn } from '@/lib/utils';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
@@ -22,6 +24,7 @@ export function DeliveryOrderDetails() {
   const { deliveryOrderId } = useParams();
 
   const navigate = useNavigate();
+  const user = useAppSelector((state) => state.user.user);
 
   const [getDeliveryOrder, { data: deliveryOrder, isFetching, isError, isLoading }] =
     deliveryOrderApi.useLazyGetDeliveryOrderQuery();
@@ -34,7 +37,7 @@ export function DeliveryOrderDetails() {
   }, [deliveryOrderId]);
 
   if (!deliveryOrderId || isError) {
-    return <Navigate to={generatePath(AppRoute.Businessman.Delivery)} />;
+    return <Navigate to={generatePath(AppRoute.General.DeliveryOrder)} />;
   }
   if (isFetching || isLoading || !deliveryOrder) {
     return (
@@ -53,7 +56,9 @@ export function DeliveryOrderDetails() {
               <BreadcrumbLink
                 className="cursor-pointer"
                 onClick={() => {
-                  navigate(AppRoute.Businessman.Delivery);
+                  user?.role === UserRole.Carrier
+                    ? navigate(AppRoute.Carrier.DeliveryOrders)
+                    : navigate(AppRoute.Businessman.Delivery);
                 }}
               >
                 Delivery

@@ -1,4 +1,3 @@
-import { IsEnum, IsString } from 'class-validator';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { PaymentTargetType } from 'src/lib/enums/enums';
 import { User } from 'src/user/user.entity';
@@ -36,12 +35,6 @@ export class StripeEntry extends Timestamps {
 }
 
 export class PaymentIntentMetadata {
-  @IsEnum(PaymentTargetType)
-  paymentTarget: PaymentTargetType;
-  @IsString()
-  targetId: string;
-  @IsString()
-  buyerId: string;
-  @IsString()
-  sellerId: string;
+  paymentId: string;
+  paymentTargetType: PaymentTargetType;
 }

@@ -19,6 +19,7 @@ import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { UserRole } from 'src/user/user.entity';
 import { CreateProductAuctionDto } from './dto/create-product-auction.dto';
 import { ProductAuctionQueryDto } from './dto/product-auction-query.dto';
+import { RestartProductAuctionDto } from './dto/restart-product-auction.dto';
 import { UpdateProductAuctionDto } from './dto/update-product-auction.dto';
 import { CustomImageValidationPipe } from './pipes/custom-image-validation-pipe';
 import { ProductAuctionService } from './product-auction.service';
@@ -95,6 +96,14 @@ export class ProductAuctionController {
       dto: dto,
       photos: photos,
     });
+  }
+
+  @Post('/restart/:id')
+  async restartAuction(
+    @Param('id') id: string,
+    @Body() dto: RestartProductAuctionDto,
+  ) {
+    return this.productAuctionService.restart(id, dto);
   }
 
   @Delete('/:id')

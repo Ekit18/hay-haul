@@ -143,7 +143,7 @@ export function UpdateProductAuctionForm() {
 
   if (loading)
     return (
-      <div className="flex justify-center">
+      <div className="flex h-full w-full items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin" />
       </div>
     );
@@ -158,9 +158,13 @@ export function UpdateProductAuctionForm() {
     return <Navigate to={AppRoute.General.MyAuctions} replace />;
   }
   if (
-    !([ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]).includes(
-      auction.auctionStatus
-    )
+    !(
+      [
+        ProductAuctionStatus.Inactive,
+        ProductAuctionStatus.StartSoon,
+        ProductAuctionStatus.Active
+      ] as ProductAuctionStatusValues[]
+    ).includes(auction.auctionStatus)
   ) {
     toast({
       variant: 'destructive',
@@ -178,7 +182,13 @@ export function UpdateProductAuctionForm() {
           <h3 className="self-start text-2xl font-bold">{auction.product.name}</h3>
           <div className="flex w-full flex-col items-center justify-start xl:flex-row">
             <div className="flex w-full justify-center xl:w-6/12">
-              <ImageCarousel items={photos} hasAddButton />
+              <ImageCarousel
+                items={photos}
+                hasAddButton={
+                  auction.auctionStatus !== ProductAuctionStatus.Active &&
+                  auction.auctionStatus !== ProductAuctionStatus.EndSoon
+                }
+              />
             </div>
             <div className="w-full xl:w-6/12">
               <div className="flex w-full flex-col gap-4 py-4 md:flex-row">
@@ -208,6 +218,10 @@ export function UpdateProductAuctionForm() {
                           <FormLabel>Start price</FormLabel>
                           <FormControl>
                             <Input
+                              disabled={
+                                auction.auctionStatus === ProductAuctionStatus.Active ||
+                                auction.auctionStatus === ProductAuctionStatus.EndSoon
+                              }
                               placeholder="Enter start price"
                               {...field}
                               onBlur={(e) => {
@@ -270,6 +284,9 @@ export function UpdateProductAuctionForm() {
                                   field.onChange(0);
                                   return;
                                 }
+                                if (auction.currentMaxBid && e.target.valueAsNumber < auction.currentMaxBid?.price) {
+                                  return;
+                                }
                                 if (e.target.valueAsNumber <= 0) {
                                   return;
                                 }
@@ -295,6 +312,10 @@ export function UpdateProductAuctionForm() {
                           <FormLabel>Bid step</FormLabel>
                           <FormControl>
                             <Input
+                              disabled={
+                                auction.auctionStatus === ProductAuctionStatus.Active ||
+                                auction.auctionStatus === ProductAuctionStatus.EndSoon
+                              }
                               placeholder="Enter bid step"
                               {...field}
                               onBlur={(e) => {
@@ -333,6 +354,10 @@ export function UpdateProductAuctionForm() {
                               <Button
                                 type="button"
                                 className="h-5 w-10 text-xs"
+                                disabled={
+                                  auction.auctionStatus === ProductAuctionStatus.Active ||
+                                  auction.auctionStatus === ProductAuctionStatus.EndSoon
+                                }
                                 onClick={() => handleAddStartEndDays(ratio.value)}
                                 key={ratio.label}
                               >
@@ -343,6 +368,10 @@ export function UpdateProductAuctionForm() {
                           <FormControl>
                             <DatePickerWithRange<UpdateProductAuctionFormValues, 'startEndDate'>
                               field="startEndDate"
+                              disabled={
+                                auction.auctionStatus === ProductAuctionStatus.Active ||
+                                auction.auctionStatus === ProductAuctionStatus.EndSoon
+                              }
                               title="Start / end date"
                             />
                           </FormControl>
@@ -362,6 +391,10 @@ export function UpdateProductAuctionForm() {
                             {addDaysRatios.map((ratio) => (
                               <Button
                                 type="button"
+                                disabled={
+                                  auction.auctionStatus === ProductAuctionStatus.Active ||
+                                  auction.auctionStatus === ProductAuctionStatus.EndSoon
+                                }
                                 className="h-5 w-10 text-xs"
                                 onClick={() => handleAddPaymentPeriod(ratio.value)}
                                 key={ratio.label}
@@ -375,6 +408,10 @@ export function UpdateProductAuctionForm() {
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="outline"
+                                  disabled={
+                                    auction.auctionStatus === ProductAuctionStatus.Active ||
+                                    auction.auctionStatus === ProductAuctionStatus.EndSoon
+                                  }
                                   className={cn(
                                     'w-full justify-start text-left font-normal',
                                     !field.value && 'text-muted-foreground'
@@ -412,6 +449,7 @@ export function UpdateProductAuctionForm() {
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
+                      disabled={auction.auctionStatus === ProductAuctionStatus.Active}
                       maxLength={255}
                       className="max-h-32 w-full xl:w-2/3"
                       placeholder="Enter description"

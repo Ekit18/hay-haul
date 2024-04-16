@@ -16,5 +16,15 @@ export enum NotificationMessage {
   // PausedAppointment = 'PAUSED_APPOINTMENT',
   // InsufficientFirstHourPayment = 'INSUFFICIENT_FIRST_HOUR_PAYMENT',
   // ResumeAppointment = 'RESUME_APPOINTMENT',
-  BidOverbid = 'BID_OVERBID'
+  BidOverbid = 'BID_OVERBID',
+  ResumeAppointment = 'RESUME_APPOINTMENT',
+  AuctionStartSoon = 'AUCTION_START_SOON',
+  AuctionStarted = 'AUCTION_STARTED',
+  FarmerAuctionEndSoon = 'FARMER_AUCTION_END_SOON',
+  BusinessmanAuctionEndSoon = 'BUSINESSMAN_AUCTION_END_SOON',
+  AuctionEndedNoBids = 'AUCTION_ENDED_NO_BIDS',
+  AuctionEndedWithBids = 'AUCTION_ENDED_WITH_BIDS',
+  BusinessmanAuctionWon = 'BUSINESSMAN_AUCTION_WON',
+  BusinessmanAuctionPaymentOverdue = 'BUSINESSMAN_AUCTION_PAYMENT_OVERDUE',
+  FarmerAuctionPaymentOverdue = 'FARMER_AUCTION_PAYMENT_OVERDUE'
 }

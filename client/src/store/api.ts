@@ -68,6 +68,7 @@ export const TagType = {
   Facility: 'Facility',
   ProductAuction: 'ProductAuction',
   Notification: 'Notification',
+  Payment: 'Payment',
   DeliveryOrder: 'DeliveryOrder'
 } as const;
 

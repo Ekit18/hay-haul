@@ -20,7 +20,6 @@ export const AppRoute = {
     Farms: '/farms',
     CreateAuction: '/create-auction',
     UpdateAuction: '/update-auction/:auctionId'
-    // MyAuctions: '/my-auctions'
   },
   Businessman: {
     ProductAuctionPaymentPage: '/product-auction/payment/:auctionId',
@@ -28,5 +27,11 @@ export const AppRoute = {
     Products: '/products',
     Bids: '/bids',
     Delivery: '/delivery'
+  },
+  Carrier: {
+    DeliveryOrders: '/delivery-orders',
+    DeliveryOffers: '/delivery-offers',
+    Transport: '/transport',
+    Drivers: '/drivers'
   }
 } as const;

@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import capitalize from 'lodash.capitalize';
 import { Crown } from 'lucide-react';
-import { useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
+import { RestartAuctionModal } from '../modals/restart-auction-modal/restart-auction-modal';
 import { productAuctionStatus } from './ProductAuctionStatus.enum';
 
 type ProductAuctionCardProps = {
@@ -29,8 +29,6 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
   const navigate = useNavigate();
 
   const isAuctionWinner = productAuction.currentMaxBid?.userId === user?.id;
-
-  const [isCreateDeliveryOrderModalOpen, setIsCreateDeliveryOrderModalOpen] = useState<boolean>(false);
 
   return (
     <div className="flex w-full flex-col items-center justify-start gap-4 rounded-lg bg-white min-[1068px]:w-full min-[1068px]:flex-row">
@@ -98,13 +96,13 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
           productAuction.auctionStatus === ProductAuctionStatus.EndSoon) && (
           <div className="border-b-2 pb-4">
             <p className="text-center">Ends in:</p>
-            <Timer toDate={productAuction.endDate} />
+            <Timer label="Auction ended" toDate={productAuction.endDate} />
           </div>
         )}
         {productAuction.auctionStatus === ProductAuctionStatus.StartSoon && (
           <div className="border-b-2 pb-4">
             <p className="text-center">Starts in:</p>
-            <Timer toDate={productAuction.startDate} className="text-blue-600" />
+            <Timer label="Starts soon" toDate={productAuction.startDate} className="text-blue-600" />
           </div>
         )}
         <div className="flex w-full flex-col gap-2 text-center">
@@ -194,31 +192,31 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
             )}
           {user?.id === productAuction.product.facilityDetails.user?.id && user?.role === UserRole.Farmer && (
             <>
-              <Button
-                type="button"
-                className="w-full"
-                disabled={
-                  !(
-                    [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
-                  ).includes(productAuction.auctionStatus)
-                }
-                onClick={() => navigate(generatePath(AppRoute.Farmer.UpdateAuction, { auctionId: productAuction.id }))}
-              >
-                Update
-              </Button>
-              <Button
-                disabled={
-                  !(
-                    [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
-                  ).includes(productAuction.auctionStatus)
-                }
-                type="button"
-                className="w-full"
-                variant="destructive"
-                onClick={onDeleteClick}
-              >
-                Delete
-              </Button>
+              {(
+                [
+                  ProductAuctionStatus.Inactive,
+                  ProductAuctionStatus.StartSoon,
+                  ProductAuctionStatus.Active
+                ] as ProductAuctionStatusValues[]
+              ).includes(productAuction.auctionStatus) && (
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={() =>
+                    navigate(generatePath(AppRoute.Farmer.UpdateAuction, { auctionId: productAuction.id }))
+                  }
+                >
+                  Update
+                </Button>
+              )}
+              {(
+                [ProductAuctionStatus.Inactive, ProductAuctionStatus.StartSoon] as ProductAuctionStatusValues[]
+              ).includes(productAuction.auctionStatus) && (
+                <Button type="button" className="w-full" variant="destructive" onClick={onDeleteClick}>
+                  Delete
+                </Button>
+              )}
+
               <Button
                 type="button"
                 className="w-full"
@@ -228,6 +226,9 @@ export function ProductAuctionCard({ productAuction, onDeleteClick }: ProductAuc
               >
                 Learn more
               </Button>
+              {([ProductAuctionStatus.Ended, ProductAuctionStatus.Unpaid] as ProductAuctionStatusValues[]).includes(
+                productAuction.auctionStatus
+              ) && <RestartAuctionModal id={productAuction.id} />}
             </>
           )}
         </div>

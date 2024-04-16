@@ -233,6 +233,26 @@ export class AuthService {
     //     otpCode: otp,
     //   },
     // });
+
+    const stripeAccount = await this.stripeService.createAccount({
+      params: { type: 'standard', email: user.email },
+    });
+    const stripeAccountLink = await this.stripeService.linkAccount({
+      params: {
+        account: stripeAccount.id,
+        return_url: `${request.headers.origin}/return/${stripeAccount.id}`,
+        refresh_url: `${request.headers.origin}/refresh/${stripeAccount.id}`,
+        type: 'account_onboarding',
+      },
+    });
+
+    await this.stripeService.createEntry({
+      userId: user.id,
+      accountId: stripeAccount.id,
+      linkExpiresAt: new Date(stripeAccountLink.expires_at * 1000),
+      linkUrl: stripeAccountLink.url,
+    });
+
     return { accessToken };
   }
 

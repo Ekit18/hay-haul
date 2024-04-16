@@ -24,7 +24,7 @@ export function TimeProgress({ startDate, endDate }: TimeProgressProps) {
       const total = Math.floor(differenceInMilliseconds(endDate, startDate));
       const elapsed = Math.floor(differenceInMilliseconds(now, startDate));
 
-      setProgress(Math.floor((elapsed / total) * 100));
+      setProgress((elapsed / total) * 100);
     }, 1000);
 
     return () => clearInterval(interval);

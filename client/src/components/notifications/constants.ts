@@ -6,7 +6,48 @@ export const notificationMessages: Record<NotificationMessage, { icon: LucideIco
   [NotificationMessage.BidOverbid]: {
     icon: AlertCircleIcon,
     message: 'Your bid was overbid on a product auction.'
+  },
+  [NotificationMessage.ResumeAppointment]: {
+    icon: AlertCircleIcon,
+    message: 'Appointment has been resumed'
+  },
+  [NotificationMessage.AuctionStartSoon]: {
+    icon: AlertCircleIcon,
+    message: 'Auction will start soon'
+  },
+  [NotificationMessage.AuctionStarted]: {
+    icon: AlertCircleIcon,
+    message: 'Auction has started'
+  },
+  [NotificationMessage.FarmerAuctionEndSoon]: {
+    icon: AlertCircleIcon,
+    message: 'Farmer auction will end soon'
+  },
+  [NotificationMessage.BusinessmanAuctionEndSoon]: {
+    icon: AlertCircleIcon,
+    message: 'Businessman auction will end soon'
+  },
+  [NotificationMessage.AuctionEndedNoBids]: {
+    icon: AlertCircleIcon,
+    message: 'Auction ended with no bids'
+  },
+  [NotificationMessage.AuctionEndedWithBids]: {
+    icon: AlertCircleIcon,
+    message: 'Auction ended with bids'
+  },
+  [NotificationMessage.BusinessmanAuctionWon]: {
+    icon: AlertCircleIcon,
+    message: 'You have won the businessman auction'
+  },
+  [NotificationMessage.BusinessmanAuctionPaymentOverdue]: {
+    icon: AlertCircleIcon,
+    message: 'Payment for businessman auction is overdue'
+  },
+  [NotificationMessage.FarmerAuctionPaymentOverdue]: {
+    icon: AlertCircleIcon,
+    message: 'Payment for farmer auction is overdue'
   }
+
   //   [NotificationMessage.BidWon]: {
   //     icon: LucideIcon.AlertCircle,
   //     message: 'You have won a bid on a product',

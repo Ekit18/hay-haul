@@ -38,7 +38,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         </div>
         <div className="flex w-full flex-row items-center border-b-2 border-gray-200">
           <div className="flex w-10/12 flex-row gap-2">
-            <p className="font-medium">{format(new Date(notification.createdAt), 'dd-MM-yyyy HH:m:s')}</p>
+            <p className="font-medium">{format(new Date(notification.createdAt), 'dd-MM-yyyy HH:mm:ss')}</p>
             <p>{notificationMessage.message}</p>
           </div>
           <div className="flex w-1/12 items-center justify-center">

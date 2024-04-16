@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
+import {
+  updateAuctionStatusTrigger,
+  updateAuctionTrigger,
+} from './trigger-data/auction.trigger';
+import { productAuctionBidTrigger } from './trigger-data/product-auction-bid.trigger';
+import { deleteProductTypeProcedure } from './trigger-data/product.trigger';
 
 @Injectable()
 export class TriggerService {
@@ -10,7 +16,10 @@ export class TriggerService {
   }
 
   private triggers: string[] = [
-    //"DO NOT REMOVE THIS COMMENT",
+    updateAuctionTrigger,
+    updateAuctionStatusTrigger,
+    deleteProductTypeProcedure,
+    productAuctionBidTrigger,
   ];
 
   private async seedTrigger(): Promise<void> {

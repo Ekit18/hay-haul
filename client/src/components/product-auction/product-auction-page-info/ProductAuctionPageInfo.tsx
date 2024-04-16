@@ -5,6 +5,7 @@ import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
 import { EntityTitle } from '@/lib/enums/entity-title.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
+import useInfiniteScroll from '@/lib/hooks/useInfiniteScroll';
 import { ProductAuction } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { DataWithCount } from '@/lib/types/types';
 import { cn } from '@/lib/utils';
@@ -19,7 +20,7 @@ import {
   QueryDefinition
 } from '@reduxjs/toolkit/query';
 import debounce from 'debounce';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { ProductAuctionCard } from '../product-auction-card/ProductAuctionCard';
 import { ProductAuctionCardSkeleton } from '../product-auction-card/ProductAuctionCard.skeleton';
@@ -86,11 +87,19 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
     await trigger(searchParams).unwrap().catch(handleRtkError);
   };
 
+  const { loadMoreRef, page: currentPage, resetPage } = useInfiniteScroll({ maxPage: data?.count });
+
+  useEffect(() => {
+    if (!currentPage) return;
+    onSubmit({ ...form.getValues(), offset: currentPage * 10 });
+  }, [currentPage]);
+
   const firstRender = useRef(true);
   useEffect(() => {
     const getFunction = () => {
       if (!isLoading || !isFetching) {
         onSubmit(form.getValues());
+        resetPage();
       }
     };
 
@@ -145,30 +154,6 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
       .catch(handleRtkError);
   };
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const hasMore = useMemo(() => currentPage < data?.count, [currentPage, data?.count]);
-
-  const observer = useRef<IntersectionObserver>();
-  const lastProductAuctionRef = useCallback(
-    (node: HTMLDivElement) => {
-      if (isLoading || isFetching) return;
-
-      if (observer.current) observer.current.disconnect();
-
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setCurrentPage((prev) => prev + 1);
-          form.setValue('offset', currentPage * 10);
-          // trigger(new URLSearchParams(form.getValues())).unwrap().catch(handleRtkError);
-          console.log('visible');
-        }
-      });
-
-      if (node) observer.current.observe(node);
-    },
-    [isLoading, isFetching, hasMore]
-  );
-
   return (
     <div className="h-full bg-gray-100 pb-4">
       <Form {...form}>
@@ -205,7 +190,8 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
                 <p>Try changing the filters</p>
               </div>
             )}
-            <div ref={lastProductAuctionRef}>...</div>
+
+            {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5"></div>}
           </div>
         </form>
       </Form>
