@@ -209,7 +209,7 @@ export const useProductAuctionFilterFormSchema = (): ObjectSchema<
     endDateSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     startDateSort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
     quantitySort: string().oneOf<SortOrderValues>(['ASC', 'DESC']),
-    innerSortKey: string().oneOf<ProductAuctionSortKeys>(['quantitySort', 'endDateSort', 'startDateSort']),
+    innerSortKey: string().oneOf<ProductAuctionSortKeys>(productAuctionSortKeys),
     innerSortOrder: string().oneOf<SortOrderValues>(['ASC', 'DESC'])
   });
 };

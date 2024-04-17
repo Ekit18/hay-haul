@@ -1,7 +1,7 @@
 import { CreateDeliveryOrderValues } from '@/components/delivery-order/modals/create-delivery-order/validation';
 import { UpdateDeliveryOrderValues } from '@/components/delivery-order/modals/update-delivery-order/validation';
 import { DeliveryOrder } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
-import { UpdateRequestDto } from '@/lib/types/types';
+import { DataWithCount, UpdateRequestDto } from '@/lib/types/types';
 import { TagType, api } from '@/store/api';
 import { generatePath } from 'react-router-dom';
 
@@ -23,17 +23,26 @@ export const deliveryOrderApi = api.injectEndpoints({
       }),
       invalidatesTags: [TagType.DeliveryOrder]
     }),
-    getDeliveryOrders: build.query<DeliveryOrder[], void>({
-      query: () => ({
+    getDeliveryOrders: build.query<DataWithCount<DeliveryOrder>, URLSearchParams>({
+      query: (searchParams) => ({
         url: '/delivery-order',
-        method: 'GET'
+        method: 'GET',
+        params: searchParams
       }),
       providesTags: [TagType.DeliveryOrder]
     }),
     getDeliveryOrder: build.query<DeliveryOrder, string>({
       query: (id) => ({
-        url: generatePath('/delivery-order/:id', { id }),
+        url: generatePath('/delivery-order/order/:id', { id }),
         method: 'GET'
+      }),
+      providesTags: [TagType.DeliveryOrder]
+    }),
+    getAllDeliveryOrders: build.query<DataWithCount<DeliveryOrder>, URLSearchParams>({
+      query: (searchParams) => ({
+        url: '/delivery-order/all-orders',
+        method: 'GET',
+        params: searchParams
       }),
       providesTags: [TagType.DeliveryOrder]
     }),

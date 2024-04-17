@@ -69,7 +69,8 @@ export const TagType = {
   ProductAuction: 'ProductAuction',
   Notification: 'Notification',
   Payment: 'Payment',
-  DeliveryOrder: 'DeliveryOrder'
+  DeliveryOrder: 'DeliveryOrder',
+  DeliveryOffer: 'DeliveryOffer'
 } as const;
 
 export const api = createApi({

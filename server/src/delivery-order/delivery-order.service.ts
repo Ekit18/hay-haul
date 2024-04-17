@@ -1,5 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  DEFAULT_OFFSET,
+  DEFAULT_PAGINATION_LIMIT,
+} from 'src/lib/constants/constants';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductAuctionService } from 'src/product-auction/product-auction.service';
 import { S3FileService } from 'src/s3-file/s3-file.service';
@@ -7,6 +11,7 @@ import { Repository } from 'typeorm';
 import { DeliveryOrderErrorMessage } from './delivery-order-error-message.enum';
 import { DeliveryOrder, DeliveryOrderStatus } from './delivery-order.entity';
 import { CreateDeliveryOrderDto } from './dto/create-delivery-order.dto';
+import { DeliveryOrderQueryDto } from './dto/delivery-order-details.dto';
 import { UpdateDeliveryOrderDto } from './dto/update-delivery-order.dto';
 
 @Injectable()
@@ -73,10 +78,71 @@ export class DeliveryOrderService {
     }
   }
 
-  public async findAllByUserId(req: AuthenticatedRequest) {
+  public async findAllByUserId(
+    req: AuthenticatedRequest,
+    {
+      limit = DEFAULT_PAGINATION_LIMIT,
+      offset = DEFAULT_OFFSET,
+    }: DeliveryOrderQueryDto,
+  ) {
     try {
       const userId = req.user.id;
-      const data = await this.deliveryOrderRepository
+
+      const [deliveryOrders, total] =
+        await this.deliveryOrderRepository.findAndCount({
+          where: {
+            userId,
+          },
+          relations: {
+            facilityDetails: true,
+            deliveryOffers: true,
+            productAuction: {
+              product: { productType: true, facilityDetails: true },
+            },
+          },
+          take: limit,
+          skip: offset,
+        });
+      // const queryBuilder = this.deliveryOrderRepository
+      // .createQueryBuilder('deliveryOrder')
+      // .innerJoinAndSelect(
+      //   'deliveryOrder.facilityDetails',
+      //   'businessmanFacilityDetails',
+      // )
+      // .leftJoinAndSelect('deliveryOrder.deliveryOffers', 'deliveryOffers')
+      // .innerJoinAndSelect('deliveryOrder.productAuction', 'productAuction')
+      // .innerJoinAndSelect('productAuction.product', 'product')
+      // .innerJoinAndSelect('product.productType', 'productType')
+      // .innerJoinAndSelect('product.facilityDetails', 'farmerFacilityDetails')
+      // .where('deliveryOrder.userId = :userId', { userId });
+
+      // const [deliveryOrders, total] = await this.deliveryOrderRepository
+      //   .createQueryBuilder('deliveryOrder')
+      //   .take(limit)
+      //   .skip(offset)
+      //   .getManyAndCount();
+
+      const pageCount = Math.ceil(total / limit);
+
+      return {
+        data: deliveryOrders,
+        count: pageCount,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        DeliveryOrderErrorMessage.FailedToGetOrders,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async findAllDeliveryOrders({
+    limit = DEFAULT_PAGINATION_LIMIT,
+    offset = DEFAULT_OFFSET,
+  }: DeliveryOrderQueryDto) {
+    try {
+      const queryBuilder = this.deliveryOrderRepository
         .createQueryBuilder('deliveryOrder')
         .innerJoinAndSelect(
           'deliveryOrder.facilityDetails',
@@ -87,10 +153,19 @@ export class DeliveryOrderService {
         .innerJoinAndSelect('productAuction.product', 'product')
         .innerJoinAndSelect('product.productType', 'productType')
         .innerJoinAndSelect('product.facilityDetails', 'farmerFacilityDetails')
-        .where('deliveryOrder.userId = :userId', { userId })
-        .getMany();
+        .where('deliveryOrder.deliveryOrderStatus = :status', {
+          status: DeliveryOrderStatus.Active,
+        });
 
-      return data;
+      const [deliveryOrders, total] = await queryBuilder
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount();
+      const pageCount = Math.ceil(total / limit);
+      return {
+        data: deliveryOrders,
+        count: pageCount,
+      };
     } catch (error) {
       console.log(error);
       throw new HttpException(
@@ -159,7 +234,11 @@ export class DeliveryOrderService {
     }
   }
 
-  public async update(id: string, dto: UpdateDeliveryOrderDto, request: AuthenticatedRequest) {
+  public async update(
+    id: string,
+    dto: UpdateDeliveryOrderDto,
+    request: AuthenticatedRequest,
+  ) {
     try {
       const userId = request.user.id;
       const deliveryOrder = await this.findOneById(id);

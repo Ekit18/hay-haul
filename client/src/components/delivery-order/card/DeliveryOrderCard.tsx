@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { EntityTitle } from '@/lib/enums/entity-title.enum';
+import { UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import {
@@ -102,24 +103,26 @@ export function DeliveryOrderCard({ deliveryOrder }: DeliveryOrderCardProps) {
           {/* todo: create counter of offers */}
         </CardContent>
         <CardFooter className="flex w-full flex-col items-center justify-center gap-5">
-          {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Inactive && (
-            <div className="flex w-full flex-col items-center justify-start gap-1 md:flex-row">
-              <Button
-                type="button"
-                variant="destructive"
-                className="flex w-full gap-1"
-                onClick={() => handleDeleteModalOpenChange(true)}
-              >
-                <Trash2 size={20} className="min-h-5 min-w-5" /> Delete
-              </Button>
-              <UpdateDeliveryOrderModalHOC deliveryOrder={deliveryOrder} />
-              {user.id === deliveryOrder.userId && (
-                <Button type="button" className="w-full" onClick={() => handleOpenChange(open)}>
-                  Start
+          {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Inactive &&
+            user.role === UserRole.Businessman &&
+            user.id === deliveryOrder.userId && (
+              <div className="flex w-full flex-col items-center justify-start gap-1 md:flex-row">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="flex w-full gap-1"
+                  onClick={() => handleDeleteModalOpenChange(true)}
+                >
+                  <Trash2 size={20} className="min-h-5 min-w-5" /> Delete
                 </Button>
-              )}
-            </div>
-          )}
+                <UpdateDeliveryOrderModalHOC deliveryOrder={deliveryOrder} />
+                {user.id === deliveryOrder.userId && (
+                  <Button type="button" className="w-full" onClick={() => handleOpenChange(open)}>
+                    Start
+                  </Button>
+                )}
+              </div>
+            )}
 
           <Button
             className="w-full"

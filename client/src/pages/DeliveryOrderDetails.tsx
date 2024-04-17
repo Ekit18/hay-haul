@@ -1,4 +1,5 @@
 import { ImageCarousel } from '@/components/carousel/ImageCarousel';
+import { CreateDeliveryOfferModal } from '@/components/delivery-offer/modals/create-delivery-offer/CreateDeliveryOfferModal';
 import { deliveryOrderStatus } from '@/components/delivery-order/card/DeliveryOrderCardStatus.enum';
 import { DeliveryOrderDestination } from '@/components/delivery-order/card/DeliveryOrderDestination';
 import {
@@ -115,10 +116,11 @@ export function DeliveryOrderDetails() {
         </div>
         <div className="mt-4">
           <h1 className="text-2xl font-bold">Delivery offers:</h1>
-          {/* {
-            user?.role === UserRole.Carrier && (
-          } */}
-          {/* TODO: add delivery offers */}
+          {user?.role === UserRole.Carrier && (
+            <div className="flex w-full justify-end py-5">
+              <CreateDeliveryOfferModal deliveryOrderId={deliveryOrder.id} desiredPrice={deliveryOrder.desiredPrice} />
+            </div>
+          )}
         </div>
       </div>
     </div>

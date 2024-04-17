@@ -11,11 +11,12 @@ import { SignUpPage } from './pages/SignUpPage';
 import { StripeRefreshPage } from './pages/StripeRefreshPage';
 import { StripeRegisterPage } from './pages/StripeRegisterPage';
 import { StripeReturnPage } from './pages/StripeReturnPage';
-import { DeliveryOrder } from './pages/businessman-pages/DeliveryOrder';
+import { BusinessDeliveryOrderPage } from './pages/businessman-pages/BusinessDeliveryOrder';
 import { Depots } from './pages/businessman-pages/Depots';
 import { MainPage as BusinessmanMainPage } from './pages/businessman-pages/MainPage';
 import { MyBids } from './pages/businessman-pages/MyBids';
 import { StripeProductAuctionPaymentPage } from './pages/businessman-pages/ProductAuctionPaymentPage';
+import { CarrierDeliveryOrderPage } from './pages/carrier-pages/CarrierDeliveryOrder';
 import { MainPage as CarrierMainPage } from './pages/carrier-pages/MainPage';
 import { CreateAuction } from './pages/farmer-pages/CreateAuction';
 import { Farms } from './pages/farmer-pages/Farms';
@@ -63,7 +64,7 @@ export const carrierRoutes: Route[] = [
   },
   {
     path: AppRoute.Carrier.DeliveryOrders,
-    Component: DeliveryOrder
+    Component: CarrierDeliveryOrderPage
   },
   {
     path: AppRoute.General.Notifications,
@@ -90,7 +91,7 @@ export const businessRoutes: Route[] = [
   },
   {
     path: AppRoute.Businessman.Delivery,
-    Component: DeliveryOrder
+    Component: BusinessDeliveryOrderPage
   },
   {
     path: AppRoute.General.Auctions,

@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { UserRole } from 'src/user/user.entity';
 import { DeliveryOrderService } from './delivery-order.service';
 import { CreateDeliveryOrderDto } from './dto/create-delivery-order.dto';
+import { DeliveryOrderQueryDto } from './dto/delivery-order-details.dto';
 import { UpdateDeliveryOrderDto } from './dto/update-delivery-order.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -34,11 +36,19 @@ export class DeliveryOrderController {
   }
 
   @Get()
-  async getDeliveryOrders(@Req() req: AuthenticatedRequest) {
-    return this.deliveryOrderService.findAllByUserId(req);
+  async getDeliveryOrders(
+    @Req() req: AuthenticatedRequest,
+    @Query() query: DeliveryOrderQueryDto,
+  ) {
+    return this.deliveryOrderService.findAllByUserId(req, query);
   }
 
-  @Get('/:id')
+  @Get('/all-orders')
+  async getAllDeliveryOrders(@Query() query: DeliveryOrderQueryDto) {
+    return this.deliveryOrderService.findAllDeliveryOrders(query);
+  }
+
+  @Get('order/:id')
   async getDeliveryOrder(@Param('id') id: string) {
     return this.deliveryOrderService.findOneById(id);
   }

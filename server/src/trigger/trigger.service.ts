@@ -5,26 +5,26 @@ import {
   updateAuctionTrigger,
 } from './trigger-data/auction.trigger';
 import { productAuctionBidTrigger } from './trigger-data/product-auction-bid.trigger';
-import { deleteProductTypeProcedure } from './trigger-data/product.trigger';
+import { deleteProductTypeTrigger } from './trigger-data/product.trigger';
 
 @Injectable()
 export class TriggerService {
   constructor(private readonly entityManager: EntityManager) {}
 
   async seed(): Promise<void> {
-    await Promise.all([this.seedTrigger()]);
+    await this.seedTrigger();
   }
 
   private triggers: string[] = [
     updateAuctionTrigger,
-    updateAuctionStatusTrigger,
-    deleteProductTypeProcedure,
+    deleteProductTypeTrigger,
     productAuctionBidTrigger,
+    updateAuctionStatusTrigger,
   ];
 
-  private async seedTrigger(): Promise<void> {
-    this.triggers.map(async (trigger) => {
+  private async seedTrigger() {
+    for (const trigger of this.triggers) {
       await this.entityManager.query(trigger);
-    });
+    }
   }
 }

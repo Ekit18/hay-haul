@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { AppRoute } from '@/lib/constants/routes';
 import { PaymentStatus } from '@/lib/enums/payment-status.enum';
 import { PaymentTargetType } from '@/lib/enums/payment-target-type.enum';
+import { UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
+import { useAppSelector } from '@/lib/hooks/redux';
 import useInfiniteScroll from '@/lib/hooks/useInfiniteScroll';
 import { ProductAuctionStatusText } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { cn } from '@/lib/utils';
@@ -18,7 +20,7 @@ import { generatePath, useNavigate } from 'react-router-dom';
 export function PaymentsPage() {
   const [getPaymentsByUserId, { data, isLoading, isError, error }] = paymentsApi.useLazyGetPaymentsByUserIdQuery();
   const { loadMoreRef, page: currentPage } = useInfiniteScroll({ maxPage: data?.count });
-
+  const user = useAppSelector((state) => state.user.user);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function PaymentsPage() {
             name = `${capitalize(payment.target.productAuction.product.name)} by ${capitalize(payment.target.productAuction.product.facilityDetails.name)}`;
             details = (
               <div className="grid w-full grid-cols-[min-content_1fr_min-content]">
-                {payment.status === PaymentStatus.WaitingPayment && (
+                {user?.role === UserRole.Businessman && payment.status === PaymentStatus.WaitingPayment && (
                   <Button
                     onClick={() =>
                       navigate(
@@ -88,7 +90,7 @@ export function PaymentsPage() {
                     Auction details
                   </Button>
                 </div>
-                {payment.status === PaymentStatus.WaitingPayment && (
+                {user?.role === UserRole.Businessman && payment.status === PaymentStatus.WaitingPayment && (
                   <Button
                     onClick={() =>
                       navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: payment.target.id }))
