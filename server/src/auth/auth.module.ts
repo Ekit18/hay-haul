@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EmailModule } from 'src/email-2/email.module';
+import { EmailModule } from 'src/email/email.module';
 import { FacilityDetailsModule } from 'src/facility-details/facility-details.module';
 import { ProductTypeModule } from 'src/product-type/product-type.module';
 import { StripeModule } from 'src/stripe/stripe.module';
@@ -10,14 +10,10 @@ import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { Otp } from './otp.entity';
-import {EmailService} from "../email-2/email.service";
-import {SendGridEmailService} from "../email-2/implementations/sendgrid-email/sendgrid-email.service";
+import {SendgridEmailProvider} from "../email/implementations/sendgrid-email/sendgrid-email.provider";
 
 @Module({
-  providers: [AuthService, JwtService, {
-    provide:EmailService,
-    useClass:SendGridEmailService
-  }],
+  providers: [AuthService, JwtService, SendgridEmailProvider],
   controllers: [AuthController],
   imports: [
     StripeModule,

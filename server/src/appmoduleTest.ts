@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { Otp } from './auth/otp.entity';
-import { EmailModule } from './email-2/email.module';
+import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
 import { FacilityDetailsModule } from './facility-details/facility-details.module';
 import { FunctionService } from './function/function.service';

@@ -29,7 +29,7 @@ import { TokenResponse } from './dto/token-response.dto';
 import { generateOtpCode } from './helpers/generate-otp-code.helper';
 import { getCookieExpireDate } from './helpers/get-cookie-expire-date';
 import { Otp } from './otp.entity';
-import {EmailService} from "../email-2/email.service";
+import {EmailService} from "../email/email.service";
 
 @Injectable()
 export class AuthService {

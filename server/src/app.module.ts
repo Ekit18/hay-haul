@@ -9,7 +9,7 @@ import { DeliveryOffer } from './delivery-offer/delivery-offer.entity';
 import { DeliveryOfferModule } from './delivery-offer/delivery-offer.module';
 import { DeliveryOrder } from './delivery-order/delivery-order.entity';
 import { DeliveryOrderModule } from './delivery-order/delivery-order.module';
-import { EmailModule } from './email-2/email.module';
+import { EmailModule } from './email/email.module';
 import { FacilityDetails } from './facility-details/facility-details.entity';
 import { FacilityDetailsModule } from './facility-details/facility-details.module';
 import { FunctionService } from './function/function.service';

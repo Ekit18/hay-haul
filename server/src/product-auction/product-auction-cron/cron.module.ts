@@ -2,12 +2,11 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EmailModule } from 'src/email-2/email.module';
+import { EmailModule } from 'src/email/email.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { ProductAuction } from '../product-auction.entity';
 import { ProductAuctionCronService } from './cron.service';
-import {EmailService} from "../../email-2/email.service";
-import {SendGridEmailService} from "../../email-2/implementations/sendgrid-email/sendgrid-email.service";
+import {SendgridEmailProvider} from "../../email/implementations/sendgrid-email/sendgrid-email.provider";
 
 @Module({
   imports: [
@@ -17,9 +16,6 @@ import {SendGridEmailService} from "../../email-2/implementations/sendgrid-email
     EmailModule,
   ],
 
-  providers: [ProductAuctionCronService,{
-    provide:EmailService,
-    useClass:SendGridEmailService
-  }],
+  providers: [ProductAuctionCronService,SendgridEmailProvider],
 })
 export class ProductAuctionCronModule {}
