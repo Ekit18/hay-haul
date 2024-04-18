@@ -16,6 +16,6 @@ import {SendgridEmailProvider} from "../../email/implementations/sendgrid-email/
     EmailModule,
   ],
 
-  providers: [ProductAuctionCronService,SendgridEmailProvider],
+  providers: [ProductAuctionCronService],
 })
 export class ProductAuctionCronModule {}

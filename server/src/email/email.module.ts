@@ -1,10 +1,14 @@
-import {Module} from "@nestjs/common";
+import {Global, Module} from "@nestjs/common";
 import {SendGridEmailService} from "./implementations/sendgrid-email/sendgrid-email.service";
 import {ConfigService} from "@nestjs/config";
 import {MailService} from "@sendgrid/mail";
+import {SendgridEmailProvider} from "./implementations/sendgrid-email/sendgrid-email.provider";
 
+@Global()
 @Module({
-  providers: [SendGridEmailService,{
+  providers: [SendGridEmailService,
+    SendgridEmailProvider,
+    {
     provide: MailService,
     useFactory: (configService: ConfigService): MailService => {
       const mail = new MailService();
@@ -14,6 +18,6 @@ import {MailService} from "@sendgrid/mail";
     },
     inject: [ConfigService],
   }],
-  exports: [SendGridEmailService,MailService],
+  exports: [SendGridEmailService,MailService,SendgridEmailProvider],
 })
 export class EmailModule {}

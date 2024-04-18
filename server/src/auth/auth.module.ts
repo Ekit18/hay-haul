@@ -10,10 +10,9 @@ import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { Otp } from './otp.entity';
-import {SendgridEmailProvider} from "../email/implementations/sendgrid-email/sendgrid-email.provider";
 
 @Module({
-  providers: [AuthService, JwtService, SendgridEmailProvider],
+  providers: [AuthService, JwtService],
   controllers: [AuthController],
   imports: [
     StripeModule,
