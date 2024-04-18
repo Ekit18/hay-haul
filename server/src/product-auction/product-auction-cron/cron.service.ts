@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isPast, subHours } from 'date-fns';
-import { EmailService } from 'src/email/services/email.service';
+import { EmailService } from 'src/email-2/email.service';
 import { ServerEventName } from 'src/lib/enums/enums';
 import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
 import { NotificationService } from 'src/notification/notification.service';

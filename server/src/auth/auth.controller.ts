@@ -10,7 +10,7 @@ import {
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { SendOtpDto } from 'src/auth/dto/send-otp.dto';
-import { EmailErrorMessage } from 'src/email/enums/email-error-message.enum';
+import { EmailErrorMessage } from 'src/email-2/enums/email-error-message.enum';
 import { getSwaggerResponseDescription } from 'src/lib/helpers/getSwaggerResponseDescription';
 import { TokenErrorMessage } from 'src/token/token-error-message.enum';
 import { RegisterUserDto } from 'src/user/dto/register-user.dto';
