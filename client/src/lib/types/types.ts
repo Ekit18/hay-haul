@@ -56,6 +56,4 @@ export type UpdateRequestDto<T> = {
   id: string;
 };
 
-export type FirstParameter<T> = T extends (..._arguments: [infer Parameter, ...infer Rest]) => unknown
-  ? Parameter
-  : never;
+export type FirstParameter<T> = T extends (..._arguments: [infer Parameter]) => unknown ? Parameter : never;

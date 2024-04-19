@@ -114,7 +114,7 @@ export function RestartAuctionModal({ id }: { id: string }) {
                   name="startEndDate"
                   render={() => (
                     <FormItem className="w-full">
-                      <FormLabel className="block">Choose start / end date</FormLabel>
+                      <FormLabel className="mb-1 block">Choose start / end date</FormLabel>
                       <div className="flex flex-row gap-1">
                         {addDaysRatios.map((ratio) => (
                           <Button
@@ -130,7 +130,7 @@ export function RestartAuctionModal({ id }: { id: string }) {
                       <FormControl>
                         <DatePickerWithRange<RestartProductAuctionFormValues, 'startEndDate'>
                           field="startEndDate"
-                          title="Start / end date"
+                          className="!rounded-l-md !border-l"
                         />
                       </FormControl>
                       <FormMessage />

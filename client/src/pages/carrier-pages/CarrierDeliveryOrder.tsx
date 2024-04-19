@@ -8,7 +8,7 @@ export function CarrierDeliveryOrderPage() {
   const { data } = deliveryOrderApi.useGetAllDeliveryOrdersQuery(originalArgs || skipToken);
 
   return (
-    //replace data with deliveryOrders, just for now
+    // replace data with deliveryOrders, just for now
     <DeliveryOrderPageInfo
       deliveryOrders={data}
       isFetching={isFetching}

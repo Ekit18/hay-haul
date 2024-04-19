@@ -1,7 +1,7 @@
 import { NotificationMessage } from '@/lib/enums/notification-message.enum';
 import { AlertCircleIcon, LucideIcon } from 'lucide-react';
 
-//todo: add more messages, and colors
+// todo: add more messages, and colors
 export const notificationMessages: Record<NotificationMessage, { icon: LucideIcon; message: string }> = {
   [NotificationMessage.BidOverbid]: {
     icon: AlertCircleIcon,

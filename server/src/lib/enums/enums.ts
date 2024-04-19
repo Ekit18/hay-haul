@@ -20,6 +20,7 @@ export enum ComparisonOperator {
 export enum ServerEventName {
   Notification = 'notification',
   AuctionUpdated = 'auction_updated',
+  DeliveryOrderUpdated = 'delivery_order_updated',
 }
 
 export enum PaymentTargetType {

@@ -124,7 +124,7 @@ export function StripeProductAuctionPaymentPage() {
             <CheckoutForm />
           </Elements>
         )}
-        <div className="w-full px-4"></div>
+        <div className="w-full px-4" />
       </div>
     </div>
   );
@@ -158,10 +158,10 @@ export function CheckoutForm() {
 
     try {
       const { error } = await stripe.confirmPayment({
-        //`Elements` instance that was used to create the Payment Element
+        // `Elements` instance that was used to create the Payment Element
         elements,
         confirmParams: {
-          //TODO: change return_url
+          // TODO: change return_url
           // return_url: 'https://google.com'
           return_url: `http://localhost:5173/auction-details/${auctionId ?? ''}`
         }

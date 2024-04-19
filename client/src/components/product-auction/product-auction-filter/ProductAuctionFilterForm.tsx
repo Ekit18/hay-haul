@@ -5,6 +5,7 @@ import { ProductAuctionStatus, ProductAuctionStatusDict } from '@/lib/types/Prod
 import { useFormContext } from 'react-hook-form';
 import { ProductAuctionSortSelect } from './ProductAuctionSortSelect';
 import { ProductAuctionFilterFormValues } from './validation';
+import { FormLabel } from '@/components/ui/form';
 
 const STATUSES = Object.entries(ProductAuctionStatus);
 
@@ -24,9 +25,14 @@ export function ProductAuctionFilterForm() {
           title="Buyout Price"
           key="buyoutPrice"
         />
-        <div className="flex">
-          <DatePickerWithRange<ProductAuctionFilterFormValues, 'startDate'> field="startDate" title="Start date" />
-          <DatePickerWithRange<ProductAuctionFilterFormValues, 'endDate'> field="endDate" title="End date" />
+        <div className="flex ">
+          <div className="flex w-full max-w-full flex-col">
+            <FormLabel className="block">Choose start / end date</FormLabel>
+            <div className="mt-3 flex ">
+              <DatePickerWithRange<ProductAuctionFilterFormValues, 'startDate'> field="startDate" />
+              <DatePickerWithRange<ProductAuctionFilterFormValues, 'endDate'> field="endDate" />
+            </div>
+          </div>
         </div>
         <NumberInputWithRange<ProductAuctionFilterFormValues, 'quantity'>
           fieldName="quantity"
@@ -47,7 +53,7 @@ export function ProductAuctionFilterForm() {
             value: item
           })}
         />
-        <ProductAuctionSortSelect />
+        <ProductAuctionSortSelect containerClassName="lg:ml-0" />
       </div>
     </>
   );

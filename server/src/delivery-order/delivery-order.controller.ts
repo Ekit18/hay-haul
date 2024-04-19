@@ -16,14 +16,16 @@ import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { UserRole } from 'src/user/user.entity';
 import { DeliveryOrderService } from './delivery-order.service';
 import { CreateDeliveryOrderDto } from './dto/create-delivery-order.dto';
-import { DeliveryOrderQueryDto } from './dto/delivery-order-details.dto';
 import { UpdateDeliveryOrderDto } from './dto/update-delivery-order.dto';
+import { DeliveryOrderQueryDto } from './dto/delivery-order-query.dto';
+import { DeliveryOrderLocationsQueryDto } from './dto/delivery-order-locations-query.dto';
+import { DeliveryOrderLocationsQueryResponse } from './dto/delivery-order-locations-query-response.dto';
 
 @UseGuards(JwtAuthGuard)
 @AllowedRoles(UserRole.Businessman, UserRole.Carrier)
 @Controller('delivery-order')
 export class DeliveryOrderController {
-  constructor(private readonly deliveryOrderService: DeliveryOrderService) {}
+  constructor(private readonly deliveryOrderService: DeliveryOrderService) { }
 
   @Post('/product-auction/:auctionId/depot/:depotId')
   async createDeliveryOrder(
@@ -33,6 +35,11 @@ export class DeliveryOrderController {
     @Req() req: AuthenticatedRequest,
   ) {
     return this.deliveryOrderService.create(dto, auctionId, req, depotId);
+  }
+
+  @Get('/locations')
+  async getAllFarmAndDepotLocations(@Query() query: DeliveryOrderLocationsQueryDto): Promise<DeliveryOrderLocationsQueryResponse> {
+    return this.deliveryOrderService.findAllLocations(query);
   }
 
   @Get()

@@ -1,5 +1,6 @@
 import { ImageCarousel } from '@/components/carousel/ImageCarousel';
-import { CreateDeliveryOfferModal } from '@/components/delivery-offer/modals/create-delivery-offer/CreateDeliveryOfferModal';
+import { DeliveryOfferCard } from '@/components/delivery-offer/delivery-offer-card/DeliveryOfferCard';
+import { CreateDeliveryOfferForm } from '@/components/delivery-offer/modals/create-delivery-offer/CreateDeliveryOfferModal';
 import { deliveryOrderStatus } from '@/components/delivery-order/card/DeliveryOrderCardStatus.enum';
 import { DeliveryOrderDestination } from '@/components/delivery-order/card/DeliveryOrderDestination';
 import {
@@ -13,12 +14,12 @@ import {
 import { AppRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
-import { DeliveryOrderStatusText } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
+import { DeliveryOrderStatus, deliveryOrderStatusText } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { cn } from '@/lib/utils';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
 import { format, parseISO } from 'date-fns';
 import { Loader2, Package } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Navigate, generatePath, useNavigate, useParams } from 'react-router-dom';
 
 export function DeliveryOrderDetails() {
@@ -27,8 +28,7 @@ export function DeliveryOrderDetails() {
   const navigate = useNavigate();
   const user = useAppSelector((state) => state.user.user);
 
-  const [getDeliveryOrder, { data: deliveryOrder, isFetching, isError, isLoading }] =
-    deliveryOrderApi.useLazyGetDeliveryOrderQuery();
+  const [getDeliveryOrder, { data, isFetching, isError, isLoading }] = deliveryOrderApi.useLazyGetDeliveryOrderQuery();
 
   useEffect(() => {
     if (!deliveryOrderId) {
@@ -37,15 +37,23 @@ export function DeliveryOrderDetails() {
     getDeliveryOrder(deliveryOrderId);
   }, [deliveryOrderId]);
 
-  if (!deliveryOrderId || isError) {
-    return <Navigate to={generatePath(AppRoute.General.DeliveryOrder)} />;
-  }
-  if (isFetching || isLoading || !deliveryOrder) {
+  const deliveryOrder = data?.data[0];
+
+  const currentOffer = useMemo(
+    () => deliveryOrder?.deliveryOffers.find((offer) => offer.userId === user?.id),
+    [deliveryOrder?.deliveryOffers, user?.id]
+  );
+
+  if (isFetching || isLoading || !data) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin" />
       </div>
     );
+  }
+
+  if (!deliveryOrderId || isError || !deliveryOrder) {
+    return <Navigate to={generatePath(AppRoute.General.DeliveryOrder)} />;
   }
 
   return (
@@ -89,7 +97,7 @@ export function DeliveryOrderDetails() {
                   deliveryOrderStatus[deliveryOrder.deliveryOrderStatus]
                 )}
               >
-                {DeliveryOrderStatusText[deliveryOrder.deliveryOrderStatus]}
+                {deliveryOrderStatusText[deliveryOrder.deliveryOrderStatus]}
               </span>
             </p>
             <p>
@@ -113,12 +121,37 @@ export function DeliveryOrderDetails() {
               to={deliveryOrder.facilityDetails?.address}
             />
           </div>
+          {user?.role === UserRole.Carrier && (
+            <div className="flex h-fit w-60 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
+              <div className="">
+                <p className="text-center">Your current offer:</p>
+                <div className="mb-6 flex flex-col items-center gap-2">
+                  <h2 className=" text-center text-3xl font-bold">
+                    {currentOffer ? `${currentOffer?.price} USD` : 'None'}
+                  </h2>
+                </div>
+              </div>
+              <div className="flex w-3/4 flex-col gap-y-3">
+                {user?.role === UserRole.Carrier && (
+                  <div className="flex w-full justify-end py-5">
+                    <CreateDeliveryOfferForm
+                      deliveryOrderId={deliveryOrder.id}
+                      desiredPrice={deliveryOrder.desiredPrice}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         <div className="mt-4">
           <h1 className="text-2xl font-bold">Delivery offers:</h1>
-          {user?.role === UserRole.Carrier && (
-            <div className="flex w-full justify-end py-5">
-              <CreateDeliveryOfferModal deliveryOrderId={deliveryOrder.id} desiredPrice={deliveryOrder.desiredPrice} />
+
+          {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Active && (
+            <div className="grid w-full grid-cols-1 gap-4 py-4 pb-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+              {deliveryOrder.deliveryOffers.map((deliveryOffer) => (
+                <DeliveryOfferCard key={deliveryOffer.id} deliveryOffer={deliveryOffer} />
+              ))}
             </div>
           )}
         </div>

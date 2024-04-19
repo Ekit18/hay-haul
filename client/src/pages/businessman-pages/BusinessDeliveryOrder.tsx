@@ -9,7 +9,7 @@ export function BusinessDeliveryOrderPage() {
   const { data } = deliveryOrderApi.useGetDeliveryOrdersQuery(originalArgs || skipToken);
 
   console.log('deliveryOrders', data);
-  //replace data with deliveryOrders, just for now
+  // replace data with deliveryOrders, just for now
   return (
     <DeliveryOrderPageInfo
       trigger={filterDeliveryOrders}

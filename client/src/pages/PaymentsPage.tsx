@@ -141,7 +141,7 @@ export function PaymentsPage() {
         </div>
       </div>
       <div className="px-4">{content}</div>
-      {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5"></div>}
+      {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5" />}
     </div>
   );
 }

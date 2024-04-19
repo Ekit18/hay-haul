@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AllowedRoles } from 'src/lib/decorators/roles-auth.decorator';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
@@ -23,5 +23,10 @@ export class DeliveryOfferController {
       req,
       dto,
     );
+  }
+
+  @Delete('/:deliveryOfferId')
+  async deleteDeliveryOffer(@Param('deliveryOfferId') deliveryOfferId: string, @Req() req: AuthenticatedRequest) {
+    return await this.deliveryOfferService.deleteDeliveryOffer(deliveryOfferId, req);
   }
 }

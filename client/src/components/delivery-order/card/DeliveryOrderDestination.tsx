@@ -15,7 +15,7 @@ export function DeliveryOrderDestination({ from, to }: DeliveryOrderDestinationP
         <MapPin size={20} className="min-h-5 min-w-5" />
         <p className="font-medium">{from}</p>
       </div>
-      <div className="ml-[9px] h-5 border-l-2 border-dashed border-primary"></div>
+      <div className="ml-[9px] h-5 border-l-2 border-dashed border-primary" />
       <div className="flex gap-2">
         <MapPin size={20} className="min-h-5 min-w-5" />
         <p className="font-medium">{to}</p>

@@ -2,6 +2,7 @@ import { ServerToClientEventName } from '@/lib/enums/server-to-client-event-name
 import { Notification } from '../Notifications/Notifications.type';
 import { ProductAuction } from '../ProductAuction/ProductAuction.type';
 import { ProductAuctionBid } from '../ProductAuctionBid/ProductAuctionBid.type';
+import { DeliveryOrder } from '../DeliveryOrder/DeliveryOrder.type';
 
 type ServerToClientEventParameter = {
   //   [ServerEventName.TRUCKS_LIST_UPDATE]: (payload: TruckEntityT[]) => void;
@@ -21,6 +22,12 @@ type ServerToClientEventParameter = {
     currentMaxBidId: ProductAuction['currentMaxBidId'];
     currentMaxBidUserId: ProductAuctionBid['userId'];
     auctionStatus?: ProductAuction['auctionStatus'];
+  }) => void;
+  [ServerToClientEventName.DeliveryOrderUpdated]: (payload: {
+    deliveryOrderId: DeliveryOrder['id'];
+    deliveryOrderStatus: DeliveryOrder['deliveryOrderStatus'];
+    deliveryOffers: DeliveryOrder['deliveryOffers'];
+
   }) => void;
   [ServerToClientEventName.BaseEvent]: (payload: unknown) => void;
   [ServerToClientEventName.Notification]: (payload: Notification) => void;

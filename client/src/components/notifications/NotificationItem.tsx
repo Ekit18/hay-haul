@@ -59,7 +59,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           </div>
           {!notification.isRead && (
             <div className="flex w-1/12 items-center justify-center">
-              <div className="size-2 rounded-full bg-primary"></div>
+              <div className="size-2 rounded-full bg-primary" />
             </div>
           )}
         </div>

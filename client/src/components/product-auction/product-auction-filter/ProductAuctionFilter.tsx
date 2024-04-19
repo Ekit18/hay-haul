@@ -72,7 +72,7 @@ export function ProductAuctionFilter() {
             <Plus size={20} /> Create Auction
           </Button>
         ) : (
-          <div className="sm:ml-auto"></div>
+          <div className="sm:ml-auto" />
         )}
       </div>
       <div className="">{filterOpen && <ProductAuctionFilterForm />}</div>

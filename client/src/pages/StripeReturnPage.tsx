@@ -13,7 +13,7 @@ import { setUser } from '@/store/reducers/user/userSlice';
 import jwt_decode from 'jwt-decode';
 import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
-//TODO: make return page. Add it to routing, It must check stripeApi.checkStatus, then call stripeApi.verify if OK or navigate to StripeRegisterPage if not OK and display toast for error message
+// TODO: make return page. Add it to routing, It must check stripeApi.checkStatus, then call stripeApi.verify if OK or navigate to StripeRegisterPage if not OK and display toast for error message
 export function StripeReturnPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();

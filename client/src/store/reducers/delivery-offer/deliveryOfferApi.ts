@@ -12,6 +12,13 @@ export const deliveryOfferApi = api.injectEndpoints({
         body: { price: data.price }
       }),
       invalidatesTags: [TagType.DeliveryOrder, TagType.DeliveryOffer]
+    }),
+    deleteDeliveryOffer: build.mutation({
+      query: (id) => ({
+        url: `delivery-offer/${id}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: [TagType.DeliveryOrder, TagType.DeliveryOffer]
     })
     // updateDeliveryOffer: build.mutation({
     //   query: (data) => ({

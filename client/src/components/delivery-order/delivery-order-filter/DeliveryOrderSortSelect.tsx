@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { SortOrder } from '@/lib/enums/sort-order.enum';
 import { MoveDown, MoveUp } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
-import { ProductAuctionFilterFormValues, productAuctionSortKeyToLabelMap, productAuctionSortKeys } from './validation';
+import { DeliveryOrderFilterFormValues, deliveryOrderSortKeys, deliveryOrderSortKeyToLabelMap } from './validation';
 import { cn } from '@/lib/utils';
 
 const sortOrderToUI = {
@@ -12,16 +12,16 @@ const sortOrderToUI = {
   [SortOrder.ASC]: <MoveUp className="mx-1 h-4 w-4" />
 } as const;
 
-export type ProductAuctionSortSelectInputProps = {
+export type DeliveryOrderSortSelectInputProps = {
   containerClassName?: string;
 };
-export function ProductAuctionSortSelect({ containerClassName }: ProductAuctionSortSelectInputProps) {
-  const { setValue, watch } = useFormContext<ProductAuctionFilterFormValues>();
+export function DeliveryOrderSortSelect({ containerClassName }: DeliveryOrderSortSelectInputProps) {
+  const { setValue, watch } = useFormContext<DeliveryOrderFilterFormValues>();
 
   const sortKey = watch('innerSortKey');
 
   const onSortKeyChange = (value: string) => {
-    setValue('innerSortKey', value as ProductAuctionFilterFormValues['innerSortKey'], {
+    setValue('innerSortKey', value as DeliveryOrderFilterFormValues['innerSortKey'], {
       shouldDirty: true,
       shouldTouch: true,
       shouldValidate: true
@@ -62,9 +62,9 @@ export function ProductAuctionSortSelect({ containerClassName }: ProductAuctionS
             </FormControl>
             <SelectContent>
               <SelectGroup>
-                {productAuctionSortKeys?.map((item) => (
+                {deliveryOrderSortKeys?.map((item) => (
                   <SelectItem key={item} value={item}>
-                    {productAuctionSortKeyToLabelMap[item]}
+                    {deliveryOrderSortKeyToLabelMap[item]}
                   </SelectItem>
                 ))}
               </SelectGroup>

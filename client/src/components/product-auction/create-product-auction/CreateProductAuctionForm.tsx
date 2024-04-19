@@ -281,7 +281,7 @@ export function CreateProductAuctionForm() {
                         <FormControl>
                           <DatePickerWithRange<CreateProductAuctionFormValues, 'startEndDate'>
                             field="startEndDate"
-                            title="Start / end date"
+                            className="h-10 min-h-full !rounded-md !border border-input font-normal"
                           />
                         </FormControl>
                         <FormMessage />

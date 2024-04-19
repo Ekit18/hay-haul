@@ -70,6 +70,7 @@ export const TagType = {
   Notification: 'Notification',
   Payment: 'Payment',
   DeliveryOrder: 'DeliveryOrder',
+  DeliveryOrderLocations: 'DeliveryOrderLocations',
   DeliveryOffer: 'DeliveryOffer'
 } as const;
 

@@ -12,6 +12,10 @@ export const DeliveryOrderStatus = {
   Delivered: 'Delivered'
 } as const;
 
+export type DeliveryOrderStatusDict = {
+  [K in string]: string;
+};
+
 export type DeliveryOrderStatusValues = ValueOf<typeof DeliveryOrderStatus>;
 
 export type DeliveryOrder = {
@@ -22,12 +26,13 @@ export type DeliveryOrder = {
   productAuctionId: string;
   userId: string;
   depotId: string;
+  chosenDeliveryOfferId: string | null;
   facilityDetails: FacilityDetails;
   productAuction: ProductAuction;
   deliveryOffers: DeliveryOffer[];
 };
 
-export const DeliveryOrderStatusText = {
+export const deliveryOrderStatusText = {
   [DeliveryOrderStatus.Inactive]: 'Inactive',
   [DeliveryOrderStatus.Active]: 'Active',
   [DeliveryOrderStatus.WaitingPayment]: 'Waiting payment',

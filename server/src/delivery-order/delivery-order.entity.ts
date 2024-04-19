@@ -56,6 +56,13 @@ export class DeliveryOrder extends Timestamps {
   @JoinColumn({ name: 'userId' })
   user: User;
 
+  @Column({ nullable: true })
+  chosenDeliveryOfferId: string;
+
+  @OneToOne(() => DeliveryOffer)
+  @JoinColumn({ name: 'chosenDeliveryOfferId' })
+  chosenDeliveryOffer: DeliveryOffer;
+
   @OneToMany(
     () => DeliveryOffer,
     (deliveryOffer) => deliveryOffer.deliveryOrder,
