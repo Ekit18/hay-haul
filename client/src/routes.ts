@@ -24,6 +24,7 @@ import { MainPage as FarmerMainPage } from './pages/farmer-pages/MainPage';
 import { MyAuctions } from './pages/farmer-pages/MyAuctions';
 import { ProductsPage } from './pages/farmer-pages/ProductsPage';
 import { UpdateAuction } from './pages/farmer-pages/UpdateAuction';
+import { StripeDeliveryOrderPaymentPage } from './pages/businessman-pages/DeliveryOrderPaymentPage';
 
 type Route = {
   path: string;
@@ -73,6 +74,10 @@ export const carrierRoutes: Route[] = [
 ];
 
 export const businessRoutes: Route[] = [
+  {
+    path: AppRoute.Businessman.DeliveryOrderPaymentPage,
+    Component: StripeDeliveryOrderPaymentPage
+  },
   {
     path: AppRoute.General.Main,
     Component: BusinessmanMainPage

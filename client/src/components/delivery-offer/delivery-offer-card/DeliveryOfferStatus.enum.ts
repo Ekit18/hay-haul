@@ -5,8 +5,7 @@ export type DeliveryOfferStatusType = {
 };
 
 export const deliveryOfferStatus: DeliveryOfferStatusType = {
-  [DeliveryOfferStatus.Pending]: 'bg-blue-500 text-white',
+  [DeliveryOfferStatus.Pending]: 'bg-gray-200',
   [DeliveryOfferStatus.Rejected]: 'bg-red-500 text-white',
-  [DeliveryOfferStatus.WaitingPayment]: 'bg-yellow-400',
-  [DeliveryOfferStatus.Paid]: 'bg-green-700 text-white'
+  [DeliveryOfferStatus.Accepted]: 'bg-green-700 text-white'
 };

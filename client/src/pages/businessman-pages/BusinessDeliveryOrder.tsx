@@ -13,7 +13,7 @@ export function BusinessDeliveryOrderPage() {
   return (
     <DeliveryOrderPageInfo
       trigger={filterDeliveryOrders}
-      deliveryOrders={data}
+      deliveryOrders={deliveryOrders}
       isFetching={isFetching}
       isLoading={isLoading}
     />

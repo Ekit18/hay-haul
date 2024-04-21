@@ -52,9 +52,15 @@ export function DatePickerWithRange<T extends FieldValues, K extends Path<DateRa
           <div className="flex w-full flex-col justify-between">
             {title && <p className="text-gray-400">{title}</p>}
             <p className="overflow-hidden text-clip whitespace-nowrap text-black dark:text-white">
-              {date
-                ? `${date.from ? format(date.from, 'd MMMM, yyyy', { locale: enUS }) : ''} — ${date?.to ? format(date.to, 'd MMMM, yyyy', { locale: enUS }) : ''}`
-                : 'Pick date range'}
+              {date ? (
+                <>
+                  <span>{!!date.from && format(date.from, 'd MMMM, yyyy', { locale: enUS })}</span>
+                  <span>—</span>
+                  <span>{!!date?.to && format(date.to, 'd MMMM, yyyy', { locale: enUS })}</span>
+                </>
+              ) : (
+                <span>Pick date range</span>
+              )}
             </p>
           </div>
           <CalendarIcon className="ml-auto hidden h-5 w-5 text-secondary xl:block" />

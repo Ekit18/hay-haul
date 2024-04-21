@@ -1,13 +1,4 @@
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
@@ -17,13 +8,15 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { CreateDeliveryOfferValues, useCreateDeliveryOfferFormSchema } from './validation';
+import { deliveryOfferPriceRatios } from './constants';
 
 interface CreateDeliveryOfferFormProps {
   deliveryOrderId: string;
   desiredPrice: number;
+  currentPrice?: number;
 }
 
-export function CreateDeliveryOfferForm({ deliveryOrderId, desiredPrice }: CreateDeliveryOfferFormProps) {
+export function CreateDeliveryOfferForm({ deliveryOrderId, desiredPrice, currentPrice }: CreateDeliveryOfferFormProps) {
   const [open, setOpen] = useState(false);
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -54,9 +47,15 @@ export function CreateDeliveryOfferForm({ deliveryOrderId, desiredPrice }: Creat
     resolver: yupResolver(createDeliveryOfferSchema),
     defaultValues: {
       deliveryOrderId,
-      price: desiredPrice
+      price: currentPrice || desiredPrice
     }
   });
+
+  const price = form.watch('price');
+
+  const handleSetPriceRation = (ration: number) => {
+    form.setValue('price', Math.round(price + price * ration));
+  };
 
   return (
     <Form {...form}>
@@ -67,8 +66,20 @@ export function CreateDeliveryOfferForm({ deliveryOrderId, desiredPrice }: Creat
               control={form.control}
               name="price"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormLabel className="block text-center">Choose price</FormLabel>
+                  <div className="flex flex-row items-center justify-center gap-1">
+                    {deliveryOfferPriceRatios.map((ratio) => (
+                      <Button
+                        type="button"
+                        key={ratio.label}
+                        className="h-5 w-10 text-xs"
+                        onClick={() => handleSetPriceRation(ratio.value)}
+                      >
+                        +{ratio.label}
+                      </Button>
+                    ))}
+                  </div>
                   <FormControl>
                     <Input
                       className="w-full"

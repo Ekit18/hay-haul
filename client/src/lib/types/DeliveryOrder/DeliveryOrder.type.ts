@@ -27,6 +27,7 @@ export type DeliveryOrder = {
   userId: string;
   depotId: string;
   chosenDeliveryOfferId: string | null;
+  chosenDeliveryOffer: DeliveryOffer | null;
   facilityDetails: FacilityDetails;
   productAuction: ProductAuction;
   deliveryOffers: DeliveryOffer[];

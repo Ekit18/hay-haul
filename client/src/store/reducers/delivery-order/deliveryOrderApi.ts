@@ -36,7 +36,8 @@ async function onDeliveryOrderCacheEntryAdded(
         updateCachedData((draft) => {
           const updatedDeliveryOrder = draft.data.find((deliveryOrder) => deliveryOrder.id === deliveryOrderId);
           if (!updatedDeliveryOrder) return;
-          if (deliveryOffers.length !== updatedDeliveryOrder.deliveryOffers.length) {
+
+          if (deliveryOffers) {
             updatedDeliveryOrder.deliveryOffers = deliveryOffers;
           }
 

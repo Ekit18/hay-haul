@@ -9,6 +9,7 @@ import { useAppSelector } from '@/lib/hooks/redux';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useMemo } from 'react';
+import { FormLabel } from '@/components/ui/form';
 import { DeliveryOrderSortSelect } from './DeliveryOrderSortSelect';
 import { deliveryOrderStatusToReadableMap } from './libs/delivery-order-status-to-readable.map';
 
@@ -31,6 +32,10 @@ export function DeliveryOrderFilterForm() {
 
   const { data: locations } = deliveryOrderApi.useGetAllFarmAndDepotLocationsQuery(locationsSearchParams);
 
+  const fromFarmLocations = useMemo(() => [...new Set(locations?.fromFarmLocations)], [locations]);
+
+  const toDepotLocations = useMemo(() => [...new Set(locations?.toDepotLocations)], [locations]);
+
   return (
     <>
       <div className="mt-10 grid flex-col gap-4 md:grid-cols-3 md:flex-row">
@@ -39,11 +44,14 @@ export function DeliveryOrderFilterForm() {
           title="Desired Price"
           key="desiredPrice"
         />
-        <DatePickerWithRange<DeliveryOrderFilterFormValues, 'desiredDate'>
-          field="desiredDate"
-          title="Desired date"
-          className="!rounded-l-md !border-l"
-        />
+
+        <div className="flex w-full flex-col justify-end">
+          <FormLabel className="mb-3 block">Desired date</FormLabel>
+          <DatePickerWithRange<DeliveryOrderFilterFormValues, 'desiredDate'>
+            field="desiredDate"
+            className="!rounded-l-md !border-l"
+          />
+        </div>
 
         <TagInput
           labelText="Select statuses"
@@ -62,14 +70,14 @@ export function DeliveryOrderFilterForm() {
         <FilterSelect<DeliveryOrderFilterFormValues, string[]>
           title="From farm"
           placeholder="Select a farm"
-          values={locations?.fromFarmLocations}
+          values={fromFarmLocations}
           fieldName="fromFarmLocation"
           containerClassName=" flex gap-4 flex-col md:flex-row w-full"
         />
         <FilterSelect<DeliveryOrderFilterFormValues, string[]>
           title="To depot"
           placeholder="Select a depot"
-          values={locations?.toDepotLocations}
+          values={toDepotLocations}
           fieldName="toDepotLocation"
           containerClassName=" flex gap-4 flex-col md:flex-row w-full"
         />

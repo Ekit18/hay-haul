@@ -29,8 +29,14 @@ export function ProductAuctionFilterForm() {
           <div className="flex w-full max-w-full flex-col">
             <FormLabel className="block">Choose start / end date</FormLabel>
             <div className="mt-3 flex ">
-              <DatePickerWithRange<ProductAuctionFilterFormValues, 'startDate'> field="startDate" />
-              <DatePickerWithRange<ProductAuctionFilterFormValues, 'endDate'> field="endDate" />
+              <DatePickerWithRange<ProductAuctionFilterFormValues, 'startDate'>
+                field="startDate"
+                className="[&_p]:flex [&_p]:flex-col"
+              />
+              <DatePickerWithRange<ProductAuctionFilterFormValues, 'endDate'>
+                field="endDate"
+                className="[&_p]:flex [&_p]:flex-col"
+              />
             </div>
           </div>
         </div>

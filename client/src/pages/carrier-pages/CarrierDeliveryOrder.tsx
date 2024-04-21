@@ -10,7 +10,7 @@ export function CarrierDeliveryOrderPage() {
   return (
     // replace data with deliveryOrders, just for now
     <DeliveryOrderPageInfo
-      deliveryOrders={data}
+      deliveryOrders={deliveryOrders}
       isFetching={isFetching}
       trigger={filterDeliveryOrders}
       isLoading={isLoading}

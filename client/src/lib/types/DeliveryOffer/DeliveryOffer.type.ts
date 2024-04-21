@@ -3,8 +3,7 @@ import { ValueOf } from '../types';
 export const DeliveryOfferStatus = {
   Pending: 'Pending',
   Rejected: 'Rejected',
-  WaitingPayment: 'WaitingPayment',
-  Paid: 'Paid'
+  Accepted: 'Accepted',
 } as const;
 
 export type DeliveryOfferStatusValues = ValueOf<typeof DeliveryOfferStatus>;
@@ -25,8 +24,7 @@ export type DeliveryOffer = {
 };
 
 export const deliveryOfferStatusText = {
-  [DeliveryOfferStatus.Paid]: 'Paid',
   [DeliveryOfferStatus.Pending]: 'Pending',
   [DeliveryOfferStatus.Rejected]: 'Rejected',
-  [DeliveryOfferStatus.WaitingPayment]: 'Waiting payment'
+  [DeliveryOfferStatus.Accepted]: 'Accepted',
 };

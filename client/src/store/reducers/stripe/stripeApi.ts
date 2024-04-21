@@ -29,7 +29,7 @@ export const stripeApi = api.injectEndpoints({
     }),
     createPayment: builder.mutation<CreatePaymentResponseDto, CreatePaymentRequestDto>({
       query: ({ auctionId }) => ({
-        url: '/stripe/payment',
+        url: '/stripe/payment/product',
         method: 'POST',
         body: { auctionId }
       })

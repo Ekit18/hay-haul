@@ -45,6 +45,15 @@ export function DeliveryOfferCard({ deliveryOffer }: DeliveryOfferCardProps) {
       .catch(handleRtkError);
   };
 
+  const [acceptOffer] = deliveryOfferApi.useAcceptDeliveryOfferByIdMutation();
+
+  const handleAcceptDeliveryOffer = async () => {
+    if (user?.role !== UserRole.Businessman) {
+      return;
+    }
+    acceptOffer(deliveryOffer.id);
+  };
+
   return (
     <>
       <Card className="flex w-full flex-col justify-between">
@@ -74,23 +83,6 @@ export function DeliveryOfferCard({ deliveryOffer }: DeliveryOfferCardProps) {
               {deliveryOffer.user.facilityDetails[0].address}
             </span>
           </p>
-          {/*
-          <div className="mt-2 flex flex-row items-center gap-1">
-            <p>Product type:</p>
-            <div className=" flex w-min flex-row gap-2 rounded border border-black p-1">
-              <Package className="min-h-5 min-w-5" />
-              <span>{deliveryOrder.productAuction?.product.productType.name}</span>
-            </div>
-          </div>
-          <p className="pt-2 ">Desired delivery price: {deliveryOrder.desiredPrice} USD</p>
-          <DeliveryOrderDestination
-            from={deliveryOrder.productAuction?.product.facilityDetails?.address}
-            to={deliveryOrder.facilityDetails?.address}
-          />
-          {deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Inactive && (
-            <p className="pt-2">Delivery offers: {deliveryOrder.deliveryOffers.length}</p>
-          )} */}
-          {/* todo: create counter of offers */}
         </CardContent>
         <CardFooter className="flex w-full flex-col items-center justify-center gap-5">
           {deliveryOffer.offerStatus === DeliveryOfferStatus.Pending && deliveryOffer.userId === user?.id && (
@@ -108,24 +100,13 @@ export function DeliveryOfferCard({ deliveryOffer }: DeliveryOfferCardProps) {
               <Button variant="destructive" type="button">
                 Decline
               </Button>
-              <Button type="button">Accept</Button>
+              <Button type="button" onClick={handleAcceptDeliveryOffer}>
+                Accept
+              </Button>
             </div>
           )}
         </CardFooter>
       </Card>
-      {/* <DeleteModal
-        entityTitle={EntityTitle.DeliveryOrder}
-        deleteCallback={handleDeleteDeliveryOrder}
-        name={`${deliveryOrder.productAuction?.product.name} to ${deliveryOrder.facilityDetails?.name}`}
-        handleOpenChange={handleDeleteModalOpenChange}
-        open={isDeleteModalOpen}
-      />
-      <ConfirmModal
-        open={open}
-        handleOpenChange={handleOpenChange}
-        confirmCallback={handleStartDeliveryOrder}
-        message="Are you sure that you want to set active status?"
-      /> */}
       <DeleteModal
         entityTitle={EntityTitle.DeliveryOffer}
         handleOpenChange={handleDeleteModalOpenChange}

@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { AppRoute } from '@/lib/constants/routes';
-import { Notification } from '@/lib/types/Notifications/Notifications.type';
+import { Notification, Notifiable } from '@/lib/types/Notifications/Notifications.type';
 import { notificationApi } from '@/store/reducers/notifications/notificationApi';
 import { format } from 'date-fns';
 import { MoreHorizontal } from 'lucide-react';
@@ -17,17 +17,41 @@ interface NotificationItemProps {
   notification: Notification;
 }
 
+type NotifiableItem = {
+  [key in Notifiable]: {
+    route: string;
+    getRouteFill: (notification: Notification) => Record<string, string>;
+    label: string;
+  };
+};
+
+const notifiableToItem: NotifiableItem = {
+  [Notifiable.ProductAuction]: {
+    route: AppRoute.General.AuctionDetails,
+    getRouteFill: (notification: Notification) => ({ auctionId: notification.notifiableId }),
+    label: 'auction'
+  },
+  [Notifiable.DeliveryOrder]: {
+    route: AppRoute.General.DeliveryOrder,
+    getRouteFill: (notification: Notification) => ({ orderId: notification.notifiableId }),
+    label: 'delivery order'
+  }
+};
+
 export function NotificationItem({ notification }: NotificationItemProps) {
   const notificationMessage = notificationMessages[notification.message];
   const navigate = useNavigate();
 
   const [setNotificationToRead] = notificationApi.useUpdateNotificationToReadMutation();
 
+  const notifiableItem = notifiableToItem[notification.notifiableType];
+
   const handleMarkIsReadClick = () => {
     setNotificationToRead(notification.id);
   };
-  const handleViewAuctionClick = () => {
-    navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: notification.productAuctionId }));
+  const handleViewClick = () => {
+    // TODO: fix
+    navigate(generatePath(notifiableItem.route, notifiableItem.getRouteFill(notification)));
   };
 
   return (
@@ -53,7 +77,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
                 <DropdownMenuItem disabled={notification.isRead} onClick={handleMarkIsReadClick}>
                   Mark as read
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleViewAuctionClick}>Show auction</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleViewClick}>Show {notifiableItem.label}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

@@ -22,6 +22,7 @@ export const AppRoute = {
     UpdateAuction: '/update-auction/:auctionId'
   },
   Businessman: {
+    DeliveryOrderPaymentPage: '/delivery-order/payment/:deliveryOrderId',
     ProductAuctionPaymentPage: '/product-auction/payment/:auctionId',
     Depots: '/depots',
     Products: '/products',

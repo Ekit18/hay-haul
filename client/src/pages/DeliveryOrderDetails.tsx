@@ -11,6 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { AppRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
@@ -55,6 +56,13 @@ export function DeliveryOrderDetails() {
   if (!deliveryOrderId || isError || !deliveryOrder) {
     return <Navigate to={generatePath(AppRoute.General.DeliveryOrder)} />;
   }
+
+  const handlePayClick = () => {
+    if (user?.role !== UserRole.Businessman || !deliveryOrder.chosenDeliveryOffer) {
+      return;
+    }
+    navigate(generatePath(AppRoute.General.Main));
+  };
 
   return (
     <div className="h-full bg-white p-4">
@@ -132,14 +140,40 @@ export function DeliveryOrderDetails() {
                 </div>
               </div>
               <div className="flex w-3/4 flex-col gap-y-3">
-                {user?.role === UserRole.Carrier && (
+                <div className="flex w-full justify-end py-5">
+                  <CreateDeliveryOfferForm
+                    currentPrice={currentOffer?.price}
+                    deliveryOrderId={deliveryOrder.id}
+                    desiredPrice={deliveryOrder.desiredPrice}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {user?.role === UserRole.Businessman && deliveryOrder.chosenDeliveryOffer && (
+            <div className="flex h-fit w-80 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
+              <div className="">
+                <p className="text-center">Your chosen offer:</p>
+                <div className="mb-6 flex flex-col items-center gap-2">
+                  <h2 className=" text-center text-3xl font-bold">{deliveryOrder.chosenDeliveryOffer.price} USD</h2>
+                </div>
+                <p className="text-xl">Carrier: {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].name}</p>
+                <p className="text-xl">
+                  Carrier's Address: {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].address}
+                </p>
+              </div>
+              <div className="flex w-3/4 flex-col gap-y-3">
+                {
                   <div className="flex w-full justify-end py-5">
-                    <CreateDeliveryOfferForm
-                      deliveryOrderId={deliveryOrder.id}
-                      desiredPrice={deliveryOrder.desiredPrice}
-                    />
+                    <Button
+                      className={cn('w-full', deliveryOrderStatus[deliveryOrder.deliveryOrderStatus])}
+                      type="button"
+                      onClick={handlePayClick}
+                    >
+                      Pay
+                    </Button>
                   </div>
-                )}
+                }
               </div>
             </div>
           )}
@@ -147,7 +181,7 @@ export function DeliveryOrderDetails() {
         <div className="mt-4">
           <h1 className="text-2xl font-bold">Delivery offers:</h1>
 
-          {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Active && (
+          {deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Active && (
             <div className="grid w-full grid-cols-1 gap-4 py-4 pb-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
               {deliveryOrder.deliveryOffers.map((deliveryOffer) => (
                 <DeliveryOfferCard key={deliveryOffer.id} deliveryOffer={deliveryOffer} />
