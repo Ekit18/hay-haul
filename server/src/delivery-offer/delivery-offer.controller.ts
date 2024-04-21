@@ -10,7 +10,13 @@ import { CreateDeliveryOfferDto } from './dto/create-delivery-offer.dto';
 @AllowedRoles(UserRole.Carrier)
 @Controller('delivery-offer')
 export class DeliveryOfferController {
-  constructor(private readonly deliveryOfferService: DeliveryOfferService) {}
+  constructor(private readonly deliveryOfferService: DeliveryOfferService) { }
+
+  @AllowedRoles(UserRole.Businessman)
+  @Post('accept/:id')
+  async acceptOfferById(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
+    return this.deliveryOfferService.acceptOfferById(request, id)
+  }
 
   @Post('/delivery-order/:deliveryOrderId')
   async createDeliveryOffer(

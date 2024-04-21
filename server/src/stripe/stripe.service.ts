@@ -24,6 +24,9 @@ import { CreateStripeEntryDto } from './dto/create-stripe-entry.dto';
 import { GetAccountStatusResponseDto } from './dto/get-account-status-response.dto';
 import { StripeErrorMessage } from './stripe-error-message.enum';
 import { PaymentIntentMetadata, StripeEntry } from './stripe.entity';
+import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
+import { DeliveryOrderService } from 'src/delivery-order/delivery-order.service';
+import { DeliveryOrderPaymentService } from 'src/delivery-order-payment/delivery-order-payment.service';
 
 @Injectable()
 export class StripeService {
@@ -41,6 +44,9 @@ export class StripeService {
     private productAuctionService: ProductAuctionService,
     @Inject(forwardRef(() => ProductAuctionPaymentService))
     private productAuctionPaymentService: ProductAuctionPaymentService,
+    private deliveryOrderService: DeliveryOrderService,
+    @Inject(forwardRef(() => DeliveryOrderPaymentService))
+    private deliveryOrderPaymentService: DeliveryOrderPaymentService,
   ) {
     this.stripe = new Stripe(configService.getOrThrow('STRIPE_SECRET_KEY'));
   }
@@ -95,6 +101,60 @@ export class StripeService {
           (
             StripeService.FEE_PERCENT *
             auction.currentMaxBid.price *
+            100
+          ).toFixed(0),
+        ),
+      });
+
+    return { clientSecret };
+  }
+
+  public async createDeliveryPayment({
+    request,
+    deliveryOrderId,
+  }: {
+    request: AuthenticatedRequest;
+    deliveryOrderId: DeliveryOrder['id'];
+    // TODO: stopped here (whole order payment process stopped here, frontend page is also in progress)
+  }) {
+    const {
+      data: [deliveryOrder],
+    } = await this.deliveryOrderService.findOneById(deliveryOrderId);
+
+
+    const stripeEntry = await this.findOneByUserId(
+      deliveryOrder.chosenDeliveryOffer.user.id
+    );
+
+    const payment = await this.deliveryOrderPaymentService.create({
+      targetId: deliveryOrder.id,
+      paymentTarget: PaymentTargetType.DeliveryOrder,
+      buyerId: request.user?.id,
+      sellerId: deliveryOrder.chosenDeliveryOffer.user.id,
+      amount: deliveryOrder.chosenDeliveryOffer.price,
+    });
+
+    const paymentIntentMetadata: Record<keyof PaymentIntentMetadata, string> = {
+      paymentId: payment.id,
+      paymentTargetType: payment.targetType,
+    };
+    const { client_secret: clientSecret } =
+      await this.stripe.paymentIntents.create({
+        amount: deliveryOrder.chosenDeliveryOffer.price * 100,
+        currency: 'usd',
+        metadata: paymentIntentMetadata,
+        description: deliveryOrder.id,
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        receipt_email: 'fieldlavender70@gmail.com',
+        transfer_data: {
+          destination: stripeEntry.accountId,
+        },
+        application_fee_amount: Number.parseInt(
+          (
+            StripeService.FEE_PERCENT *
+            deliveryOrder.chosenDeliveryOffer.price *
             100
           ).toFixed(0),
         ),

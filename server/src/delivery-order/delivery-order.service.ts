@@ -211,7 +211,7 @@ export class DeliveryOrderService {
 
 
       if (deliveryOrderStatus) {
-        queryBuilder.andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus })
+        queryBuilder.andWhere('order.deliveryOrderStatus IN (:...deliveryOrderStatus)', { deliveryOrderStatus })
       }
       if (fromFarmLocation) {
         queryBuilder.andWhere('farmerFacilityDetails.address = :fromFarmLocation', { fromFarmLocation })
@@ -265,6 +265,13 @@ export class DeliveryOrderService {
           'deliveryOrder.facilityDetails',
           'businessmanFacilityDetails',
         )
+        .leftJoinAndSelect('deliveryOrder.chosenDeliveryOffer', 'chosenDeliveryOffer')
+        .leftJoinAndSelect('chosenDeliveryOffer.user', 'chosenCarrier')
+        .leftJoin('chosenCarrier.facilityDetails', 'chosenCarrierFacilityDetails')
+        .addSelect([
+          'chosenCarrierFacilityDetails.name',
+          'chosenCarrierFacilityDetails.address',
+        ])
 
         .leftJoinAndSelect('deliveryOrder.deliveryOffers', 'deliveryOffers')
         .leftJoin('deliveryOffers.user', 'carrier')

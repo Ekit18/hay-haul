@@ -16,6 +16,8 @@ import { QueryFailedError, Repository, UpdateResult } from 'typeorm';
 import { CreateProductAuctionBidDto } from './dto/create-product-bid-auction.dto';
 import { ProductAuctionBidErrorMessage } from './product-auction-bid-error-message.enum';
 import { ProductAuctionBid } from './product-auction-bid.entity';
+import { Notifiable } from 'src/notification/notification.entity';
+
 
 @Injectable()
 export class ProductAuctionBidService {
@@ -28,7 +30,7 @@ export class ProductAuctionBidService {
     private userService: UserService,
     private notificationService: NotificationService,
     private socketService: SocketService,
-  ) {}
+  ) { }
 
   async create(
     auctionId: string,
@@ -151,6 +153,7 @@ export class ProductAuctionBidService {
               userId,
               auction.id,
               NotificationMessage.BusinessmanAuctionWon,
+              Notifiable.ProductAuction,
               transactionalEntityManager,
             );
 
@@ -158,6 +161,7 @@ export class ProductAuctionBidService {
               auction.product.facilityDetails.user.id,
               auction.id,
               NotificationMessage.AuctionEndedWithBids,
+              Notifiable.ProductAuction,
               transactionalEntityManager,
             );
             //TODO: send notification to user
@@ -172,6 +176,7 @@ export class ProductAuctionBidService {
               previousMaxBidderId,
               auction.id,
               NotificationMessage.BidOverbid,
+              Notifiable.ProductAuction,
               transactionalEntityManager,
             );
           }

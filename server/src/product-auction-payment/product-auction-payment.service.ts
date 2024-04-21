@@ -10,8 +10,8 @@ import { GetPaymentsByUserQueryDto } from 'src/payment-facade/dto/get-payments-b
 import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { StripeService } from 'src/stripe/stripe.service';
 import { Repository } from 'typeorm';
-import { CreateProductAuctionPaymentDto } from './dto/create-product-auction-payment.dto';
 import { ProductAuctionPayment } from './product-auction-payment.entity';
+import { CreatePaymentDto } from '../payment-facade/dto/create-payment.dto'
 
 @Injectable()
 export class ProductAuctionPaymentService {
@@ -21,7 +21,7 @@ export class ProductAuctionPaymentService {
     private stripeService: StripeService,
     @InjectRepository(ProductAuctionPayment)
     private productAuctionPaymentRepository: Repository<ProductAuctionPayment>,
-  ) {}
+  ) { }
 
   async findAllByUserId({
     query,
@@ -57,7 +57,7 @@ export class ProductAuctionPaymentService {
     return await this.productAuctionPaymentRepository.findOneBy({ id });
   }
 
-  async create(dto: CreateProductAuctionPaymentDto) {
+  async create(dto: CreatePaymentDto) {
     let [payment] = await this.productAuctionPaymentRepository.find({
       where: {
         buyerId: dto.buyerId,

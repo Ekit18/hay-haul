@@ -14,8 +14,7 @@ import {
 export enum DeliveryOfferStatus {
   Pending = 'Pending',
   Rejected = 'Rejected',
-  WaitingPayment = 'WaitingPayment',
-  Paid = 'Paid',
+  Accepted = 'Accepted',
 }
 
 const statuses = Object.values(DeliveryOfferStatus)

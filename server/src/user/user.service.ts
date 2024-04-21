@@ -10,13 +10,28 @@ import { User } from './user.entity';
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(dto: CreateUserDto) {
     try {
       const user = await this.userRepository.save({
         ...dto,
         isVerified: false,
+      });
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        UserErrorMessage.FailedToCreateUser,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async createDriver(dto: CreateUserDto) {
+    try {
+      const user = await this.userRepository.save({
+        ...dto,
+        isVerified: true,
       });
       return user;
     } catch (error) {

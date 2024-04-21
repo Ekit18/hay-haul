@@ -1,12 +1,14 @@
 import { Otp } from 'src/auth/otp.entity';
 import { DeliveryOffer } from 'src/delivery-offer/delivery-offer.entity';
 import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
+import { DriverDetails } from 'src/driver-details/driver-details.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { ProductAuctionBid } from 'src/product-auction-bid/product-auction-bid.entity';
 import { ProductAuctionPayment } from 'src/product-auction-payment/product-auction-payment.entity';
 import { StripeEntry } from 'src/stripe/stripe.entity';
 import { Token } from 'src/token/token.entity';
+import { Transport } from 'src/transport/transport.entity';
 import {
   Check,
   Column,
@@ -91,4 +93,17 @@ export class User extends Timestamps {
 
   @OneToMany(() => DeliveryOffer, (deliveryOffer) => deliveryOffer.user)
   deliveryOffers: DeliveryOffer[];
+
+  @OneToOne(() => DriverDetails, driverDetails => driverDetails.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  driverDetails: DriverDetails | null;
+
+  @OneToMany(() => DriverDetails, driverDetails => driverDetails.carrier)
+  drivers: DriverDetails[];
+
+  @OneToMany(() => Transport, transport => transport.carrier)
+  transports: Transport[];
 }

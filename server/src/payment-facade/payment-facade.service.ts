@@ -30,6 +30,7 @@ import { GetPaymentDto } from './dto/get-payment.dto';
 import { GetPaymentsByUserIdResponse } from './dto/get-payments-by-user-id-response';
 import { GetPaymentsByUserQueryDto } from './dto/get-payments-by-user-query.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
+import { Notifiable } from 'src/notification/notification.entity';
 
 @Injectable()
 export class PaymentFacadeService {
@@ -41,7 +42,7 @@ export class PaymentFacadeService {
     private stripeService: StripeService,
     private userService: UserService,
     private notificationService: NotificationService,
-  ) {}
+  ) { }
 
   async getAllPaymentsByUserId(
     query: GetPaymentsByUserQueryDto,
@@ -131,6 +132,7 @@ export class PaymentFacadeService {
         auction.product.facilityDetails.user.id,
         auction.id,
         NotificationMessage.AuctionEndedWithBids,
+        Notifiable.ProductAuction
       );
 
       return payment;

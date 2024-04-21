@@ -8,6 +8,8 @@ import { UserModule } from 'src/user/user.module';
 import { StripeController } from './stripe.controller';
 import { StripeEntry } from './stripe.entity';
 import { StripeService } from './stripe.service';
+import { DeliveryOrderModule } from 'src/delivery-order/delivery-order.module';
+import { DeliveryOrderPaymentModule } from 'src/delivery-order-payment/delivery-order-payment.module';
 
 @Module({
   providers: [StripeService],
@@ -18,8 +20,10 @@ import { StripeService } from './stripe.service';
     UserModule,
     ProductAuctionModule,
     forwardRef(() => ProductAuctionPaymentModule),
+    DeliveryOrderModule,
+    forwardRef(() => DeliveryOrderPaymentModule),
   ],
   exports: [StripeService],
   controllers: [StripeController],
 })
-export class StripeModule {}
+export class StripeModule { }

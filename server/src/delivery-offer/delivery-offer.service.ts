@@ -1,14 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeliveryOrderService } from 'src/delivery-order/delivery-order.service';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { Repository } from 'typeorm';
 import { DeliveryOfferErrorMessage } from './delivery-offer-error-message.enum';
-import { DeliveryOffer } from './delivery-offer.entity';
+import { DeliveryOffer, DeliveryOfferStatus } from './delivery-offer.entity';
 import { CreateDeliveryOfferDto } from './dto/create-delivery-offer.dto';
-import { ca } from 'date-fns/locale';
+import { ca, th } from 'date-fns/locale';
 import { SocketService } from 'src/socket/socket.service';
 import { ServerEventName } from 'src/lib/enums/enums';
+import { DeliveryOrder, DeliveryOrderStatus } from 'src/delivery-order/delivery-order.entity';
 
 @Injectable()
 export class DeliveryOfferService {
@@ -19,6 +20,33 @@ export class DeliveryOfferService {
     private socketService: SocketService,
   ) {
   }
+
+  public async acceptOfferById(req: AuthenticatedRequest, id: string) {
+    const offer = await this.deliveryOfferRepository.findOne({
+      where: { id }, relations: {
+        deliveryOrder: {
+          user: true
+        }
+      }
+    })
+    if (offer.deliveryOrder.user.id !== req.user.id) {
+      throw new BadRequestException({ message: 'Can accept only own order offers' })
+    }
+    await this.deliveryOfferRepository.manager.transaction(
+      'SERIALIZABLE',
+      async (transactionalEntityManager) => {
+        await transactionalEntityManager.save(DeliveryOffer, { id, offerStatus: DeliveryOfferStatus.Accepted })
+        await transactionalEntityManager.update(DeliveryOrder, offer.deliveryOrder.id, { deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment, chosenDeliveryOfferId: id });
+      })
+    SocketService.SocketServer.to(offer.deliveryOrder.id).emit(ServerEventName.DeliveryOrderUpdated, {
+      deliveryOrderId: offer.deliveryOrder.id,
+      deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment,
+    });
+
+    //TODO: notify carrier (You won!)
+
+  }
+
 
   public async createDeliveryOffer(
     deliveryOrderId: string,
@@ -50,7 +78,13 @@ export class DeliveryOfferService {
         //   deliveryOrderStatus: deliveryOrder.data[0].deliveryOrderStatus,
         //   deliveryOffers: deliveryOrder.data[0].deliveryOffers.map((deliveryOffer) => deliveryOffer.id === candidateOffer.id ? offer : deliveryOffer),
         // });
-        // return 
+        // return
+        if (candidateOffer.price === dto.price) {
+          throw new HttpException(
+            DeliveryOfferErrorMessage.CannotSetSamePrice,
+            HttpStatus.BAD_REQUEST,
+          )
+        }
         await this.deliveryOfferRepository.update({
           userId: req.user.id,
           deliveryOrderId
@@ -122,10 +156,12 @@ export class DeliveryOfferService {
       }
       await this.deliveryOfferRepository.delete({ id: deliveryOfferId });
 
+      const deliveryOffers = await this.deliveryOfferRepository.find({ where: { deliveryOrderId: deliveryOffer.deliveryOrder.id }, relations: { user: { facilityDetails: true } } });
+
       SocketService.SocketServer.to(deliveryOffer.deliveryOrder.id).emit(ServerEventName.DeliveryOrderUpdated, {
         deliveryOrderId: deliveryOffer.deliveryOrder.id,
         deliveryOrderStatus: deliveryOffer.deliveryOrder.deliveryOrderStatus,
-        deliveryOffers: deliveryOffer.deliveryOrder.deliveryOffers.filter((offer) => offer.id !== deliveryOfferId),
+        deliveryOffers: deliveryOffers.filter((offer) => offer.id !== deliveryOfferId),
       });
     } catch (error) {
       throw new HttpException(

@@ -13,6 +13,8 @@ import {
   ProductAuction,
   ProductAuctionStatus,
 } from '../product-auction.entity';
+import { Notifiable } from 'src/notification/notification.entity';
+
 
 @Injectable()
 export class ProductAuctionCronService {
@@ -24,7 +26,7 @@ export class ProductAuctionCronService {
     private productAuctionRepository: Repository<ProductAuction>,
     private notificationService: NotificationService,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   @Cron('1 * * * * *')
   async updateAuctionStatus(): Promise<void> {
@@ -64,6 +66,7 @@ export class ProductAuctionCronService {
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.AuctionStartSoon,
+                Notifiable.ProductAuction
               );
               auction.auctionStatus = ProductAuctionStatus.StartSoon;
             }
@@ -75,6 +78,7 @@ export class ProductAuctionCronService {
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.AuctionStarted,
+                Notifiable.ProductAuction
               );
               auction.auctionStatus = ProductAuctionStatus.Active;
             }
@@ -86,6 +90,7 @@ export class ProductAuctionCronService {
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.FarmerAuctionEndSoon,
+                Notifiable.ProductAuction
               );
               // email/notification bidders that auction is about to end
               auction.bids.forEach(async (bid) => {
@@ -93,6 +98,7 @@ export class ProductAuctionCronService {
                   bid.user.id,
                   auction.id,
                   NotificationMessage.BusinessmanAuctionEndSoon,
+                  Notifiable.ProductAuction
                 );
               });
 
@@ -107,6 +113,7 @@ export class ProductAuctionCronService {
                   auction.product.facilityDetails.user.id,
                   auction.id,
                   NotificationMessage.AuctionEndedNoBids,
+                  Notifiable.ProductAuction
                 );
 
                 auction.auctionStatus = ProductAuctionStatus.Ended;
@@ -116,12 +123,14 @@ export class ProductAuctionCronService {
                   auction.product.facilityDetails.user.id,
                   auction.id,
                   NotificationMessage.AuctionEndedWithBids,
+                  Notifiable.ProductAuction
                 );
 
                 await this.notificationService.createNotification(
                   auction.currentMaxBid.user.id,
                   auction.id,
                   NotificationMessage.BusinessmanAuctionWon,
+                  Notifiable.ProductAuction
                 );
                 // set the winner of auction
                 auction.auctionStatus = ProductAuctionStatus.WaitingPayment;
@@ -135,12 +144,14 @@ export class ProductAuctionCronService {
                 auction.currentMaxBid.user.id,
                 auction.id,
                 NotificationMessage.BusinessmanAuctionPaymentOverdue,
+                Notifiable.ProductAuction
               );
               // email/notification to farmer that he has not received payment
               await this.notificationService.createNotification(
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.FarmerAuctionPaymentOverdue,
+                Notifiable.ProductAuction
               );
 
               auction.auctionStatus = ProductAuctionStatus.Unpaid;
