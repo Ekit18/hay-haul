@@ -164,7 +164,7 @@ function UpdateDeliveryOrderModal({ deliveryOrder, open, handleOpenChange }: Upd
               <div className="w-full items-center">
                 <FormField
                   control={form.control}
-                  name={'desiredPrice'}
+                  name="desiredPrice"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="block">Choose desired delivery price</FormLabel>
@@ -176,7 +176,6 @@ function UpdateDeliveryOrderModal({ deliveryOrder, open, handleOpenChange }: Upd
                           onBlur={(e) => {
                             if (e.target.value === '') {
                               field.onChange(e.target.value);
-                              return;
                             }
                           }}
                           onChange={(e) => {

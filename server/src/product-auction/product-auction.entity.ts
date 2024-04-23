@@ -87,12 +87,9 @@ export class ProductAuction {
   @Column({ default: ProductAuctionStatus.Inactive })
   auctionStatus: ProductAuctionStatus;
 
-  @OneToMany(() => Notification, (notification) => notification.productAuction)
-  notifications: Notification;
-
   @OneToMany(() => S3File, (file) => file.productAuction)
   photos: S3File[];
 
   @OneToOne(() => ProductAuctionPayment, (payment) => payment.auction)
-  payment: ProductAuctionPayment;
+  payment?: ProductAuctionPayment;
 }

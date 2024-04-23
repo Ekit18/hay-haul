@@ -27,7 +27,7 @@ export class ProductAuctionService {
     private productService: ProductService,
     private socketService: SocketService,
     private s3FileService: S3FileService,
-  ) {}
+  ) { }
 
   async create({
     productId,

@@ -5,11 +5,25 @@ import { generatePath } from 'react-router-dom';
 
 export const deliveryOfferApi = api.injectEndpoints({
   endpoints: (build) => ({
+    acceptDeliveryOfferById: build.mutation<undefined, string>({
+      query: (id) => ({
+        url: generatePath('delivery-offer/accept/:id', { id }),
+        method: 'POST'
+      }),
+      invalidatesTags: [TagType.DeliveryOffer, TagType.DeliveryOrder]
+    }),
     createDeliveryOffer: build.mutation<DeliveryOffer, CreateDeliveryOfferValues>({
       query: (data) => ({
         url: generatePath('delivery-offer/delivery-order/:deliveryOrderId', { deliveryOrderId: data.deliveryOrderId }),
         method: 'POST',
         body: { price: data.price }
+      }),
+      invalidatesTags: [TagType.DeliveryOrder, TagType.DeliveryOffer]
+    }),
+    deleteDeliveryOffer: build.mutation({
+      query: (id) => ({
+        url: `delivery-offer/${id}`,
+        method: 'DELETE'
       }),
       invalidatesTags: [TagType.DeliveryOrder, TagType.DeliveryOffer]
     })

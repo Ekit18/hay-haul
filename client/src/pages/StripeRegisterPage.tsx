@@ -26,7 +26,6 @@ export function StripeRegisterPage() {
   useEffect(() => {
     if (stripeStatus?.payoutsEnabled === true) {
       navigate(AppRoute.General.StripeReturn);
-      return;
     }
   }, [stripeStatus?.payoutsEnabled]);
   const isLoading = status === QueryStatus.pending || status === QueryStatus.uninitialized;

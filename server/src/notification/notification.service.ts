@@ -11,6 +11,7 @@ import {
   NotificationsListResponse,
   UnreadNotificationsResponse,
 } from './types/notification.type';
+import { Notifiable } from './notification.entity';
 
 @Injectable()
 export class NotificationService {
@@ -18,7 +19,7 @@ export class NotificationService {
     @InjectRepository(Notification)
     private readonly notificationRepository: Repository<Notification>,
     private readonly socketService: SocketService,
-  ) {}
+  ) { }
 
   async getNotifications(
     userId: string,
@@ -45,46 +46,35 @@ export class NotificationService {
 
   public async createNotification(
     userId: string,
-    productAuctionId: string,
+    notifiableId: string,
     message: NotificationMessage,
+    type: Notifiable,
     transactionalEntityManager?: EntityManager,
   ): Promise<void> {
     let notification;
+
+
     if (transactionalEntityManager) {
       notification = await transactionalEntityManager.save(Notification, {
         message,
         isRead: false,
         receiverId: userId,
-        productAuctionId,
+        notifiableId,
       });
     } else {
       notification = await this.notificationRepository.save({
         message,
         isRead: false,
         receiverId: userId,
-        productAuctionId,
+        notifiableId,
       });
     }
+
     SocketService.SocketServer.to(userId).emit(
       ServerEventName.Notification,
       notification,
     );
   }
-
-  // public async createNotificationWithTransaction(
-  //   userId: string,
-  //   productAuctionId: string,
-  //   message: NotificationMessage,
-  //   transactionalEntityManager: EntityManager,
-  // ): Promise<void> {
-  //   const newNotification = transactionalEntityManager.create(Notification, {
-  //     message,
-  //     receiver: { id: userId },
-  //     productAuction: { id: productAuctionId },
-  //   });
-
-  //   await transactionalEntityManager.save(newNotification);
-  // }
 
   public async getUnreadNotifications(
     userId: string,

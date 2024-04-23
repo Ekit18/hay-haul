@@ -1,13 +1,4 @@
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
@@ -17,13 +8,15 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { CreateDeliveryOfferValues, useCreateDeliveryOfferFormSchema } from './validation';
+import { deliveryOfferPriceRatios } from './constants';
 
-interface CreateDeliveryOfferModalProps {
+interface CreateDeliveryOfferFormProps {
   deliveryOrderId: string;
   desiredPrice: number;
+  currentPrice?: number;
 }
 
-export function CreateDeliveryOfferModal({ deliveryOrderId, desiredPrice }: CreateDeliveryOfferModalProps) {
+export function CreateDeliveryOfferForm({ deliveryOrderId, desiredPrice, currentPrice }: CreateDeliveryOfferFormProps) {
   const [open, setOpen] = useState(false);
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -54,73 +47,75 @@ export function CreateDeliveryOfferModal({ deliveryOrderId, desiredPrice }: Crea
     resolver: yupResolver(createDeliveryOfferSchema),
     defaultValues: {
       deliveryOrderId,
-      price: desiredPrice
+      price: currentPrice || desiredPrice
     }
   });
 
+  const price = form.watch('price');
+
+  const handleSetPriceRation = (ration: number) => {
+    form.setValue('price', Math.round(price + price * ration));
+  };
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button type="button" onClick={() => setOpen(true)}>
-          Make an offer
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create new delivery offer</DialogTitle>
-          <DialogDescription>Add your delivery offer here.</DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <div className="flex w-full flex-col items-center justify-center gap-10">
-            <div className="flex w-full flex-col gap-4 py-4">
-              <div className="w-full items-center ">
-                <FormField
-                  control={form.control}
-                  name={'price'}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block">Choose price for delivery</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="w-full"
-                          placeholder="Price"
-                          {...field}
-                          onBlur={(e) => {
-                            if (e.target.value === '') {
-                              field.onChange(undefined);
-                              return;
-                            }
-                          }}
-                          onChange={(e) => {
-                            if (Number.isNaN(e.target.valueAsNumber)) {
-                              field.onChange(undefined);
-                              return;
-                            }
+    <Form {...form}>
+      <div className="flex w-full flex-col items-center justify-center gap-10">
+        <div className="flex w-full flex-col gap-4 py-4">
+          <div className="w-full items-center ">
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel className="block text-center">Choose price</FormLabel>
+                  <div className="flex flex-row items-center justify-center gap-1">
+                    {deliveryOfferPriceRatios.map((ratio) => (
+                      <Button
+                        type="button"
+                        key={ratio.label}
+                        className="h-5 w-10 text-xs"
+                        onClick={() => handleSetPriceRation(ratio.value)}
+                      >
+                        +{ratio.label}
+                      </Button>
+                    ))}
+                  </div>
+                  <FormControl>
+                    <Input
+                      className="w-full"
+                      placeholder="Price"
+                      {...field}
+                      onBlur={(e) => {
+                        if (e.target.value === '') {
+                          field.onChange(undefined);
+                        }
+                      }}
+                      onChange={(e) => {
+                        if (Number.isNaN(e.target.valueAsNumber)) {
+                          field.onChange(undefined);
+                          return;
+                        }
 
-                            if (e.target.valueAsNumber <= 0) {
-                              return;
-                            }
+                        if (e.target.valueAsNumber <= 0) {
+                          return;
+                        }
 
-                            field.onChange(e.target.valueAsNumber);
-                          }}
-                          value={field.value || ''}
-                          type="number"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-            <DialogFooter className="flex w-full justify-end">
-              <Button type="button" onClick={form.handleSubmit(onSubmit)} className="px-10">
-                Submit
-              </Button>
-            </DialogFooter>
+                        field.onChange(e.target.valueAsNumber);
+                      }}
+                      value={field.value || ''}
+                      type="number"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-        </Form>
-      </DialogContent>
-    </Dialog>
+        </div>
+        <Button type="button" onClick={form.handleSubmit(onSubmit)} className="w-full px-10">
+          Submit
+        </Button>
+      </div>
+    </Form>
   );
 }

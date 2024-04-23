@@ -29,6 +29,7 @@ import { CreateProductPaymentDto } from './dto/create-product-payment.dto';
 import { GetAccountStatusResponseDto } from './dto/get-account-status-response.dto';
 import { StripeErrorMessage } from './stripe-error-message.enum';
 import { StripeService } from './stripe.service';
+import { CreateDeliveryPaymentDto } from './dto/create-delivery-payment.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('stripe')
@@ -37,7 +38,7 @@ export class StripeController {
     private stripeService: StripeService,
     @Inject(forwardRef(() => PaymentFacadeService))
     private paymentFacadeService: PaymentFacadeService,
-  ) {}
+  ) { }
 
   @ApiOperation({
     summary: 'Endpoint for Stripe Webhook on successful payment',
@@ -118,7 +119,7 @@ export class StripeController {
   @ApiNotFoundResponse({
     description: ProductAuctionErrorMessage.AuctionNotFound,
   })
-  @Post('payment')
+  @Post('payment/product')
   async sdf(
     @Req() request: AuthenticatedRequest,
     @Body() { auctionId }: CreateProductPaymentDto,
@@ -127,6 +128,20 @@ export class StripeController {
     const tokenDto = await this.stripeService.createProductPayment({
       request,
       auctionId,
+    });
+
+    res.json(tokenDto);
+  }
+
+  @Post('payment/delivery')
+  async sdf2(
+    @Req() request: AuthenticatedRequest,
+    @Body() { deliveryOrderId }: CreateDeliveryPaymentDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const tokenDto = await this.stripeService.createDeliveryPayment({
+      request,
+      deliveryOrderId,
     });
 
     res.json(tokenDto);

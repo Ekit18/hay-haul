@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AllowedRoles } from 'src/lib/decorators/roles-auth.decorator';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
@@ -10,7 +10,13 @@ import { CreateDeliveryOfferDto } from './dto/create-delivery-offer.dto';
 @AllowedRoles(UserRole.Carrier)
 @Controller('delivery-offer')
 export class DeliveryOfferController {
-  constructor(private readonly deliveryOfferService: DeliveryOfferService) {}
+  constructor(private readonly deliveryOfferService: DeliveryOfferService) { }
+
+  @AllowedRoles(UserRole.Businessman)
+  @Post('accept/:id')
+  async acceptOfferById(@Req() request: AuthenticatedRequest, @Param('id') id: string) {
+    return this.deliveryOfferService.acceptOfferById(request, id)
+  }
 
   @Post('/delivery-order/:deliveryOrderId')
   async createDeliveryOffer(
@@ -23,5 +29,10 @@ export class DeliveryOfferController {
       req,
       dto,
     );
+  }
+
+  @Delete('/:deliveryOfferId')
+  async deleteDeliveryOffer(@Param('deliveryOfferId') deliveryOfferId: string, @Req() req: AuthenticatedRequest) {
+    return await this.deliveryOfferService.deleteDeliveryOffer(deliveryOfferId, req);
   }
 }

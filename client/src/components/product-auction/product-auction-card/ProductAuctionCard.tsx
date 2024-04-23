@@ -15,7 +15,7 @@ import { format, parseISO } from 'date-fns';
 import capitalize from 'lodash.capitalize';
 import { Crown } from 'lucide-react';
 import { generatePath, useNavigate } from 'react-router-dom';
-import { RestartAuctionModal } from '../modals/restart-auction-modal/restart-auction-modal';
+import { RestartAuctionModal } from '../modals/restart-auction-modal/RestartAuctionModal';
 import { productAuctionStatus } from './ProductAuctionStatus.enum';
 
 type ProductAuctionCardProps = {

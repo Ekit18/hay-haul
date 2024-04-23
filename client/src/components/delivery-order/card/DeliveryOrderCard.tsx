@@ -11,7 +11,7 @@ import { useAppSelector } from '@/lib/hooks/redux';
 import {
   DeliveryOrder,
   DeliveryOrderStatus,
-  DeliveryOrderStatusText
+  deliveryOrderStatusText
 } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { cn } from '@/lib/utils';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
@@ -82,7 +82,7 @@ export function DeliveryOrderCard({ deliveryOrder }: DeliveryOrderCardProps) {
                 deliveryOrderStatus[deliveryOrder.deliveryOrderStatus]
               )}
             >
-              {DeliveryOrderStatusText[deliveryOrder.deliveryOrderStatus]}
+              {deliveryOrderStatusText[deliveryOrder.deliveryOrderStatus]}
             </span>
           </p>
           <div className="mt-2 flex flex-row items-center gap-1">

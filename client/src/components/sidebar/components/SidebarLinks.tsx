@@ -26,7 +26,7 @@ export function SidebarLinks() {
           {link.title}
         </Button>
       ))}
-      {[UserRole.Farmer, UserRole.Businessman].includes(userRole) && <NotificationLink />}
+      <NotificationLink />
     </div>
   );
 }

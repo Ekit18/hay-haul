@@ -5,14 +5,17 @@ import { SortOrder } from '@/lib/enums/sort-order.enum';
 import { MoveDown, MoveUp } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 import { ProductAuctionFilterFormValues, productAuctionSortKeyToLabelMap, productAuctionSortKeys } from './validation';
+import { cn } from '@/lib/utils';
 
 const sortOrderToUI = {
   [SortOrder.DESC]: <MoveDown className="mx-1 h-4 w-4" />,
   [SortOrder.ASC]: <MoveUp className="mx-1 h-4 w-4" />
 } as const;
 
-export type ProductAuctionSortSelectInputProps = {};
-export function ProductAuctionSortSelect({}) {
+export type ProductAuctionSortSelectInputProps = {
+  containerClassName?: string;
+};
+export function ProductAuctionSortSelect({ containerClassName }: ProductAuctionSortSelectInputProps) {
   const { setValue, watch } = useFormContext<ProductAuctionFilterFormValues>();
 
   const sortKey = watch('innerSortKey');
@@ -36,7 +39,7 @@ export function ProductAuctionSortSelect({}) {
   };
 
   return (
-    <div className="flex flex-col gap-4 md:flex-row lg:ml-4 ">
+    <div className={cn('flex flex-col gap-4 md:flex-row lg:ml-4 ', containerClassName)}>
       <div className="w-full">
         <FormItem className="w-full">
           <FormLabel>Sort criterion</FormLabel>

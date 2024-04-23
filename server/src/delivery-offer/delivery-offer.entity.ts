@@ -12,7 +12,9 @@ import {
 } from 'typeorm';
 
 export enum DeliveryOfferStatus {
-  Pending = 'pending',
+  Pending = 'Pending',
+  Rejected = 'Rejected',
+  Accepted = 'Accepted',
 }
 
 const statuses = Object.values(DeliveryOfferStatus)

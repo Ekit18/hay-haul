@@ -1,6 +1,5 @@
-import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
-import { DeliveryOrder } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
+import { DeliveryOrder, DeliveryOrderStatus } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { DataWithCount } from '@/lib/types/types';
 import {
   BaseQueryFn,
@@ -11,9 +10,24 @@ import {
   QueryDefinition
 } from '@reduxjs/toolkit/query';
 import { Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { DeliveryOrderCard } from './card/DeliveryOrderCard';
-import { CreateDeliveryOrderModalHOC } from './modals/create-delivery-order/CreateDeliveryOrderModal';
+import {
+  DeliveryOrderFilterFormValues,
+  deliveryOrderFilterFormDefaultValues,
+  useDeliveryOrderFilterFormSchema
+} from './delivery-order-filter/validation';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { Form } from '@/components/ui/form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { handleRtkError } from '@/lib/helpers/handleRtkError';
+import useInfiniteScroll from '@/lib/hooks/useInfiniteScroll';
+import debounce from 'debounce';
+import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
+import { DeliveryOrderFilter } from './delivery-order-filter/DeliveryOrderFilter';
+import { cn } from '@/lib/utils';
+import { ProductAuctionCardSkeleton } from '../product-auction/product-auction-card/ProductAuctionCard.skeleton';
+import { UserRole } from '@/lib/enums/user-role.enum';
 
 export type DeliveryOrderPageInfoProps = {
   deliveryOrders: DataWithCount<DeliveryOrder> | undefined;
@@ -31,13 +45,94 @@ export type DeliveryOrderPageInfoProps = {
       'api'
     >
   >;
+  label: string;
 };
 
-export function DeliveryOrderPageInfo({ trigger, deliveryOrders, isFetching, isLoading }: DeliveryOrderPageInfoProps) {
+export function DeliveryOrderPageInfo({
+  trigger,
+  deliveryOrders: data,
+  isFetching,
+  isLoading,
+  label
+}: DeliveryOrderPageInfoProps) {
   const user = useAppSelector((state) => state.user.user);
+  const deliveryOrderFilterFormSchema = useDeliveryOrderFilterFormSchema();
+  const form = useForm<DeliveryOrderFilterFormValues>({
+    resolver: yupResolver(deliveryOrderFilterFormSchema),
+    mode: 'onSubmit',
+    defaultValues: {
+      ...deliveryOrderFilterFormDefaultValues,
+      ...(user?.role === UserRole.Carrier ? { deliveryOrderStatus: [DeliveryOrderStatus.Active] } : {})
+    }
+  });
+
   useEffect(() => {
     trigger(new URLSearchParams());
   }, []);
+
+  const onSubmit: SubmitHandler<DeliveryOrderFilterFormValues> = async (data) => {
+    if (isLoading || isFetching) return;
+
+    const searchParams = new URLSearchParams();
+
+    const { deliveryOrderStatus, innerSortKey, innerSortOrder, ...body } = data;
+
+    Object.entries(body).forEach(([key, value]) => {
+      if (value && typeof value === 'object') {
+        const capitalizedNames = key.charAt(0).toUpperCase() + key.slice(1);
+
+        if (value.from) searchParams.append(`min${capitalizedNames}`, value.from.toString());
+        if (value.to) searchParams.append(`max${capitalizedNames}`, value.to.toString());
+        return;
+      }
+
+      if (value) searchParams.append(key, value.toString());
+    });
+
+    if (innerSortKey && innerSortOrder) {
+      searchParams.append(innerSortKey, innerSortOrder);
+    }
+
+    if (deliveryOrderStatus && deliveryOrderStatus.length) {
+      searchParams.append('deliveryOrderStatus', deliveryOrderStatus?.join(',') ?? '');
+    }
+    await trigger(searchParams).unwrap().catch(handleRtkError);
+  };
+
+  const { loadMoreRef, page: currentPage, resetPage } = useInfiniteScroll({ maxPage: data?.count });
+
+  useEffect(() => {
+    if (!currentPage) return;
+    onSubmit({ ...form.getValues(), offset: currentPage * 10 });
+  }, [currentPage]);
+
+  const firstRender = useRef(true);
+  useEffect(() => {
+    const getFunction = () => {
+      if (!isLoading || !isFetching) {
+        onSubmit(form.getValues());
+        resetPage();
+      }
+    };
+
+    const debouncedFunction = debounce(getFunction, DEBOUNCE_DELAY);
+
+    if (firstRender.current) {
+      getFunction();
+      firstRender.current = false;
+      return;
+    }
+
+    const watchSubscription = form.watch(() => {
+      debouncedFunction();
+    });
+
+    return () => {
+      watchSubscription.unsubscribe();
+      debouncedFunction.clear();
+    };
+  }, []);
+
   if (isFetching || isLoading) {
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -45,32 +140,38 @@ export function DeliveryOrderPageInfo({ trigger, deliveryOrders, isFetching, isL
       </div>
     );
   }
-  console.log(deliveryOrders);
+  // console.log(data);
 
   if (!user) return null;
 
-  if (deliveryOrders?.count === 0) {
-    <div className="flex h-full w-full items-center justify-center">
-      <h3 className="text-xl font-bold">No delivery orders</h3>
-    </div>;
-  }
   return (
-    <div className="">
-      <div className="flex flex-col gap-2">
-        <div className="bg-white p-4">
-          <h2 className="mb-9 mt-6 text-3xl font-bold">Delivery orders</h2>
-        </div>
-        {user?.role === UserRole.Businessman && (
-          <div className="flex w-full justify-end pr-5">
-            <CreateDeliveryOrderModalHOC />
+    <div className="h-full bg-gray-100 pb-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className=" flex h-full flex-col">
+          <div className="bg-white p-4 pt-10">
+            <h2 className="mb-9 text-3xl font-bold">{label}</h2>
+            <DeliveryOrderFilter />
           </div>
-        )}
-        <div className="grid w-full grid-cols-1 gap-4 px-4 pt-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-          {deliveryOrders?.data.map((deliveryOrder) => (
-            <DeliveryOrderCard key={deliveryOrder.id} deliveryOrder={deliveryOrder} />
-          ))}
-        </div>
-      </div>
+          {data?.count === 0 ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <h3 className="text-xl font-bold">No {label.toLowerCase()}</h3>
+            </div>
+          ) : (
+            <div
+              className={cn(
+                'grid w-full grid-cols-1 gap-4 bg-gray-100 px-4 py-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
+                data?.data && data?.data.length >= 3 && 'pb-5'
+              )}
+            >
+              {data?.data.map((deliveryOrder) => (
+                <DeliveryOrderCard key={deliveryOrder.id} deliveryOrder={deliveryOrder} />
+              ))}
+
+              {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5" />}
+            </div>
+          )}
+        </form>
+      </Form>
     </div>
   );
 }

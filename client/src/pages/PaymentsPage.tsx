@@ -60,18 +60,26 @@ export function PaymentsPage() {
           if (payment.targetType === PaymentTargetType.DeliveryOrder) {
             name = `${capitalize(payment.target.productAuction.product.name)} by ${capitalize(payment.target.productAuction.product.facilityDetails.name)}`;
             details = (
-              <div className="grid w-full grid-cols-[min-content_1fr_min-content]">
+              <div className="flex w-full justify-between pt-4">
+                <div className="flex flex-row items-end">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      navigate(generatePath(AppRoute.General.DeliveryOrder, { deliveryOrderId: payment.target.id }))
+                    }
+                  >
+                    Order details
+                  </Button>
+                </div>
                 {user?.role === UserRole.Businessman && payment.status === PaymentStatus.WaitingPayment && (
                   <Button
                     onClick={() =>
-                      navigate(
-                        generatePath(AppRoute.General.AuctionDetails, { auctionId: payment.target.productAuction.id })
-                      )
+                      navigate(generatePath(AppRoute.General.DeliveryOrder, { deliveryOrderId: payment.target.id }))
                     }
                     type="button"
-                    className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                    className=" bg-yellow-400 text-black hover:bg-yellow-500"
                   >
-                    Pay for the product
+                    Pay for the order
                   </Button>
                 )}
               </div>
@@ -141,7 +149,7 @@ export function PaymentsPage() {
         </div>
       </div>
       <div className="px-4">{content}</div>
-      {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5"></div>}
+      {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5" />}
     </div>
   );
 }

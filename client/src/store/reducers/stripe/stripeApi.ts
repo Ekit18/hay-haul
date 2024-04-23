@@ -9,8 +9,12 @@ export type GetAccountStatusResponseDto = {
   payoutsEnabled: boolean;
 };
 
-export type CreatePaymentRequestDto = {
+export type CreateProductAuctionPaymentRequestDto = {
   auctionId: string;
+};
+
+export type CreateDeliveryOrderPaymentRequestDto = {
+  deliveryOrderId: string;
 };
 
 export type CreatePaymentResponseDto = {
@@ -27,11 +31,18 @@ export const stripeApi = api.injectEndpoints({
       }),
       invalidatesTags: [TagType.ProductAuction]
     }),
-    createPayment: builder.mutation<CreatePaymentResponseDto, CreatePaymentRequestDto>({
+    createProductAuctionPayment: builder.mutation<CreatePaymentResponseDto, CreateProductAuctionPaymentRequestDto>({
       query: ({ auctionId }) => ({
-        url: '/stripe/payment',
+        url: '/stripe/payment/product',
         method: 'POST',
         body: { auctionId }
+      })
+    }),
+    createDeliveryOrderPayment: builder.mutation<CreatePaymentResponseDto, CreateDeliveryOrderPaymentRequestDto>({
+      query: ({ deliveryOrderId }) => ({
+        url: '/stripe/payment/delivery',
+        method: 'POST',
+        body: { deliveryOrderId }
       })
     }),
     recreateStripeLink: builder.mutation<RecreateLinkResponseDto, void>({

@@ -35,7 +35,7 @@ export function DeleteModal({ open, handleOpenChange, name, deleteCallback, enti
   const form = useForm<DeleteFormValues>({
     mode: 'onSubmit',
     defaultValues: deleteDefaultValues,
-    values: { confirmName: '', originalName: name },
+    values: { confirmName: '', originalName: name.trim() },
     resolver: yupResolver(deleteFormSchema)
   });
 

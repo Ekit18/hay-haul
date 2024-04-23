@@ -3,5 +3,7 @@ export const EntityTitle = {
   Depots: 'Depots',
   ProductAuction: 'Product auction',
   Farm: 'Farm',
-  DeliveryOrder: 'Delivery order'
+  DeliveryOrder: 'Delivery order',
+  DeliveryOffer: 'Delivery offer',
+  CarrierCompany: 'Carrier company',
 } as const;

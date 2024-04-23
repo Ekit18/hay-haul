@@ -25,12 +25,11 @@ import { TokenService } from 'src/token/token.service';
   },
 })
 export class ProductsAuctionGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private socketService: SocketService,
     private tokenService: TokenService,
-  ) {}
+  ) { }
 
   @WebSocketServer() public server: Server;
 
@@ -75,5 +74,19 @@ export class ProductsAuctionGateway
       `Client ${client.user?.id} joined rooms: ${productAuctionIds}`,
     );
     client.join(productAuctionIds);
+  }
+
+  @SubscribeMessage(ClientToServerEventName.JOIN_DELIVERY_ORDER_ROOMS)
+  joinDeliveryOrderRooms(
+    @MessageBody()
+    deliveryOrderIds: FirstParameter<
+      ClientToServerEventParameter[ClientToServerEventName.JOIN_DELIVERY_ORDER_ROOMS]
+    >,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    this.logger.log(
+      `Client ${client.user?.id} joined rooms: ${deliveryOrderIds}`,
+    );
+    client.join(deliveryOrderIds);
   }
 }

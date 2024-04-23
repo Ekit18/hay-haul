@@ -1,6 +1,7 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { CreateDeliveryOrderDto } from './create-delivery-order.dto';
+import { DeliveryOrderStatus } from '../delivery-order.entity';
 
 export class UpdateDeliveryOrderDto extends PartialType(
   CreateDeliveryOrderDto,
@@ -8,5 +9,10 @@ export class UpdateDeliveryOrderDto extends PartialType(
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  depotId: string;
+  depotId?: string;
+
+  @IsOptional()
+  @IsEnum(DeliveryOrderStatus)
+  @IsNotEmpty()
+  deliveryOrderStatus?: DeliveryOrderStatus;
 }

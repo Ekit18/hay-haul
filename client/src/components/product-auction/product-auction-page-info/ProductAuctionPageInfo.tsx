@@ -191,7 +191,7 @@ function ProductAuctionPageInfo({ trigger, data, isLoading, isFetching, pageLabe
               </div>
             )}
 
-            {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5"></div>}
+            {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5" />}
           </div>
         </form>
       </Form>

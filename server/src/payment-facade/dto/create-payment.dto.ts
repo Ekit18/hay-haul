@@ -1,7 +1,7 @@
 import { IsEnum, IsNumber, IsString } from 'class-validator';
 import { PaymentTargetType } from 'src/lib/enums/enums';
 
-export class CreateProductAuctionPaymentDto {
+export class CreatePaymentDto {
   @IsEnum(PaymentTargetType)
   paymentTarget: PaymentTargetType;
   @IsString()

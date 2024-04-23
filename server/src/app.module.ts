@@ -39,6 +39,12 @@ import { TokenModule } from './token/token.module';
 import { TriggerService } from './trigger/trigger.service';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
+import { DriverDetailsModule } from './driver-details/driver-details.module';
+import { DriverDetails } from './driver-details/driver-details.entity';
+import { TransportModule } from './transport/transport.module';
+import { Transport } from './transport/transport.entity';
+import { DeliveryOrderPaymentModule } from './delivery-order-payment/delivery-order-payment.module';
+import { DeliveryOrderPayment } from './delivery-order-payment/delivery-order-payment.entity';
 
 @Module({
   imports: [
@@ -86,6 +92,9 @@ import { UserModule } from './user/user.module';
           DeliveryOrder,
           ProductAuctionPayment,
           DeliveryOffer,
+          DriverDetails,
+          Transport,
+          DeliveryOrderPayment
         ],
         // logger: 'simple-console',
         // logging: true,
@@ -117,6 +126,9 @@ import { UserModule } from './user/user.module';
     DeliveryOfferModule,
     ProductAuctionPaymentModule,
     PaymentFacadeModule,
+    DriverDetailsModule,
+    TransportModule,
+    DeliveryOrderPaymentModule,
   ],
   providers: [TriggerService, FunctionService],
 })
@@ -124,7 +136,7 @@ export class AppModule implements OnApplicationBootstrap {
   constructor(
     private readonly seedingService: TriggerService,
     private readonly functionService: FunctionService,
-  ) {}
+  ) { }
 
   async onApplicationBootstrap(): Promise<void> {
     await this.functionService.seed();

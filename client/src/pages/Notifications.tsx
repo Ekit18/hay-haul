@@ -12,8 +12,6 @@ export function Notifications() {
 
   const [markAllAsRead] = notificationApi.useUpdateNotificationToReadAllMutation();
 
-  console.log(notifications);
-
   const handleMarkAllAsRead = () => {
     markAllAsRead(user.id);
   };

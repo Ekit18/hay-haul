@@ -46,7 +46,7 @@ export function CreateDeliveryOrderModalHOC({ auctionId }: CreateDeliveryOrderMo
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} className="bg-green-700 text-white">
+      <Button type="button" onClick={() => setIsOpen(true)} className="bg-green-700 text-white">
         Create delivery order
       </Button>
       {isOpen && <CreateDeliveryOrderModal auctionId={auctionId} open={isOpen} handleOpenChange={handleOpenChange} />}
@@ -203,7 +203,7 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
               <div className="w-full items-center">
                 <FormField
                   control={form.control}
-                  name={'desiredPrice'}
+                  name="desiredPrice"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="block">Choose desired delivery price</FormLabel>
@@ -215,7 +215,6 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
                           onBlur={(e) => {
                             if (e.target.value === '') {
                               field.onChange(undefined);
-                              return;
                             }
                           }}
                           onChange={(e) => {

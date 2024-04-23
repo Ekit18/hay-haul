@@ -10,13 +10,27 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { NotificationMessage } from './enums/notification-message.enum';
+import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
+import { DeliveryOffer } from 'src/delivery-offer/delivery-offer.entity';
+
+export type NotifiableTypes = ProductAuction | DeliveryOrder | DeliveryOffer;
+
+export enum Notifiable {
+  ProductAuction = 'ProductAuction',
+  DeliveryOrder = 'DeliveryOrder'
+}
 
 const notificationMessages = Object.values(NotificationMessage)
   .map((notificationMessage) => `'${notificationMessage}'`)
   .join(', ');
 
+const notificationTypes = Object.values(Notifiable)
+  .map((type) => `'${type}'`)
+  .join(', ');
+
 @Entity()
 @Check(`"message" IN (${notificationMessages})`)
+@Check(`"notifiableType" IN (${notificationTypes})`)
 export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -32,18 +46,14 @@ export class Notification {
   @Column({ default: false })
   isRead: boolean;
 
-  @Column()
-  productAuctionId: string;
+  @Column({
+    type: 'nvarchar',
+    default: Notifiable.ProductAuction,
+  })
+  notifiableType: Notifiable;
 
-  @ManyToOne(
-    () => ProductAuction,
-    (productAuction) => productAuction.notifications,
-    {
-      onDelete: 'CASCADE',
-    },
-  )
-  @JoinColumn({ name: 'productAuctionId' })
-  productAuction: ProductAuction;
+  @Column()
+  notifiableId: string;
 
   @Column()
   receiverId: string;

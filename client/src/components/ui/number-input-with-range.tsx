@@ -32,7 +32,6 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
                   onBlur={(e) => {
                     if (e.target.value === '') {
                       field.onChange({ ...currentValue, from: undefined });
-                      return;
                     }
                   }}
                   onChange={(e) => {
@@ -67,7 +66,6 @@ export function NumberInputWithRange<T extends FieldValues, K extends Path<Numbe
                   onBlur={(e) => {
                     if (e.target.value === '') {
                       field.onChange({ ...currentValue, to: undefined });
-                      return;
                     }
                   }}
                   onChange={(e) => {

@@ -4,7 +4,7 @@ import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isPast, subHours } from 'date-fns';
 import { EmailService } from 'src/email/email.service';
-import { ServerEventName } from 'src/lib/enums/enums';
+import { PaymentTargetType, ServerEventName } from 'src/lib/enums/enums';
 import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
 import { NotificationService } from 'src/notification/notification.service';
 import { SocketService } from 'src/socket/socket.service';
@@ -13,6 +13,9 @@ import {
   ProductAuction,
   ProductAuctionStatus,
 } from '../product-auction.entity';
+import { Notifiable } from 'src/notification/notification.entity';
+import { ProductAuctionPaymentService } from 'src/product-auction-payment/product-auction-payment.service';
+
 
 @Injectable()
 export class ProductAuctionCronService {
@@ -24,7 +27,8 @@ export class ProductAuctionCronService {
     private productAuctionRepository: Repository<ProductAuction>,
     private notificationService: NotificationService,
     private emailService: EmailService,
-  ) {}
+    private productAuctionPaymentService: ProductAuctionPaymentService,
+  ) { }
 
   @Cron('1 * * * * *')
   async updateAuctionStatus(): Promise<void> {
@@ -64,6 +68,7 @@ export class ProductAuctionCronService {
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.AuctionStartSoon,
+                Notifiable.ProductAuction
               );
               auction.auctionStatus = ProductAuctionStatus.StartSoon;
             }
@@ -75,6 +80,7 @@ export class ProductAuctionCronService {
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.AuctionStarted,
+                Notifiable.ProductAuction
               );
               auction.auctionStatus = ProductAuctionStatus.Active;
             }
@@ -86,6 +92,7 @@ export class ProductAuctionCronService {
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.FarmerAuctionEndSoon,
+                Notifiable.ProductAuction
               );
               // email/notification bidders that auction is about to end
               auction.bids.forEach(async (bid) => {
@@ -93,6 +100,7 @@ export class ProductAuctionCronService {
                   bid.user.id,
                   auction.id,
                   NotificationMessage.BusinessmanAuctionEndSoon,
+                  Notifiable.ProductAuction
                 );
               });
 
@@ -107,6 +115,7 @@ export class ProductAuctionCronService {
                   auction.product.facilityDetails.user.id,
                   auction.id,
                   NotificationMessage.AuctionEndedNoBids,
+                  Notifiable.ProductAuction
                 );
 
                 auction.auctionStatus = ProductAuctionStatus.Ended;
@@ -116,14 +125,29 @@ export class ProductAuctionCronService {
                   auction.product.facilityDetails.user.id,
                   auction.id,
                   NotificationMessage.AuctionEndedWithBids,
+                  Notifiable.ProductAuction
                 );
 
                 await this.notificationService.createNotification(
                   auction.currentMaxBid.user.id,
                   auction.id,
                   NotificationMessage.BusinessmanAuctionWon,
+                  Notifiable.ProductAuction
                 );
                 // set the winner of auction
+                const targetId = auction.id
+                const buyerId = auction.currentMaxBid.user.id;
+                const sellerId = auction.product.facilityDetails.user.id
+                const amount = auction.currentMaxBid.price
+
+                const payment = await this.productAuctionPaymentService.create({
+                  targetId,
+                  paymentTarget: PaymentTargetType.ProductAuction,
+                  buyerId,
+                  sellerId,
+                  amount,
+                });
+
                 auction.auctionStatus = ProductAuctionStatus.WaitingPayment;
               }
             }
@@ -135,12 +159,14 @@ export class ProductAuctionCronService {
                 auction.currentMaxBid.user.id,
                 auction.id,
                 NotificationMessage.BusinessmanAuctionPaymentOverdue,
+                Notifiable.ProductAuction
               );
               // email/notification to farmer that he has not received payment
               await this.notificationService.createNotification(
                 auction.product.facilityDetails.user.id,
                 auction.id,
                 NotificationMessage.FarmerAuctionPaymentOverdue,
+                Notifiable.ProductAuction
               );
 
               auction.auctionStatus = ProductAuctionStatus.Unpaid;

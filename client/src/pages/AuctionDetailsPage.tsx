@@ -22,6 +22,7 @@ import { EntityTitle } from '@/lib/enums/entity-title.enum';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
+import { stripePromise } from '@/lib/stripe/stripePromise';
 import {
   ProductAuctionStatus,
   ProductAuctionStatusText,
@@ -36,7 +37,6 @@ import { format, parseISO } from 'date-fns';
 import { Crown, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, generatePath, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { stripePromise } from './businessman-pages/ProductAuctionPaymentPage';
 
 export function AuctionDetailsPage() {
   const user = useAppSelector((state) => state.user.user);
