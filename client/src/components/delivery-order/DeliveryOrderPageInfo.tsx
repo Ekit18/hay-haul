@@ -1,5 +1,5 @@
 import { useAppSelector } from '@/lib/hooks/redux';
-import { DeliveryOrder } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
+import { DeliveryOrder, DeliveryOrderStatus } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { DataWithCount } from '@/lib/types/types';
 import {
   BaseQueryFn,
@@ -27,6 +27,7 @@ import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
 import { DeliveryOrderFilter } from './delivery-order-filter/DeliveryOrderFilter';
 import { cn } from '@/lib/utils';
 import { ProductAuctionCardSkeleton } from '../product-auction/product-auction-card/ProductAuctionCard.skeleton';
+import { UserRole } from '@/lib/enums/user-role.enum';
 
 export type DeliveryOrderPageInfoProps = {
   deliveryOrders: DataWithCount<DeliveryOrder> | undefined;
@@ -44,20 +45,25 @@ export type DeliveryOrderPageInfoProps = {
       'api'
     >
   >;
+  label: string;
 };
 
 export function DeliveryOrderPageInfo({
   trigger,
   deliveryOrders: data,
   isFetching,
-  isLoading
+  isLoading,
+  label
 }: DeliveryOrderPageInfoProps) {
   const user = useAppSelector((state) => state.user.user);
   const deliveryOrderFilterFormSchema = useDeliveryOrderFilterFormSchema();
   const form = useForm<DeliveryOrderFilterFormValues>({
     resolver: yupResolver(deliveryOrderFilterFormSchema),
     mode: 'onSubmit',
-    defaultValues: deliveryOrderFilterFormDefaultValues
+    defaultValues: {
+      ...deliveryOrderFilterFormDefaultValues,
+      ...(user?.role === UserRole.Carrier ? { deliveryOrderStatus: [DeliveryOrderStatus.Active] } : {})
+    }
   });
 
   useEffect(() => {
@@ -134,7 +140,7 @@ export function DeliveryOrderPageInfo({
       </div>
     );
   }
-  console.log(data);
+  // console.log(data);
 
   if (!user) return null;
 
@@ -143,12 +149,12 @@ export function DeliveryOrderPageInfo({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className=" flex h-full flex-col">
           <div className="bg-white p-4 pt-10">
-            <h2 className="mb-9 text-3xl font-bold">Delivery orders</h2>
+            <h2 className="mb-9 text-3xl font-bold">{label}</h2>
             <DeliveryOrderFilter />
           </div>
           {data?.count === 0 ? (
             <div className="flex h-full w-full items-center justify-center">
-              <h3 className="text-xl font-bold">No delivery orders</h3>
+              <h3 className="text-xl font-bold">No {label.toLowerCase()}</h3>
             </div>
           ) : (
             <div

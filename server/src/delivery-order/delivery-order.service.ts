@@ -7,7 +7,7 @@ import {
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductAuctionService } from 'src/product-auction/product-auction.service';
 import { S3FileService } from 'src/s3-file/s3-file.service';
-import { And, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { And, Brackets, LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from 'typeorm';
 import { DeliveryOrderErrorMessage } from './delivery-order-error-message.enum';
 import { DeliveryOrder, DeliveryOrderStatus } from './delivery-order.entity';
 import { CreateDeliveryOrderDto } from './dto/create-delivery-order.dto';
@@ -15,6 +15,7 @@ import { DeliveryOrderQueryDto } from './dto/delivery-order-query.dto';
 import { UpdateDeliveryOrderDto } from './dto/update-delivery-order.dto';
 import { DeliveryOrderLocationsQueryDto } from './dto/delivery-order-locations-query.dto';
 import { DeliveryOrderLocationsQueryResponse } from './dto/delivery-order-locations-query-response.dto';
+import { UserRole } from 'src/user/user.entity';
 
 @Injectable()
 export class DeliveryOrderService {
@@ -84,6 +85,7 @@ export class DeliveryOrderService {
   public async findAllLocations(
     query: DeliveryOrderLocationsQueryDto,
   ): Promise<DeliveryOrderLocationsQueryResponse> {
+
     const queryBuilder = await this.deliveryOrderRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.facilityDetails', 'facilityDetails')
@@ -91,8 +93,28 @@ export class DeliveryOrderService {
       .leftJoinAndSelect('productAuction.product', 'product')
       .leftJoinAndSelect('product.facilityDetails', 'productFacilityDetails');
 
+    if (query.carrierId) {
+      queryBuilder.leftJoinAndSelect('order.deliveryOffers', 'deliveryOffers')
+        .leftJoinAndSelect('order.chosenDeliveryOffer', 'chosenOffer')
+        .where(new Brackets(qb => {
+          qb.where('deliveryOffers.userId = :carrierId', { carrierId: query.carrierId })
+            .andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus: DeliveryOrderStatus.Active });
+        }))
+        .orWhere(new Brackets(qb => {
+          qb.where('chosenOffer.userId = :carrierId', { carrierId: query.carrierId })
+            .andWhere('order.deliveryOrderStatus IN (:...statuses)', { statuses: [DeliveryOrderStatus.Paid, DeliveryOrderStatus.WaitingPayment] });
+        }));
+      console.log('asd')
+    }
+
     if (query.userId) {
       queryBuilder.andWhere('order.userId = :userId', { userId: query.userId });
+      console.log('fdgh')
+    }
+
+    if (!query.userId && !query.carrierId) {
+      queryBuilder.andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus: DeliveryOrderStatus.Active });
+      console.log('tywe')
     }
     const orders = await queryBuilder.getMany();
 
@@ -109,86 +131,8 @@ export class DeliveryOrderService {
     return response;
   }
 
-  public async findAllByUserId(
-    req: AuthenticatedRequest,
-    {
-      limit = DEFAULT_PAGINATION_LIMIT,
-      offset = DEFAULT_OFFSET,
-      deliveryOrderStatus,
-      fromFarmLocation,
-      maxDesiredDate,
-      minDesiredDate,
-      maxDesiredPrice,
-      minDesiredPrice,
-      productName,
-      toDepotLocation,
-    }: DeliveryOrderQueryDto,
-  ) {
-    try {
-      const userId = req.user.id;
+  private async getPreFilteredQueryBuilder({
 
-      const queryBuilder = this.deliveryOrderRepository
-        .createQueryBuilder('order')
-        .leftJoinAndSelect('order.facilityDetails', 'facilityDetails')
-        .leftJoinAndSelect('order.deliveryOffers', 'deliveryOffers')
-        .leftJoinAndSelect('order.productAuction', 'productAuction')
-        .leftJoinAndSelect('productAuction.product', 'product')
-        .leftJoinAndSelect('product.productType', 'productType')
-        .leftJoinAndSelect('product.facilityDetails', 'farmerFacilityDetails')
-        .where('order.userId = :userId', { userId });
-
-
-      if (deliveryOrderStatus) {
-        queryBuilder.andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus })
-      }
-      if (fromFarmLocation) {
-        queryBuilder.andWhere('farmerFacilityDetails.address = :fromFarmLocation', { fromFarmLocation })
-      }
-      if (maxDesiredDate) {
-        queryBuilder.andWhere('order.desiredDate <= :maxDesiredDate', { maxDesiredDate })
-      }
-      if (minDesiredDate) {
-        queryBuilder.andWhere('order.desiredDate >= :minDesiredDate', { minDesiredDate })
-      }
-      if (maxDesiredPrice) {
-        queryBuilder.andWhere('order.desiredPrice <= :maxDesiredPrice', { maxDesiredPrice })
-      }
-      if (minDesiredPrice) {
-        queryBuilder.andWhere('order.desiredPrice >= :minDesiredPrice', { minDesiredPrice })
-
-      }
-      if (productName) {
-        queryBuilder.where('product.name LIKE :productName', {
-          productName: `%${productName}%`,
-        });
-      }
-      if (toDepotLocation) {
-        queryBuilder.andWhere('facilityDetails.address = :toDepotLocation', { toDepotLocation })
-      }
-
-      const [deliveryOrders, total] = await queryBuilder
-        .take(limit)
-        .skip(offset)
-        .getManyAndCount();
-
-      const pageCount = Math.ceil(total / limit);
-
-      return {
-        data: deliveryOrders,
-        count: pageCount,
-      };
-    } catch (error) {
-      console.log(error);
-      throw new HttpException(
-        DeliveryOrderErrorMessage.FailedToGetOrders,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  public async findAllDeliveryOrders({
-    limit = DEFAULT_PAGINATION_LIMIT,
-    offset = DEFAULT_OFFSET,
     deliveryOrderStatus,
     fromFarmLocation,
     maxDesiredDate,
@@ -197,46 +141,86 @@ export class DeliveryOrderService {
     minDesiredPrice,
     productName,
     toDepotLocation,
-  }: DeliveryOrderQueryDto) {
+  }: DeliveryOrderQueryDto,): Promise<SelectQueryBuilder<DeliveryOrder>> {
+    const queryBuilder = this.deliveryOrderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.facilityDetails', 'facilityDetails')
+      .leftJoinAndSelect('order.deliveryOffers', 'deliveryOffers')
+      .leftJoinAndSelect('order.productAuction', 'productAuction')
+      .leftJoinAndSelect('productAuction.product', 'product')
+      .leftJoinAndSelect('product.productType', 'productType')
+      .leftJoinAndSelect('product.facilityDetails', 'farmerFacilityDetails')
+
+
+    if (deliveryOrderStatus) {
+      queryBuilder.andWhere('order.deliveryOrderStatus IN (:...deliveryOrderStatus)', { deliveryOrderStatus })
+    }
+    if (fromFarmLocation) {
+      queryBuilder.andWhere('farmerFacilityDetails.address = :fromFarmLocation', { fromFarmLocation })
+    }
+    if (maxDesiredDate) {
+      queryBuilder.andWhere('order.desiredDate <= :maxDesiredDate', { maxDesiredDate })
+    }
+    if (minDesiredDate) {
+      queryBuilder.andWhere('order.desiredDate >= :minDesiredDate', { minDesiredDate })
+    }
+    if (maxDesiredPrice) {
+      queryBuilder.andWhere('order.desiredPrice <= :maxDesiredPrice', { maxDesiredPrice })
+    }
+    if (minDesiredPrice) {
+      queryBuilder.andWhere('order.desiredPrice >= :minDesiredPrice', { minDesiredPrice })
+
+    }
+    if (productName) {
+      queryBuilder.where('product.name LIKE :productName', {
+        productName: `%${productName}%`,
+      });
+    }
+    if (toDepotLocation) {
+      queryBuilder.andWhere('facilityDetails.address = :toDepotLocation', { toDepotLocation })
+    }
+
+    return queryBuilder;
+  }
+
+
+
+  public async findAllByUserId(
+    req: AuthenticatedRequest,
+    { limit = DEFAULT_PAGINATION_LIMIT,
+      offset = DEFAULT_OFFSET, ...filterDto }: DeliveryOrderQueryDto,
+  ) {
+    try {
+      const userId = req.user.id;
+      const queryBuilder = (await this.getPreFilteredQueryBuilder(filterDto))
+        .andWhere('order.userId = :userId', { userId });
+
+      const [deliveryOrders, total] = await queryBuilder
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount();
+
+      const pageCount = Math.ceil(total / limit);
+
+      return {
+        data: deliveryOrders,
+        count: pageCount,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        DeliveryOrderErrorMessage.FailedToGetOrders,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  public async findAllDeliveryOrders({ limit = DEFAULT_PAGINATION_LIMIT,
+    offset = DEFAULT_OFFSET, ...filterDto }: DeliveryOrderQueryDto) {
     try {
 
-      const queryBuilder = this.deliveryOrderRepository
-        .createQueryBuilder('order')
-        .leftJoinAndSelect('order.facilityDetails', 'facilityDetails')
-        .leftJoinAndSelect('order.deliveryOffers', 'deliveryOffers')
-        .leftJoinAndSelect('order.productAuction', 'productAuction')
-        .leftJoinAndSelect('productAuction.product', 'product')
-        .leftJoinAndSelect('product.productType', 'productType')
-        .leftJoinAndSelect('product.facilityDetails', 'farmerFacilityDetails')
-
-
-      if (deliveryOrderStatus) {
-        queryBuilder.andWhere('order.deliveryOrderStatus IN (:...deliveryOrderStatus)', { deliveryOrderStatus })
-      }
-      if (fromFarmLocation) {
-        queryBuilder.andWhere('farmerFacilityDetails.address = :fromFarmLocation', { fromFarmLocation })
-      }
-      if (maxDesiredDate) {
-        queryBuilder.andWhere('order.desiredDate <= :maxDesiredDate', { maxDesiredDate })
-      }
-      if (minDesiredDate) {
-        queryBuilder.andWhere('order.desiredDate >= :minDesiredDate', { minDesiredDate })
-      }
-      if (maxDesiredPrice) {
-        queryBuilder.andWhere('order.desiredPrice <= :maxDesiredPrice', { maxDesiredPrice })
-      }
-      if (minDesiredPrice) {
-        queryBuilder.andWhere('order.desiredPrice >= :minDesiredPrice', { minDesiredPrice })
-
-      }
-      if (productName) {
-        queryBuilder.where('product.name LIKE :productName', {
-          productName: `%${productName}%`,
-        });
-      }
-      if (toDepotLocation) {
-        queryBuilder.andWhere('facilityDetails.address = :toDepotLocation', { toDepotLocation })
-      }
+      const queryBuilder = (await this.getPreFilteredQueryBuilder(filterDto))
+        .andWhere('order.deliveryOrderStatus = :status', { status: DeliveryOrderStatus.Active });
 
       const [deliveryOrders, total] = await queryBuilder
         .take(limit)
@@ -256,6 +240,44 @@ export class DeliveryOrderService {
       );
     }
   }
+
+  async findCarrierOffers(req: AuthenticatedRequest, { limit = DEFAULT_PAGINATION_LIMIT,
+    offset = DEFAULT_OFFSET, ...filterDto }: DeliveryOrderQueryDto) {
+    try {
+
+      const queryBuilder = (await this.getPreFilteredQueryBuilder(filterDto))
+        .andWhere('deliveryOffers.userId = :userId', { userId: req.user.id })
+        .leftJoinAndSelect('order.chosenDeliveryOffer', 'chosenOffer')
+        .where(new Brackets(qb => {
+          qb.where('deliveryOffers.userId = :carrierId', { carrierId: req.user.id })
+            .andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus: DeliveryOrderStatus.Active });
+        }))
+        .orWhere(new Brackets(qb => {
+          qb.where('chosenOffer.userId = :carrierId', { carrierId: req.user.id })
+            .andWhere('order.deliveryOrderStatus IN (:...statuses)', { statuses: [DeliveryOrderStatus.Paid, DeliveryOrderStatus.WaitingPayment] });
+        }));
+
+
+      const [deliveryOrders, total] = await queryBuilder
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount();
+
+      const pageCount = Math.ceil(total / limit);
+      return {
+        data: deliveryOrders,
+        count: pageCount,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        DeliveryOrderErrorMessage.FailedToGetOrders,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+
 
   public async findOneById(id: string) {
     try {
@@ -266,11 +288,12 @@ export class DeliveryOrderService {
           'businessmanFacilityDetails',
         )
         .leftJoinAndSelect('deliveryOrder.chosenDeliveryOffer', 'chosenDeliveryOffer')
-        .leftJoinAndSelect('chosenDeliveryOffer.user', 'chosenCarrier')
+        .leftJoin('chosenDeliveryOffer.user', 'chosenCarrier')
         .leftJoin('chosenCarrier.facilityDetails', 'chosenCarrierFacilityDetails')
         .addSelect([
           'chosenCarrierFacilityDetails.name',
           'chosenCarrierFacilityDetails.address',
+          'chosenCarrier.id', 'chosenCarrier.email', 'chosenCarrier.fullName'
         ])
 
         .leftJoinAndSelect('deliveryOrder.deliveryOffers', 'deliveryOffers')

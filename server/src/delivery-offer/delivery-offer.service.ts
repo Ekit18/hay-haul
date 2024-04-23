@@ -8,8 +8,9 @@ import { DeliveryOffer, DeliveryOfferStatus } from './delivery-offer.entity';
 import { CreateDeliveryOfferDto } from './dto/create-delivery-offer.dto';
 import { ca, th } from 'date-fns/locale';
 import { SocketService } from 'src/socket/socket.service';
-import { ServerEventName } from 'src/lib/enums/enums';
+import { PaymentTargetType, ServerEventName } from 'src/lib/enums/enums';
 import { DeliveryOrder, DeliveryOrderStatus } from 'src/delivery-order/delivery-order.entity';
+import { DeliveryOrderPaymentService } from 'src/delivery-order-payment/delivery-order-payment.service';
 
 @Injectable()
 export class DeliveryOfferService {
@@ -17,6 +18,7 @@ export class DeliveryOfferService {
     @InjectRepository(DeliveryOffer)
     private readonly deliveryOfferRepository: Repository<DeliveryOffer>,
     private readonly deliveryOrderService: DeliveryOrderService,
+    private readonly deliveryOrderPaymentService: DeliveryOrderPaymentService,
     private socketService: SocketService,
   ) {
   }
@@ -36,6 +38,18 @@ export class DeliveryOfferService {
       'SERIALIZABLE',
       async (transactionalEntityManager) => {
         await transactionalEntityManager.save(DeliveryOffer, { id, offerStatus: DeliveryOfferStatus.Accepted })
+        const targetId = offer.deliveryOrder.id;
+        const buyerId = req.user?.id
+        const sellerId = offer.deliveryOrder.chosenDeliveryOffer.user.id;
+        const amount = offer.deliveryOrder.chosenDeliveryOffer.price
+
+        await this.deliveryOrderPaymentService.create({
+          targetId,
+          paymentTarget: PaymentTargetType.DeliveryOrder,
+          buyerId,
+          sellerId,
+          amount,
+        }, transactionalEntityManager);
         await transactionalEntityManager.update(DeliveryOrder, offer.deliveryOrder.id, { deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment, chosenDeliveryOfferId: id });
       })
     SocketService.SocketServer.to(offer.deliveryOrder.id).emit(ServerEventName.DeliveryOrderUpdated, {

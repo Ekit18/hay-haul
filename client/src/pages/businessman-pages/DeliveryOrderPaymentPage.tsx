@@ -1,21 +1,24 @@
+import { deliveryOrderStatus } from '@/components/delivery-order/card/DeliveryOrderCardStatus.enum';
+import { DeliveryOrderDestination } from '@/components/delivery-order/card/DeliveryOrderDestination';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { useAppSelector } from '@/lib/hooks/redux';
-import { DeliveryOrderStatus } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
+import { stripePromise } from '@/lib/stripe/stripePromise';
+import { DeliveryOrderStatus, deliveryOrderStatusText } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { ProductAuctionStatus } from '@/lib/types/ProductAuction/ProductAuction.type';
+import { cn } from '@/lib/utils';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { stripeApi } from '@/store/reducers/stripe/stripeApi';
 import { QueryStatus } from '@reduxjs/toolkit/query';
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { StripeElementsOptions, StripeError, loadStripe } from '@stripe/stripe-js';
+import { format, parseISO } from 'date-fns';
 import capitalize from 'lodash.capitalize';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Package } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-
-export const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export function StripeDeliveryOrderPaymentPage() {
   const [loading, setLoading] = useState(true);
@@ -27,7 +30,7 @@ export function StripeDeliveryOrderPaymentPage() {
   const deliveryOrder = deliveryOrderWithCount?.data[0];
 
   const [createPayment, { data: createPaymentResponse, status: createPaymentMutationStatus }] =
-    stripeApi.useCreatePaymentMutation();
+    stripeApi.useCreateDeliveryOrderPaymentMutation();
 
   const { deliveryOrderId } = useParams();
 
@@ -65,7 +68,7 @@ export function StripeDeliveryOrderPaymentPage() {
       return;
     }
     createPayment({ deliveryOrderId: deliveryOrder.id });
-  }, [auction?.currentMaxBid?.userId, auction?.auctionStatus, user?.id]);
+  }, [deliveryOrder?.userId, deliveryOrder?.deliveryOrderStatus, user?.id]);
 
   if (loading)
     return (
@@ -73,22 +76,22 @@ export function StripeDeliveryOrderPaymentPage() {
         <Loader2 className="h-10 w-10 animate-spin" />
       </div>
     );
-  if (!auction || !auctionId) return <Navigate to={AppRoute.General.MyAuctions} replace />;
-  if (user?.id !== auction?.currentMaxBid?.userId) {
+  if (!deliveryOrder || !deliveryOrderId) return <Navigate to={AppRoute.General.DeliveryOrder} replace />;
+  if (user?.id !== deliveryOrder?.userId) {
     toast({
       variant: 'destructive',
       title: 'Access denied',
-      description: 'Only winner can pay for auction.'
+      description: 'Only order owner can pay for it.'
     });
-    return <Navigate to={AppRoute.General.MyAuctions} replace />;
+    return <Navigate to={AppRoute.General.DeliveryOrder} replace />;
   }
-  if (ProductAuctionStatus.WaitingPayment !== auction.auctionStatus) {
+  if (DeliveryOrderStatus.WaitingPayment !== deliveryOrder?.deliveryOrderStatus) {
     toast({
       variant: 'destructive',
       title: 'Access denied',
       description: 'You can only pay for won auctions.'
     });
-    return <Navigate to={AppRoute.General.MyAuctions} replace />;
+    return <Navigate to={AppRoute.General.DeliveryOrder} replace />;
   }
 
   return (
@@ -98,26 +101,46 @@ export function StripeDeliveryOrderPaymentPage() {
           <h2 className="mb-9 mt-6 text-3xl font-bold">Payment page</h2>
         </div>
         <div className="w-full p-4">
-          <div className="grid h-full w-full grid-cols-3 gap-4">
+          <div className="grid h-full w-full grid-cols-1 gap-4 min-[790px]:grid-cols-4">
             <div className="flex h-full flex-col justify-between border-b-2 text-center">
-              <span className="border-b-2 text-center">Auction image</span>
+              <span className="border-b-2">Product</span>
+              <div className="m-auto flex flex-col items-center gap-y-4 py-8">
+                <span>
+                  {capitalize(deliveryOrder?.productAuction.product.name)} by{' '}
+                  {capitalize(deliveryOrder?.productAuction.product.facilityDetails.name)}
+                </span>
+                <div className="flex w-min flex-row gap-2 rounded border border-black p-1">
+                  <Package className="min-h-5 min-w-5" />
+                  <span>{deliveryOrder.productAuction.product.productType.name}</span>
+                </div>
+              </div>
+            </div>
+            {/* <div className="flex h-full flex-col justify-between border-b-2 text-center">
+              <span className="border-b-2 text-center">Product order image</span>
               <img
                 className="m-auto w-[200px] rounded-t-lg  object-cover min-[1068px]:h-full min-[1068px]:rounded-l-lg min-[1068px]:rounded-tr-none"
-                src={auction?.photos[0]?.signedUrl}
-                alt={auction.product.name}
+                src={deliveryOrder?.productAuction.photos[0]?.signedUrl}
+                alt={deliveryOrder?.productAuction.product.name}
               />
+            </div> */}
+            <div className="flex h-full flex-col border-b-2 text-center">
+              <span className="border-b-2">Desired delivery date</span>
+              <span className="m-auto py-8 font-medium">
+                {format(parseISO(deliveryOrder.desiredDate.toString()), 'yyyy-MM-dd')}
+              </span>
             </div>
-            <div className="flex h-full flex-col justify-between border-b-2 text-center">
-              <span className="border-b-2">Auction name</span>
-              <div className="m-auto">
-                <span>
-                  {capitalize(auction.product.name)} by {capitalize(auction.product.facilityDetails.name)}
-                </span>
+            <div className="flex h-full flex-col border-b-2 text-center">
+              <span className="border-b-2">From / To addresses</span>
+              <div className="m-auto py-8">
+                <DeliveryOrderDestination
+                  from={deliveryOrder.productAuction?.product.facilityDetails?.address}
+                  to={deliveryOrder.facilityDetails?.address}
+                />
               </div>
             </div>
             <div className="flex h-full flex-col border-b-2 text-center">
               <span className="border-b-2">Charge amount</span>
-              <span className="m-auto text-2xl font-bold">{auction.currentMaxBid?.price} USD</span>
+              <span className="m-auto py-8 text-2xl font-bold">{deliveryOrder?.chosenDeliveryOffer?.price} USD</span>
             </div>
           </div>
         </div>
@@ -139,7 +162,7 @@ export function CheckoutForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const navigate = useNavigate();
-  const { auctionId } = useParams();
+  const { deliveryOrderId } = useParams();
 
   useEffect(() => {
     if (errorMessage) {
@@ -165,7 +188,7 @@ export function CheckoutForm() {
         confirmParams: {
           // TODO: change return_url
           // return_url: 'https://google.com'
-          return_url: `http://localhost:5173/auction-details/${auctionId ?? ''}`
+          return_url: `http://localhost:5173/delivery-order/${deliveryOrderId ?? ''}`
         }
       });
 

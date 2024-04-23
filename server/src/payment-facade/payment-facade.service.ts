@@ -31,13 +31,19 @@ import { GetPaymentsByUserIdResponse } from './dto/get-payments-by-user-id-respo
 import { GetPaymentsByUserQueryDto } from './dto/get-payments-by-user-query.dto';
 import { PaymentResponseDto } from './dto/payment-response.dto';
 import { Notifiable } from 'src/notification/notification.entity';
+import { DeliveryOrderPaymentService } from 'src/delivery-order-payment/delivery-order-payment.service';
+import { DeliveryOrderPayment } from 'src/delivery-order-payment/delivery-order-payment.entity';
+import { DeliveryOrder, DeliveryOrderStatus } from 'src/delivery-order/delivery-order.entity';
 
 @Injectable()
 export class PaymentFacadeService {
   constructor(
     @InjectRepository(ProductAuction)
     private productAuctionRepository: Repository<ProductAuction>,
+    @InjectRepository(DeliveryOrder)
+    private deliveryOrderRepository: Repository<DeliveryOrder>,
     private productAuctionPaymentService: ProductAuctionPaymentService,
+    private deliveryOrderPaymentService: DeliveryOrderPaymentService,
     @Inject(forwardRef(() => StripeService))
     private stripeService: StripeService,
     private userService: UserService,
@@ -53,10 +59,16 @@ export class PaymentFacadeService {
         query,
         userId,
       });
+    const deliveryOrderPayments = await this.deliveryOrderPaymentService.findAllByUserId({
+      query,
+      userId,
+    });
     //TODO:reserved for delivery order payments
     return {
       count: productAuctionPayments.count + 0,
-      data: [...productAuctionPayments.data],
+      data: [...productAuctionPayments.data, ...deliveryOrderPayments.data].sort((a, b) => {
+        return -1 * (a.status.localeCompare(b.status) || a.updatedAt.getDate() - b.updatedAt.getDate())
+      }),
     };
   }
 
@@ -88,6 +100,9 @@ export class PaymentFacadeService {
     } else if (metadata.paymentTargetType === PaymentTargetType.DeliveryOrder) {
       //TODO: reserved for delivery order
       //payment = ...
+      payment = await this.deliveryOrderPaymentService.findOneById(
+        metadata.paymentId,
+      );
     }
 
     console.log('payment');
@@ -123,7 +138,7 @@ export class PaymentFacadeService {
       SocketService.SocketServer.to(auctionId).emit(
         ServerEventName.AuctionUpdated,
         {
-          auctionId: auctionId,
+          auctionId,
           auctionStatus: ProductAuctionStatus.Paid,
         },
       );
@@ -137,8 +152,39 @@ export class PaymentFacadeService {
 
       return payment;
     } else {
-      //TODO: reserved for delivery order
-      //payment = ...
+      await this.deliveryOrderPaymentService.setPaymentStatus({
+        paymentStatus: PaymentStatus.Paid,
+        deliveryOrderPaymentId: payment.id,
+      });
+
+      const orderId = (payment as DeliveryOrderPayment).orderId;
+
+      const order = await this.deliveryOrderRepository.findOne({
+        where: { id: orderId },
+        relations: { chosenDeliveryOffer: true },
+      });
+
+      console.log("FACADE ORDER", order)
+
+      await this.deliveryOrderRepository.save({
+        deliveryOrderStatus: DeliveryOrderStatus.Paid,
+        id: orderId,
+      });
+
+      SocketService.SocketServer.to(orderId).emit(
+        ServerEventName.DeliveryOrderUpdated,
+        {
+          deliveryOrderId: orderId, deliveryOrderStatus: DeliveryOrderStatus.Paid
+        },
+      );
+
+      await this.notificationService.createNotification(
+        order.chosenDeliveryOffer.userId,
+        order.id,
+        NotificationMessage.DeliveryOrderPaid,
+        Notifiable.DeliveryOrder
+      );
+
       return payment;
     }
   }

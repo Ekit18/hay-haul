@@ -23,6 +23,7 @@ export enum NotificationMessage {
   BusinessmanAuctionEndSoon = 'BUSINESSMAN_AUCTION_END_SOON',
   AuctionEndedNoBids = 'AUCTION_ENDED_NO_BIDS',
   AuctionEndedWithBids = 'AUCTION_ENDED_WITH_BIDS',
+  DeliveryOrderPaid = 'DELIVERY_ORDER_PAID',
   BusinessmanAuctionWon = 'BUSINESSMAN_AUCTION_WON',
   BusinessmanAuctionPaymentOverdue = 'BUSINESSMAN_AUCTION_PAYMENT_OVERDUE',
   FarmerAuctionPaymentOverdue = 'FARMER_AUCTION_PAYMENT_OVERDUE',

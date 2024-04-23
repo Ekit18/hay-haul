@@ -25,6 +25,9 @@ import { MyAuctions } from './pages/farmer-pages/MyAuctions';
 import { ProductsPage } from './pages/farmer-pages/ProductsPage';
 import { UpdateAuction } from './pages/farmer-pages/UpdateAuction';
 import { StripeDeliveryOrderPaymentPage } from './pages/businessman-pages/DeliveryOrderPaymentPage';
+import { CarrierOffers } from './pages/carrier-pages/CarrierOffers';
+import { Transport } from './pages/carrier-pages/Transport';
+import { Drivers } from './pages/carrier-pages/Drivers';
 
 type Route = {
   path: string;
@@ -51,10 +54,6 @@ export const generalRoutes: Route[] = [
   {
     path: AppRoute.General.StripeReturn,
     Component: StripeReturnPage
-  },
-  {
-    path: AppRoute.General.DeliveryOrder,
-    Component: DeliveryOrderDetails
   }
 ];
 
@@ -70,6 +69,22 @@ export const carrierRoutes: Route[] = [
   {
     path: AppRoute.General.Notifications,
     Component: Notifications
+  },
+  {
+    path: AppRoute.General.DeliveryOrder,
+    Component: DeliveryOrderDetails
+  },
+  {
+    path: AppRoute.Carrier.DeliveryOffers,
+    Component: CarrierOffers
+  },
+  {
+    path: AppRoute.Carrier.Transport,
+    Component: Transport
+  },
+  {
+    path: AppRoute.Carrier.Drivers,
+    Component: Drivers
   }
 ];
 
@@ -105,6 +120,10 @@ export const businessRoutes: Route[] = [
   {
     path: AppRoute.General.AuctionDetails,
     Component: AuctionDetailsPage
+  },
+  {
+    path: AppRoute.General.DeliveryOrder,
+    Component: DeliveryOrderDetails
   }
 ];
 

@@ -53,6 +53,7 @@ export class NotificationService {
   ): Promise<void> {
     let notification;
 
+
     if (transactionalEntityManager) {
       notification = await transactionalEntityManager.save(Notification, {
         message,

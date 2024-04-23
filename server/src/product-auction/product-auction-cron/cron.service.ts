@@ -4,7 +4,7 @@ import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isPast, subHours } from 'date-fns';
 import { EmailService } from 'src/email/services/email.service';
-import { ServerEventName } from 'src/lib/enums/enums';
+import { PaymentTargetType, ServerEventName } from 'src/lib/enums/enums';
 import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
 import { NotificationService } from 'src/notification/notification.service';
 import { SocketService } from 'src/socket/socket.service';
@@ -14,6 +14,7 @@ import {
   ProductAuctionStatus,
 } from '../product-auction.entity';
 import { Notifiable } from 'src/notification/notification.entity';
+import { ProductAuctionPaymentService } from 'src/product-auction-payment/product-auction-payment.service';
 
 
 @Injectable()
@@ -26,6 +27,7 @@ export class ProductAuctionCronService {
     private productAuctionRepository: Repository<ProductAuction>,
     private notificationService: NotificationService,
     private emailService: EmailService,
+    private productAuctionPaymentService: ProductAuctionPaymentService,
   ) { }
 
   @Cron('1 * * * * *')
@@ -133,6 +135,19 @@ export class ProductAuctionCronService {
                   Notifiable.ProductAuction
                 );
                 // set the winner of auction
+                const targetId = auction.id
+                const buyerId = auction.currentMaxBid.user.id;
+                const sellerId = auction.product.facilityDetails.user.id
+                const amount = auction.currentMaxBid.price
+
+                const payment = await this.productAuctionPaymentService.create({
+                  targetId,
+                  paymentTarget: PaymentTargetType.ProductAuction,
+                  buyerId,
+                  sellerId,
+                  amount,
+                });
+
                 auction.auctionStatus = ProductAuctionStatus.WaitingPayment;
               }
             }

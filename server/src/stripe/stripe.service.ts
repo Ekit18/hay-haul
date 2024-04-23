@@ -72,12 +72,17 @@ export class StripeService {
       auction.product.facilityDetails.user.id,
     );
 
+    const targetId = auction.id
+    const buyerId = request.user?.id
+    const sellerId = auction.product.facilityDetails.user.id
+    const amount = auction.currentMaxBid.price
+
     const payment = await this.productAuctionPaymentService.create({
-      targetId: auction.id,
+      targetId,
       paymentTarget: PaymentTargetType.ProductAuction,
-      buyerId: request.user?.id,
-      sellerId: auction.product.facilityDetails.user.id,
-      amount: auction.currentMaxBid.price,
+      buyerId,
+      sellerId,
+      amount,
     });
 
     const paymentIntentMetadata: Record<keyof PaymentIntentMetadata, string> = {
@@ -100,7 +105,7 @@ export class StripeService {
         application_fee_amount: Number.parseInt(
           (
             StripeService.FEE_PERCENT *
-            auction.currentMaxBid.price *
+            amount *
             100
           ).toFixed(0),
         ),
@@ -122,16 +127,24 @@ export class StripeService {
     } = await this.deliveryOrderService.findOneById(deliveryOrderId);
 
 
+
+    console.log('mem2', deliveryOrder)
+
     const stripeEntry = await this.findOneByUserId(
       deliveryOrder.chosenDeliveryOffer.user.id
     );
 
+    const targetId = deliveryOrder.id;
+    const buyerId = request.user?.id
+    const sellerId = deliveryOrder.chosenDeliveryOffer.user.id;
+    const amount = deliveryOrder.chosenDeliveryOffer.price
+
     const payment = await this.deliveryOrderPaymentService.create({
-      targetId: deliveryOrder.id,
+      targetId,
       paymentTarget: PaymentTargetType.DeliveryOrder,
-      buyerId: request.user?.id,
-      sellerId: deliveryOrder.chosenDeliveryOffer.user.id,
-      amount: deliveryOrder.chosenDeliveryOffer.price,
+      buyerId,
+      sellerId,
+      amount,
     });
 
     const paymentIntentMetadata: Record<keyof PaymentIntentMetadata, string> = {
@@ -140,7 +153,7 @@ export class StripeService {
     };
     const { client_secret: clientSecret } =
       await this.stripe.paymentIntents.create({
-        amount: deliveryOrder.chosenDeliveryOffer.price * 100,
+        amount: amount * 100,
         currency: 'usd',
         metadata: paymentIntentMetadata,
         description: deliveryOrder.id,
@@ -154,7 +167,7 @@ export class StripeService {
         application_fee_amount: Number.parseInt(
           (
             StripeService.FEE_PERCENT *
-            deliveryOrder.chosenDeliveryOffer.price *
+            amount *
             100
           ).toFixed(0),
         ),

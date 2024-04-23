@@ -14,6 +14,7 @@ export function CarrierDeliveryOrderPage() {
       isFetching={isFetching}
       trigger={filterDeliveryOrders}
       isLoading={isLoading}
+      label="Delivery Orders"
     />
   );
 }

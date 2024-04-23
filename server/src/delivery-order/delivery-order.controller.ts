@@ -42,6 +42,11 @@ export class DeliveryOrderController {
     return this.deliveryOrderService.findAllLocations(query);
   }
 
+  @Get('/carrier-offers')
+  async getCarrierOffers(@Req() req: AuthenticatedRequest, @Query() query: DeliveryOrderQueryDto) {
+    return this.deliveryOrderService.findCarrierOffers(req, query);
+  }
+
   @Get()
   async getDeliveryOrders(
     @Req() req: AuthenticatedRequest,

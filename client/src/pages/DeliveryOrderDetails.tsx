@@ -12,16 +12,21 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
+import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
+import { stripePromise } from '@/lib/stripe/stripePromise';
 import { DeliveryOrderStatus, deliveryOrderStatusText } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { cn } from '@/lib/utils';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
+import { stripeApi } from '@/store/reducers/stripe/stripeApi';
+import { Stripe } from '@stripe/stripe-js';
 import { format, parseISO } from 'date-fns';
-import { Loader2, Package } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
-import { Navigate, generatePath, useNavigate, useParams } from 'react-router-dom';
+import { Crown, Loader2, Package } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Navigate, generatePath, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 export function DeliveryOrderDetails() {
   const { deliveryOrderId } = useParams();
@@ -45,6 +50,77 @@ export function DeliveryOrderDetails() {
     [deliveryOrder?.deliveryOffers, user?.id]
   );
 
+  const [hookPaymentSuccessful] = stripeApi.usePaymentSuccessHookMutation();
+  const [stripe, setStripe] = useState<Stripe | null>(null);
+  const [_, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    stripePromise.then((stripe) => {
+      console.log('STRPE PROMISE');
+      setStripe(stripe);
+    });
+  }, [stripePromise]);
+
+  useEffect(() => {
+    console.log('stripe');
+    console.log(stripe);
+    if (!stripe) {
+      return;
+    }
+
+    // Retrieve the "payment_intent_client_secret" query parameter appended to
+    // your return_url by Stripe.js
+    const searchParams = new URLSearchParams(window.location.search);
+    const clientSecret = searchParams.get('payment_intent_client_secret');
+    const paymentIntentId = searchParams.get('payment_intent');
+
+    if (!clientSecret) {
+      return;
+    }
+
+    // Retrieve the PaymentIntent
+    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
+      if (!paymentIntent) {
+        return;
+      }
+      // Inspect the PaymentIntent `status` to indicate the status of the payment
+      // to your customer.
+      //
+      // Some payment methods will [immediately succeed or fail][0] upon
+      // confirmation, while others will first enter a `processing` state.
+      //
+      // [0]: https://stripe.com/docs/payments/payment-methods#payment-notification
+      switch (paymentIntent.status) {
+        case 'succeeded':
+          if (paymentIntentId) {
+            hookPaymentSuccessful(paymentIntentId)
+              .unwrap()
+              .catch(handleRtkError)
+              .finally(() => {
+                setSearchParams(() => new URLSearchParams());
+              });
+          }
+          toast({ variant: 'success', title: 'Success! Payment received.' });
+          break;
+
+        case 'processing':
+          toast({ variant: 'default', title: "Payment processing. We'll update you when payment is received." });
+          break;
+
+        case 'requires_payment_method':
+          // Redirect your user back to your payment page to attempt collecting
+          // payment again
+          toast({ variant: 'destructive', title: 'Payment failed. Please try another payment method.' });
+          navigate(`http://localhost:5173/delivery-order/payment/${deliveryOrderId ?? ''}`);
+          break;
+
+        default:
+          toast({ variant: 'destructive', title: 'Something went wrong.' });
+          break;
+      }
+    });
+  }, [stripe]);
+
   if (isFetching || isLoading || !data) {
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -58,10 +134,10 @@ export function DeliveryOrderDetails() {
   }
 
   const handlePayClick = () => {
-    if (user?.role !== UserRole.Businessman || !deliveryOrder.chosenDeliveryOffer) {
+    if (user?.role !== UserRole.Businessman || !deliveryOrder.chosenDeliveryOffer || !deliveryOrderId) {
       return;
     }
-    navigate(generatePath(AppRoute.General.Main));
+    navigate(generatePath(AppRoute.Businessman.DeliveryOrderPaymentPage, { deliveryOrderId }));
   };
 
   return (
@@ -130,7 +206,7 @@ export function DeliveryOrderDetails() {
             />
           </div>
           {user?.role === UserRole.Carrier && (
-            <div className="flex h-fit w-60 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
+            <div className="mb-8 flex h-fit w-60 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
               <div className="">
                 <p className="text-center">Your current offer:</p>
                 <div className="mb-6 flex flex-col items-center gap-2">
@@ -139,31 +215,40 @@ export function DeliveryOrderDetails() {
                   </h2>
                 </div>
               </div>
-              <div className="flex w-3/4 flex-col gap-y-3">
-                <div className="flex w-full justify-end py-5">
-                  <CreateDeliveryOfferForm
-                    currentPrice={currentOffer?.price}
-                    deliveryOrderId={deliveryOrder.id}
-                    desiredPrice={deliveryOrder.desiredPrice}
-                  />
+              {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Active && (
+                <div className="flex w-3/4 flex-col gap-y-3">
+                  <div className="flex w-full justify-end py-5">
+                    <CreateDeliveryOfferForm
+                      currentPrice={currentOffer?.price}
+                      deliveryOrderId={deliveryOrder.id}
+                      desiredPrice={deliveryOrder.desiredPrice}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
+              {deliveryOrder.chosenDeliveryOffer && deliveryOrder.chosenDeliveryOffer.userId === user.id && (
+                <div className="flex gap-2">
+                  <Crown className="text-yellow-400" />
+                  <p className="">You were selected for this order</p>
+                </div>
+              )}
             </div>
           )}
           {user?.role === UserRole.Businessman && deliveryOrder.chosenDeliveryOffer && (
-            <div className="flex h-fit w-80 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
+            <div className="mb-8 flex h-fit w-80 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
               <div className="">
                 <p className="text-center">Your chosen offer:</p>
                 <div className="mb-6 flex flex-col items-center gap-2">
                   <h2 className=" text-center text-3xl font-bold">{deliveryOrder.chosenDeliveryOffer.price} USD</h2>
                 </div>
+                <p>Winner:</p>
                 <p className="text-xl">Carrier: {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].name}</p>
                 <p className="text-xl">
                   Carrier's Address: {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].address}
                 </p>
               </div>
               <div className="flex w-3/4 flex-col gap-y-3">
-                {
+                {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.WaitingPayment && (
                   <div className="flex w-full justify-end py-5">
                     <Button
                       className={cn('w-full', deliveryOrderStatus[deliveryOrder.deliveryOrderStatus])}
@@ -173,20 +258,21 @@ export function DeliveryOrderDetails() {
                       Pay
                     </Button>
                   </div>
-                }
+                )}
               </div>
             </div>
           )}
         </div>
         <div className="mt-4">
-          <h1 className="text-2xl font-bold">Delivery offers:</h1>
-
-          {deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Active && (
-            <div className="grid w-full grid-cols-1 gap-4 py-4 pb-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-              {deliveryOrder.deliveryOffers.map((deliveryOffer) => (
-                <DeliveryOfferCard key={deliveryOffer.id} deliveryOffer={deliveryOffer} />
-              ))}
-            </div>
+          {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Active && (
+            <>
+              <h1 className="text-2xl font-bold">Delivery offers:</h1>
+              <div className="grid w-full grid-cols-1 gap-4 py-4 pb-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                {deliveryOrder.deliveryOffers.map((deliveryOffer) => (
+                  <DeliveryOfferCard key={deliveryOffer.id} deliveryOffer={deliveryOffer} />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>

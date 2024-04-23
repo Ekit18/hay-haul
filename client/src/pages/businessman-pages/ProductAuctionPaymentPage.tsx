@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { AppRoute } from '@/lib/constants/routes';
 import { useAppSelector } from '@/lib/hooks/redux';
+import { stripePromise } from '@/lib/stripe/stripePromise';
 import { ProductAuctionStatus } from '@/lib/types/ProductAuction/ProductAuction.type';
 import { productAuctionApi } from '@/store/reducers/product-auction/productAuctionApi';
 import { stripeApi } from '@/store/reducers/stripe/stripeApi';
@@ -13,8 +14,6 @@ import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
-export const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 export function StripeProductAuctionPaymentPage() {
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +24,7 @@ export function StripeProductAuctionPaymentPage() {
   const auction = auctionWithCount?.data[0];
 
   const [createPayment, { data: createPaymentResponse, status: createPaymentMutationStatus }] =
-    stripeApi.useCreatePaymentMutation();
+    stripeApi.useCreateProductAuctionPaymentMutation();
 
   const { auctionId } = useParams();
 

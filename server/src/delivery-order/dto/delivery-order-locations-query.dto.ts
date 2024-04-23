@@ -4,4 +4,8 @@ export class DeliveryOrderLocationsQueryDto {
   @IsString()
   @IsOptional()
   userId: string;
+
+  @IsString()
+  @IsOptional()
+  carrierId: string;
 }

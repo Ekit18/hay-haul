@@ -103,7 +103,7 @@ export const links: Links = {
       icon: Home
     },
     {
-      title: 'Delivery',
+      title: 'Orders',
       url: AppRoute.Carrier.DeliveryOrders,
       icon: TractorIcon
     },

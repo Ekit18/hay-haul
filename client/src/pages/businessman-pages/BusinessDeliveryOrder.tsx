@@ -16,6 +16,7 @@ export function BusinessDeliveryOrderPage() {
       deliveryOrders={deliveryOrders}
       isFetching={isFetching}
       isLoading={isLoading}
+      label="Delivery Orders"
     />
   );
 }

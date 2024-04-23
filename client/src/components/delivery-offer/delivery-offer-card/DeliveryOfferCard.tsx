@@ -24,6 +24,7 @@ export function DeliveryOfferCard({ deliveryOffer }: DeliveryOfferCardProps) {
   console.log(deliveryOffer.offerStatus);
   const user = useAppSelector((state) => state.user.user);
   console.log(deliveryOfferStatus.Pending);
+  console.log('\\\\\\\\\\\\\\');
 
   const [open, setOpen] = useState(false);
 

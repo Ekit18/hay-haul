@@ -33,7 +33,7 @@ const notifiableToItem: NotifiableItem = {
   },
   [Notifiable.DeliveryOrder]: {
     route: AppRoute.General.DeliveryOrder,
-    getRouteFill: (notification: Notification) => ({ orderId: notification.notifiableId }),
+    getRouteFill: (notification: Notification) => ({ deliveryOrderId: notification.notifiableId }),
     label: 'delivery order'
   }
 };

@@ -96,6 +96,15 @@ export const deliveryOrderApi = api.injectEndpoints({
       onCacheEntryAdded: onDeliveryOrderCacheEntryAdded,
       providesTags: [TagType.DeliveryOrder]
     }),
+    getCarrierOffers: build.query<DataWithCount<DeliveryOrder>, URLSearchParams>({
+      query: (searchParams) => ({
+        url: '/delivery-order/carrier-offers',
+        method: 'GET',
+        params: searchParams
+      }),
+      onCacheEntryAdded: onDeliveryOrderCacheEntryAdded,
+      providesTags: [TagType.DeliveryOrder]
+    }),
     getAllDeliveryOrders: build.query<DataWithCount<DeliveryOrder>, URLSearchParams>({
       query: (searchParams) => ({
         url: '/delivery-order/all-orders',

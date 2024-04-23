@@ -3,14 +3,17 @@ import { MapPin } from 'lucide-react';
 interface DeliveryOrderDestinationProps {
   from: string;
   to: string;
+  isOuterHeader?: boolean;
 }
 
-export function DeliveryOrderDestination({ from, to }: DeliveryOrderDestinationProps) {
+export function DeliveryOrderDestination({ from, to, isOuterHeader }: DeliveryOrderDestinationProps) {
   return (
     <div className="mt-2">
-      <div className="mb-1">
-        <p>Delivery destination:</p>
-      </div>
+      {isOuterHeader && (
+        <div className="mb-1">
+          <p>Delivery destination:</p>
+        </div>
+      )}
       <div className="flex items-end gap-2">
         <MapPin size={20} className="min-h-5 min-w-5" />
         <p className="font-medium">{from}</p>

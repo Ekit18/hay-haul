@@ -7,4 +7,4 @@ export const deliveryOrderStatusToReadableMap: Record<DeliveryOrderStatusValues,
     [DeliveryOrderStatus.Inactive]: 'Inactive',
     [DeliveryOrderStatus.Paid]: 'Paid',
     [DeliveryOrderStatus.WaitingPayment]: 'Waiting Payment',
-}
+} as const

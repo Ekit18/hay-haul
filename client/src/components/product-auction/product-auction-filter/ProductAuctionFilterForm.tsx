@@ -6,8 +6,7 @@ import { useFormContext } from 'react-hook-form';
 import { ProductAuctionSortSelect } from './ProductAuctionSortSelect';
 import { ProductAuctionFilterFormValues } from './validation';
 import { FormLabel } from '@/components/ui/form';
-
-const STATUSES = Object.entries(ProductAuctionStatus);
+import { productAuctionStatusToReadableMap } from './libs/product-auction-status-to-readable.map';
 
 export function ProductAuctionFilterForm() {
   const { control } = useFormContext<ProductAuctionFilterFormValues>();
@@ -50,8 +49,8 @@ export function ProductAuctionFilterForm() {
           control={control}
           noOptionsText="No matching auctions"
           name="statuses"
-          suggestions={STATUSES.map(([key, value]) => ({
-            label: value,
+          suggestions={Object.entries(ProductAuctionStatus).map(([key, value]) => ({
+            label: productAuctionStatusToReadableMap[value],
             value: key
           }))}
           selectedFn={(item: string) => ({

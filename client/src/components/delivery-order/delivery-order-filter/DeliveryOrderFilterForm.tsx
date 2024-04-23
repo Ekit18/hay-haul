@@ -12,8 +12,14 @@ import { useMemo } from 'react';
 import { FormLabel } from '@/components/ui/form';
 import { DeliveryOrderSortSelect } from './DeliveryOrderSortSelect';
 import { deliveryOrderStatusToReadableMap } from './libs/delivery-order-status-to-readable.map';
+import { useLocation } from 'react-router-dom';
+import { AppRoute } from '@/lib/constants/routes';
+import { ProductType } from '@/lib/types/ProductType/ProductType.type';
+import { EmptyTagInput } from '@/components/tag-input/EmptyTagInput';
+import { getLocationsSearchParam } from './libs/getLocationsSearchParam.helper';
 
 export function DeliveryOrderFilterForm() {
+  const location = useLocation();
   const { control } = useFormContext<DeliveryOrderFilterFormValues>();
 
   const user = useAppSelector((state) => state.user.user);
@@ -25,8 +31,11 @@ export function DeliveryOrderFilterForm() {
   const userId = user.id;
   const userRole = user.role;
 
+  const isUserCarrierAndOnAllDeliveryOrdersPage =
+    userRole === UserRole.Carrier && location.pathname === AppRoute.Carrier.DeliveryOrders;
+
   const locationsSearchParams = useMemo(
-    () => new URLSearchParams(userRole === UserRole.Businessman ? [['userId', userId]] : undefined),
+    () => new URLSearchParams(getLocationsSearchParam(userRole, location.pathname, userId)),
     [userId, userRole]
   );
 
@@ -52,21 +61,24 @@ export function DeliveryOrderFilterForm() {
             className="!rounded-l-md !border-l"
           />
         </div>
-
-        <TagInput
-          labelText="Select statuses"
-          control={control}
-          noOptionsText="No matching orders"
-          name="deliveryOrderStatus"
-          suggestions={Object.entries(DeliveryOrderStatus).map(([key, value]) => ({
-            label: deliveryOrderStatusToReadableMap[value],
-            value: key
-          }))}
-          selectedFn={(item: string) => ({
-            label: (DeliveryOrderStatus as DeliveryOrderStatusDict)[item],
-            value: item
-          })}
-        />
+        {isUserCarrierAndOnAllDeliveryOrdersPage ? (
+          <EmptyTagInput selected={[{ name: DeliveryOrderStatus.Active } as ProductType]} />
+        ) : (
+          <TagInput
+            labelText="Select statuses"
+            control={control}
+            noOptionsText="No matching orders"
+            name="deliveryOrderStatus"
+            suggestions={Object.entries(DeliveryOrderStatus).map(([key, value]) => ({
+              label: deliveryOrderStatusToReadableMap[value],
+              value: key
+            }))}
+            selectedFn={(item: string) => ({
+              label: (DeliveryOrderStatus as DeliveryOrderStatusDict)[item],
+              value: item
+            })}
+          />
+        )}
         <FilterSelect<DeliveryOrderFilterFormValues, string[]>
           title="From farm"
           placeholder="Select a farm"
