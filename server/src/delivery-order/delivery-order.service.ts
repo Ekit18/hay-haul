@@ -104,17 +104,14 @@ export class DeliveryOrderService {
           qb.where('chosenOffer.userId = :carrierId', { carrierId: query.carrierId })
             .andWhere('order.deliveryOrderStatus IN (:...statuses)', { statuses: [DeliveryOrderStatus.Paid, DeliveryOrderStatus.WaitingPayment] });
         }));
-      console.log('asd')
     }
 
     if (query.userId) {
       queryBuilder.andWhere('order.userId = :userId', { userId: query.userId });
-      console.log('fdgh')
     }
 
     if (!query.userId && !query.carrierId) {
       queryBuilder.andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus: DeliveryOrderStatus.Active });
-      console.log('tywe')
     }
     const orders = await queryBuilder.getMany();
 
@@ -132,7 +129,7 @@ export class DeliveryOrderService {
   }
 
   private async getPreFilteredQueryBuilder({
-
+    chosenCarrierId,
     deliveryOrderStatus,
     fromFarmLocation,
     maxDesiredDate,
@@ -146,12 +143,15 @@ export class DeliveryOrderService {
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.facilityDetails', 'facilityDetails')
       .leftJoinAndSelect('order.deliveryOffers', 'deliveryOffers')
+      .leftJoinAndSelect('order.chosenDeliveryOffer', 'chosenDeliveryOffer')
       .leftJoinAndSelect('order.productAuction', 'productAuction')
       .leftJoinAndSelect('productAuction.product', 'product')
       .leftJoinAndSelect('product.productType', 'productType')
       .leftJoinAndSelect('product.facilityDetails', 'farmerFacilityDetails')
 
-
+    if (chosenCarrierId) {
+      queryBuilder.andWhere('chosenDeliveryOffer.userId = :chosenCarrierId', { chosenCarrierId })
+    }
     if (deliveryOrderStatus) {
       queryBuilder.andWhere('order.deliveryOrderStatus IN (:...deliveryOrderStatus)', { deliveryOrderStatus })
     }

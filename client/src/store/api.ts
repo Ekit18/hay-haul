@@ -10,6 +10,7 @@ import { setAccessToken } from './reducers/token/tokenSlice';
 import { TokenResponse } from './reducers/user/userApi';
 import { logOut } from './reducers/user/userSlice';
 import { RootState } from './store';
+import { Drivers } from '@/pages/carrier-pages/Drivers';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -70,8 +71,11 @@ export const TagType = {
   Notification: 'Notification',
   Payment: 'Payment',
   DeliveryOrder: 'DeliveryOrder',
+  Delivery: 'Delivery',
   DeliveryOrderLocations: 'DeliveryOrderLocations',
-  DeliveryOffer: 'DeliveryOffer'
+  DeliveryOffer: 'DeliveryOffer',
+  Transport: 'Transport',
+  Drivers: 'Drivers'
 } as const;
 
 export const api = createApi({

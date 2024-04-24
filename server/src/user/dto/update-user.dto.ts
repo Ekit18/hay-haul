@@ -19,7 +19,7 @@ export class UpdateUserDto {
 
   @IsString({ message: 'Must be string' })
   @IsOptional()
-  readonly userName?: string;
+  readonly fullName?: string;
 
   @IsBoolean()
   @IsOptional()

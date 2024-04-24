@@ -1,5 +1,6 @@
 import { DeliveryOffer } from 'src/delivery-offer/delivery-offer.entity';
 import { DeliveryOrderPayment } from 'src/delivery-order-payment/delivery-order-payment.entity';
+import { Delivery } from 'src/delivery/delivery.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { ProductAuction } from 'src/product-auction/product-auction.entity';
@@ -82,4 +83,7 @@ export class DeliveryOrder extends Timestamps {
 
   @OneToOne(() => DeliveryOrderPayment, (payment) => payment.order)
   payment?: DeliveryOrderPayment;
+
+  @OneToOne(() => Delivery, (delivery) => delivery.deliveryOrder)
+  delivery?: Delivery;
 }

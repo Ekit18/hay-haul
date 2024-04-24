@@ -28,6 +28,7 @@ import { StripeDeliveryOrderPaymentPage } from './pages/businessman-pages/Delive
 import { CarrierOffers } from './pages/carrier-pages/CarrierOffers';
 import { Transport } from './pages/carrier-pages/Transport';
 import { Drivers } from './pages/carrier-pages/Drivers';
+import { DeliveriesPage } from './pages/carrier-pages/DeliveriesPage';
 
 type Route = {
   path: string;
@@ -77,6 +78,10 @@ export const carrierRoutes: Route[] = [
   {
     path: AppRoute.Carrier.DeliveryOffers,
     Component: CarrierOffers
+  },
+  {
+    path: AppRoute.Carrier.Deliveries,
+    Component: DeliveriesPage
   },
   {
     path: AppRoute.Carrier.Transport,

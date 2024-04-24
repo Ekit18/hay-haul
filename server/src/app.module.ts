@@ -45,6 +45,9 @@ import { TransportModule } from './transport/transport.module';
 import { Transport } from './transport/transport.entity';
 import { DeliveryOrderPaymentModule } from './delivery-order-payment/delivery-order-payment.module';
 import { DeliveryOrderPayment } from './delivery-order-payment/delivery-order-payment.entity';
+import { DeliveryModule } from './delivery/delivery.module';
+import { Delivery } from './delivery/delivery.entity';
+import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
@@ -78,6 +81,7 @@ import { DeliveryOrderPayment } from './delivery-order-payment/delivery-order-pa
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
         entities: [
+          Delivery,
           User,
           Token,
           Product,
@@ -129,6 +133,8 @@ import { DeliveryOrderPayment } from './delivery-order-payment/delivery-order-pa
     DriverDetailsModule,
     TransportModule,
     DeliveryOrderPaymentModule,
+    DeliveryModule,
+    CaslModule,
   ],
   providers: [TriggerService, FunctionService],
 })

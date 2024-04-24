@@ -1,6 +1,7 @@
+import { Delivery } from 'src/delivery/delivery.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { User } from 'src/user/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne, Check } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne, Check, OneToMany } from 'typeorm';
 
 export enum DriverStatus {
     Active = 'Active',
@@ -33,10 +34,13 @@ export class DriverDetails extends Timestamps {
     @Column()
     userId: string;
 
-    @OneToOne(() => User, (user) => user.driverDetails)
+    @OneToOne(() => User, (user) => user.driverDetails, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'userId' })
     user: User;
 
     @Column({ default: DriverStatus.Inactive })
     status: DriverStatus;
+
+    @OneToMany(() => Delivery, (delivery) => delivery.driver)
+    deliveries: Delivery[]
 }

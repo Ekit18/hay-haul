@@ -10,10 +10,6 @@ export class CreateTransportDto {
     @IsNotEmpty()
     readonly licensePlate: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    readonly tonnage: number;
-
     @IsString()
     @IsNotEmpty()
     @IsEnum(TransportType)

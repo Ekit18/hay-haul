@@ -5,4 +5,5 @@ export enum DriverDetailsErrorMessage {
     FailedToDeleteDriver = 'Failed to delete driver',
     DriverNotFound = 'Driver not found',
     FailedToGetDrivers = 'Failed to get drivers',
+    FailedToRegeneratePassword = 'Failed to regenerate password',
 }

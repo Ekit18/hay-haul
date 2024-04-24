@@ -1,6 +1,7 @@
+import { Delivery } from 'src/delivery/delivery.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { User } from 'src/user/user.entity';
-import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum TransportType {
     LightDuty = 'LightDuty',
@@ -25,9 +26,6 @@ export class Transport extends Timestamps {
     licensePlate: string;
 
     @Column()
-    tonnage: number;
-
-    @Column()
     type: TransportType;
 
     @Column()
@@ -36,4 +34,7 @@ export class Transport extends Timestamps {
     @ManyToOne(() => User, (user) => user.transports)
     @JoinColumn({ name: 'carrierId' })
     carrier: User;
+
+    @OneToMany(() => Delivery, (delivery) => delivery.transport)
+    deliveries: Delivery[]
 }

@@ -10,14 +10,8 @@ export enum TransportType {
 export type Transport = {
     id: string;
     name: string;
-
     licensePlate: string;
-
-    tonnage: number;
-
     type: TransportType;
-
     carrierId: string;
-
     carrier: User;
 }

@@ -117,6 +117,7 @@ export class UserService {
         .where('id = :id', { id })
         .execute();
     } catch (error) {
+      console.log(error)
       throw new HttpException(
         UserErrorMessage.FailedToDeleteUser,
         HttpStatus.BAD_REQUEST,

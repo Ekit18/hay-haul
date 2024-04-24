@@ -8,6 +8,7 @@ import {
   LucideIcon,
   PackageSearch,
   PercentSquare,
+  Route,
   Tractor,
   TractorIcon,
   Truck,
@@ -101,6 +102,11 @@ export const links: Links = {
       title: 'Home',
       url: AppRoute.General.Main,
       icon: Home
+    },
+    {
+      title: 'Deliveries',
+      url: AppRoute.Carrier.Deliveries,
+      icon: Route
     },
     {
       title: 'Orders',

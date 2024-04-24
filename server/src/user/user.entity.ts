@@ -1,6 +1,7 @@
 import { Otp } from 'src/auth/otp.entity';
 import { DeliveryOffer } from 'src/delivery-offer/delivery-offer.entity';
 import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
+import { Delivery } from 'src/delivery/delivery.entity';
 import { DriverDetails } from 'src/driver-details/driver-details.entity';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { Timestamps } from 'src/lib/classes/timestamps.class';
@@ -106,4 +107,7 @@ export class User extends Timestamps {
 
   @OneToMany(() => Transport, transport => transport.carrier)
   transports: Transport[];
+
+  @OneToMany(() => Delivery, (delivery) => delivery.carrier)
+  deliveries: Delivery[]
 }

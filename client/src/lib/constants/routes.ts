@@ -33,6 +33,7 @@ export const AppRoute = {
     DeliveryOrders: '/delivery-orders',
     DeliveryOffers: '/delivery-offers',
     Transport: '/transport',
-    Drivers: '/drivers'
+    Drivers: '/drivers',
+    Deliveries: '/deliveries'
   }
 } as const;

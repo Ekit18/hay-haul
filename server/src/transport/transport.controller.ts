@@ -4,6 +4,7 @@ import { CreateTransportDto } from './dto/create-transport.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AllowedRoles } from 'src/lib/decorators/roles-auth.decorator';
 import { UserRole } from 'src/user/user.entity';
+import { UpdateTransportDto } from './dto/update-transport.dto';
 
 @UseGuards(JwtAuthGuard)
 @AllowedRoles(UserRole.Carrier)
@@ -22,12 +23,12 @@ export class TransportController {
     }
 
     @Put(':id')
-    async updateTransport(@Param('id') id: string, @Body() updateTransportDto: CreateTransportDto) {
+    async updateTransport(@Param('id') id: string, @Body() updateTransportDto: UpdateTransportDto) {
         return await this.transportService.update(id, updateTransportDto);
     }
 
     @Get('carrier/:carrierId')
-    async getTransportsByCarrierId(@Param(':carrierId') carrierId: string) {
+    async getTransportsByCarrierId(@Param('carrierId') carrierId: string) {
         return await this.transportService.getTransportsByCarrierId(carrierId);
     }
 

@@ -41,7 +41,6 @@ export function CreateTransportModal() {
     mode: 'onBlur',
     defaultValues: {
       carrierId: user?.id,
-      tonnage: 0,
       type: '',
       licensePlate: '',
       name: ''
@@ -88,7 +87,12 @@ export function CreateTransportModal() {
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel>Transport type</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={(type) => {
+                          field.onChange(type);
+                        }}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select type of the truck" />
@@ -98,50 +102,14 @@ export function CreateTransportModal() {
                           <SelectGroup>
                             {transportTypes.map((type) => (
                               <SelectItem key={type.value} value={type.value}>
-                                {type.label}
+                                <div className="flex items-center gap-2">
+                                  <type.icon size={16} /> {type.label}
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="w-full items-center">
-                <FormField
-                  control={form.control}
-                  name="tonnage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="block">Enter tonnage</FormLabel>
-                      <FormControl>
-                        <Input
-                          className="w-full"
-                          placeholder="Tonnage"
-                          {...field}
-                          onBlur={(e) => {
-                            if (e.target.value === '') {
-                              field.onChange(undefined);
-                            }
-                          }}
-                          onChange={(e) => {
-                            if (Number.isNaN(e.target.valueAsNumber)) {
-                              field.onChange(undefined);
-                              return;
-                            }
-
-                            if (e.target.valueAsNumber <= 0) {
-                              return;
-                            }
-
-                            field.onChange(e.target.valueAsNumber);
-                          }}
-                          value={field.value || ''}
-                          type="number"
-                        />
-                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -14,6 +14,10 @@ export class DeliveryOrderQueryDto {
 
   @IsString()
   @IsOptional()
+  chosenCarrierId?: string;
+
+  @IsString()
+  @IsOptional()
   productName?: string;
 
   @IsNumber()

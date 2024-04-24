@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Transport } from './transport.entity';
 import { CreateTransportDto } from './dto/create-transport.dto';
 import { TransportErrorMessage } from './transport-error-message.enum';
+import { UpdateTransportDto } from './dto/update-transport.dto';
 
 @Injectable()
 export class TransportService {
@@ -44,7 +45,7 @@ export class TransportService {
         }
     }
 
-    async update(transportId: string, dto: CreateTransportDto) {
+    async update(transportId: string, dto: UpdateTransportDto) {
         try {
             const transport = await this.transportRepository.findOne({ where: { id: transportId } });
             if (!transport) {
