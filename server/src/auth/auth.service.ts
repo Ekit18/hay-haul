@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
 import { Request, Response } from 'express';
 import { SendOtpDto } from 'src/auth/dto/send-otp.dto';
-import { EmailService } from 'src/email/services/email.service';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
 import { OtpType } from 'src/lib/enums/enums';
 import { TokenPayload } from 'src/lib/types/token-payload.type';
@@ -30,6 +29,7 @@ import { TokenResponse } from './dto/token-response.dto';
 import { generateOtpCode } from './helpers/generate-otp-code.helper';
 import { getCookieExpireDate } from './helpers/get-cookie-expire-date';
 import { Otp } from './otp.entity';
+import {EmailService} from "../email/email.service";
 
 @Injectable()
 export class AuthService {
