@@ -11,6 +11,9 @@ import { SocketService } from 'src/socket/socket.service';
 import { PaymentTargetType, ServerEventName } from 'src/lib/enums/enums';
 import { DeliveryOrder, DeliveryOrderStatus } from 'src/delivery-order/delivery-order.entity';
 import { DeliveryOrderPaymentService } from 'src/delivery-order-payment/delivery-order-payment.service';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
+import { Notifiable } from 'src/notification/notification.entity';
 
 @Injectable()
 export class DeliveryOfferService {
@@ -20,6 +23,7 @@ export class DeliveryOfferService {
     private readonly deliveryOrderService: DeliveryOrderService,
     private readonly deliveryOrderPaymentService: DeliveryOrderPaymentService,
     private socketService: SocketService,
+    private readonly notificationService: NotificationService,
   ) {
   }
 
@@ -31,12 +35,15 @@ export class DeliveryOfferService {
         }
       }
     })
+    console.log(offer.deliveryOrder.chosenDeliveryOffer)
     if (offer.deliveryOrder.user.id !== req.user.id) {
       throw new BadRequestException({ message: 'Can accept only own order offers' })
     }
+    await this.deliveryOrderService.update(offer.deliveryOrder.id, { chosenDeliveryOfferId: id, deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment }, req);
     await this.deliveryOfferRepository.manager.transaction(
       'SERIALIZABLE',
       async (transactionalEntityManager) => {
+
         await transactionalEntityManager.save(DeliveryOffer, { id, offerStatus: DeliveryOfferStatus.Accepted })
         const targetId = offer.deliveryOrder.id;
         const buyerId = req.user?.id
@@ -51,14 +58,47 @@ export class DeliveryOfferService {
           amount,
         }, transactionalEntityManager);
         await transactionalEntityManager.update(DeliveryOrder, offer.deliveryOrder.id, { deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment, chosenDeliveryOfferId: id });
+        await this.notificationService.createNotification(
+          offer.user.id,
+          offer.deliveryOrder.id,
+          NotificationMessage.AcceptedDeliveryOffer,
+          Notifiable.DeliveryOrder,
+          transactionalEntityManager,
+        )
       })
     SocketService.SocketServer.to(offer.deliveryOrder.id).emit(ServerEventName.DeliveryOrderUpdated, {
       deliveryOrderId: offer.deliveryOrder.id,
       deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment,
     });
 
-    //TODO: notify carrier (You won!)
+  }
 
+  public async rejectOfferById(id: string) {
+    const offer = await this.deliveryOfferRepository.findOne({
+      where: { id }, relations: {
+        deliveryOrder: {
+          user: true
+        }
+      }
+    })
+    console.log(offer)
+
+    await this.deliveryOfferRepository.update({ id }, { offerStatus: DeliveryOfferStatus.Rejected });
+
+    await this.notificationService.createNotification(
+      offer.userId,
+      offer.deliveryOrder.id,
+      NotificationMessage.DeclinedDeliveryOffer,
+      Notifiable.DeliveryOrder,
+    )
+
+    const deliveryOrder = await this.deliveryOrderService.findOneById(offer.deliveryOrder.id);
+    console.log(deliveryOrder.data[0])
+    SocketService.SocketServer.to(offer.deliveryOrder.id).emit(ServerEventName.DeliveryOrderUpdated, {
+      deliveryOrderId: deliveryOrder.data[0].id,
+      deliveryOrderStatus: deliveryOrder.data[0].deliveryOrderStatus,
+      deliveryOffers: deliveryOrder.data[0].deliveryOffers,
+    });
   }
 
 
@@ -101,9 +141,10 @@ export class DeliveryOfferService {
         }
         await this.deliveryOfferRepository.update({
           userId: req.user.id,
-          deliveryOrderId
+          deliveryOrderId,
         }, {
           ...dto,
+          offerStatus: DeliveryOfferStatus.Pending,
         });
       } else {
 

@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FacilityDetailsErrorMessage } from 'src/facility-details/facility-details-error-message.enum';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
 import {
-  DEFAULT_OFFSET,
+  DEFAULT_PAGINATION_OFFSET,
   DEFAULT_PAGINATION_LIMIT,
 } from 'src/lib/constants/constants';
 import { SortOrder } from 'src/lib/enums/enums';
@@ -33,12 +33,12 @@ export class ProductService {
     private readonly facilityDetailsService: FacilityDetailsService,
     @Inject(forwardRef(() => ProductTypeService))
     private readonly productTypeService: ProductTypeService,
-  ) {}
+  ) { }
 
   async filterAll(
     {
       limit = DEFAULT_PAGINATION_LIMIT,
-      offset = DEFAULT_OFFSET,
+      offset = DEFAULT_PAGINATION_OFFSET,
       searchQuery = '',
       farmId,
       maxQuantity,
@@ -261,7 +261,7 @@ export class ProductService {
       if (
         product.productAuction &&
         product.productAuction.auctionStatus !==
-          ProductAuctionStatus.Inactive &&
+        ProductAuctionStatus.Inactive &&
         product.productAuction.auctionStatus !== ProductAuctionStatus.StartSoon
       ) {
         throw new HttpException(

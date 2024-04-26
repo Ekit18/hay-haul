@@ -31,6 +31,12 @@ export class DeliveryOfferController {
     );
   }
 
+  @AllowedRoles(UserRole.Businessman)
+  @Post('decline/:id')
+  async decline(@Param('id') id: string) {
+    return this.deliveryOfferService.rejectOfferById(id)
+  }
+
   @Delete('/:deliveryOfferId')
   async deleteDeliveryOffer(@Param('deliveryOfferId') deliveryOfferId: string, @Req() req: AuthenticatedRequest) {
     return await this.deliveryOfferService.deleteDeliveryOffer(deliveryOfferId, req);

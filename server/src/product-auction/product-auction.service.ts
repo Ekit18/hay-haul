@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  DEFAULT_OFFSET,
+  DEFAULT_PAGINATION_OFFSET,
   DEFAULT_PAGINATION_LIMIT,
 } from 'src/lib/constants/constants';
 import { formatAuctionDateHours } from 'src/lib/helpers/formatAuctionDatesHours';
@@ -86,6 +86,7 @@ export class ProductAuctionService {
         .createQueryBuilder('productAuction')
         .leftJoinAndSelect('productAuction.product', 'product')
         .leftJoinAndSelect('product.productType', 'productType')
+        .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .leftJoinAndSelect('productAuction.deliveryOrder', 'deliveryOrder')
         .innerJoin('productAuction.currentMaxBid', 'currentMaxBid')
         .innerJoin('currentMaxBid.user', 'user')
@@ -171,7 +172,7 @@ export class ProductAuctionService {
   async findAll(
     {
       limit = DEFAULT_PAGINATION_LIMIT,
-      offset = DEFAULT_OFFSET,
+      offset = DEFAULT_PAGINATION_OFFSET,
       productName,
       maxBuyoutPrice,
       minBuyoutPrice,

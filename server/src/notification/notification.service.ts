@@ -60,6 +60,7 @@ export class NotificationService {
         isRead: false,
         receiverId: userId,
         notifiableId,
+        type
       });
     } else {
       notification = await this.notificationRepository.save({
@@ -67,6 +68,7 @@ export class NotificationService {
         isRead: false,
         receiverId: userId,
         notifiableId,
+        notifiableType: type
       });
     }
 

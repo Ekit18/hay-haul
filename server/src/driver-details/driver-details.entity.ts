@@ -4,7 +4,7 @@ import { User } from 'src/user/user.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne, Check, OneToMany } from 'typeorm';
 
 export enum DriverStatus {
-    Active = 'Active',
+    Idle = 'Idle',
     Inactive = 'Inactive',
 }
 

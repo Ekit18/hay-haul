@@ -55,6 +55,11 @@ export class DeliveryOrderController {
     return this.deliveryOrderService.findAllByUserId(req, query);
   }
 
+  @Get('/orders-for-delivery')
+  async getAllOrdersForDelivery(@Query() query: DeliveryOrderQueryDto) {
+    return this.deliveryOrderService.findAllOrdersForDelivery(query);
+  }
+
   @Get('/all-orders')
   async getAllDeliveryOrders(@Query() query: DeliveryOrderQueryDto) {
     return this.deliveryOrderService.findAllDeliveryOrders(query);

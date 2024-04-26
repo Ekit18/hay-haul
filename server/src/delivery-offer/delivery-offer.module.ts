@@ -6,6 +6,7 @@ import { DeliveryOfferController } from './delivery-offer.controller';
 import { DeliveryOffer } from './delivery-offer.entity';
 import { DeliveryOfferService } from './delivery-offer.service';
 import { DeliveryOrderPaymentModule } from 'src/delivery-order-payment/delivery-order-payment.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   controllers: [DeliveryOfferController],
@@ -14,7 +15,8 @@ import { DeliveryOrderPaymentModule } from 'src/delivery-order-payment/delivery-
     TypeOrmModule.forFeature([DeliveryOffer]),
     TokenModule,
     DeliveryOrderModule,
-    DeliveryOrderPaymentModule
+    DeliveryOrderPaymentModule,
+    NotificationModule,
   ],
   exports: [DeliveryOfferService],
 })

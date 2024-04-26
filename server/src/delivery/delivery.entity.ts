@@ -1,5 +1,6 @@
 import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { DriverDetails } from 'src/driver-details/driver-details.entity';
+import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { Transport } from 'src/transport/transport.entity';
 import { User } from 'src/user/user.entity';
 import {
@@ -12,6 +13,7 @@ import {
 } from 'typeorm';
 
 export enum DeliveryStatus {
+  AwaitingDriver = 'AWAITING_DRIVER',
   AtFarmerFacility = 'AT_FARMER_FACILITY',
   Loading = 'LOADING',
   OnTheWay = 'ON_THE_WAY',
@@ -20,7 +22,7 @@ export enum DeliveryStatus {
 }
 
 @Entity()
-export class Delivery {
+export class Delivery extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -52,6 +54,6 @@ export class Delivery {
   @JoinColumn({ name: 'deliveryOrderId' })
   deliveryOrder: DeliveryOrder;
 
-  @Column({ enum: DeliveryStatus, default: DeliveryStatus.AtBusinessFacility })
+  @Column({ nullable: true, enum: DeliveryStatus, default: null })
   status: DeliveryStatus;
 }

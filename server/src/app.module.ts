@@ -51,6 +51,7 @@ import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
+    CaslModule,
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],

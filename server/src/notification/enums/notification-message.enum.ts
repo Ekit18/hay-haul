@@ -27,4 +27,6 @@ export enum NotificationMessage {
   BusinessmanAuctionWon = 'BUSINESSMAN_AUCTION_WON',
   BusinessmanAuctionPaymentOverdue = 'BUSINESSMAN_AUCTION_PAYMENT_OVERDUE',
   FarmerAuctionPaymentOverdue = 'FARMER_AUCTION_PAYMENT_OVERDUE',
+  DeclinedDeliveryOffer = 'DECLINED_DELIVERY_OFFER',
+  AcceptedDeliveryOffer = 'ACCEPTED_DELIVERY_OFFER',
 }

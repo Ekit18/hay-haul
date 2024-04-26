@@ -15,4 +15,9 @@ export class UpdateDeliveryOrderDto extends PartialType(
   @IsEnum(DeliveryOrderStatus)
   @IsNotEmpty()
   deliveryOrderStatus?: DeliveryOrderStatus;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  chosenDeliveryOfferId?: string;
 }

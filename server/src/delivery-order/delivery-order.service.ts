@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
-  DEFAULT_OFFSET,
+  DEFAULT_PAGINATION_OFFSET,
   DEFAULT_PAGINATION_LIMIT,
 } from 'src/lib/constants/constants';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
@@ -188,7 +188,7 @@ export class DeliveryOrderService {
   public async findAllByUserId(
     req: AuthenticatedRequest,
     { limit = DEFAULT_PAGINATION_LIMIT,
-      offset = DEFAULT_OFFSET, ...filterDto }: DeliveryOrderQueryDto,
+      offset = DEFAULT_PAGINATION_OFFSET, ...filterDto }: DeliveryOrderQueryDto,
   ) {
     try {
       const userId = req.user.id;
@@ -215,8 +215,34 @@ export class DeliveryOrderService {
     }
   }
 
+  public async findAllOrdersForDelivery({ limit = DEFAULT_PAGINATION_LIMIT,
+    offset = DEFAULT_PAGINATION_OFFSET, ...filterDto }: DeliveryOrderQueryDto) {
+    try {
+
+      const queryBuilder = (await this.getPreFilteredQueryBuilder(filterDto))
+        .andWhere('order.deliveryOrderStatus = :status', { status: DeliveryOrderStatus.Paid });
+
+      const [deliveryOrders, total] = await queryBuilder
+        .take(limit)
+        .skip(offset)
+        .getManyAndCount();
+
+      const pageCount = Math.ceil(total / limit);
+      return {
+        data: deliveryOrders,
+        count: pageCount,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new HttpException(
+        DeliveryOrderErrorMessage.FailedToGetOrders,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   public async findAllDeliveryOrders({ limit = DEFAULT_PAGINATION_LIMIT,
-    offset = DEFAULT_OFFSET, ...filterDto }: DeliveryOrderQueryDto) {
+    offset = DEFAULT_PAGINATION_OFFSET, ...filterDto }: DeliveryOrderQueryDto) {
     try {
 
       const queryBuilder = (await this.getPreFilteredQueryBuilder(filterDto))
@@ -242,7 +268,7 @@ export class DeliveryOrderService {
   }
 
   async findCarrierOffers(req: AuthenticatedRequest, { limit = DEFAULT_PAGINATION_LIMIT,
-    offset = DEFAULT_OFFSET, ...filterDto }: DeliveryOrderQueryDto) {
+    offset = DEFAULT_PAGINATION_OFFSET, ...filterDto }: DeliveryOrderQueryDto) {
     try {
 
       const queryBuilder = (await this.getPreFilteredQueryBuilder(filterDto))
@@ -254,7 +280,7 @@ export class DeliveryOrderService {
         }))
         .orWhere(new Brackets(qb => {
           qb.where('chosenOffer.userId = :carrierId', { carrierId: req.user.id })
-            .andWhere('order.deliveryOrderStatus IN (:...statuses)', { statuses: [DeliveryOrderStatus.Paid, DeliveryOrderStatus.WaitingPayment] });
+            .andWhere('order.deliveryOrderStatus IN (:...statuses)', { statuses: [DeliveryOrderStatus.Paid, DeliveryOrderStatus.WaitingPayment, DeliveryOrderStatus.Delivering, DeliveryOrderStatus.Delivered] });
         }));
 
 
@@ -310,6 +336,8 @@ export class DeliveryOrderService {
         .innerJoinAndSelect('productAuction.product', 'product')
         .innerJoinAndSelect('product.productType', 'productType')
         .innerJoinAndSelect('product.facilityDetails', 'farmerFacilityDetails')
+        .leftJoin('deliveryOrder.delivery', 'delivery')
+        .addSelect(['delivery.status', 'delivery.id'])
         .where('deliveryOrder.id = :id', { id });
 
       // data.deliveryOffers[0].user.facilityDetails.name
@@ -317,7 +345,7 @@ export class DeliveryOrderService {
 
       const [deliveryOrder, total] = await queryBuilder
         .take(DEFAULT_PAGINATION_LIMIT)
-        .skip(DEFAULT_OFFSET)
+        .skip(DEFAULT_PAGINATION_OFFSET)
         .getManyAndCount();
 
       for await (const photo of deliveryOrder[0].productAuction.photos) {
@@ -379,12 +407,6 @@ export class DeliveryOrderService {
       const { data } = await this.findOneById(id);
       const deliveryOrder = data[0];
 
-      if (deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Inactive) {
-        throw new HttpException(
-          DeliveryOrderErrorMessage.CannotUpdateActiveDeliveryOrder,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
 
       if (deliveryOrder.userId !== userId) {
         throw new HttpException(
@@ -395,6 +417,7 @@ export class DeliveryOrderService {
 
       await this.deliveryOrderRepository.update(id, dto);
     } catch (error) {
+      console.log(error)
       throw new HttpException(
         DeliveryOrderErrorMessage.FailedToUpdateDeliveryOrder,
         HttpStatus.INTERNAL_SERVER_ERROR,

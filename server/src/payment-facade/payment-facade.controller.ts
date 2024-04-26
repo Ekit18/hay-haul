@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import {
-  DEFAULT_OFFSET,
+  DEFAULT_PAGINATION_OFFSET,
   DEFAULT_PAGINATION_LIMIT,
 } from 'src/lib/constants/constants';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
@@ -12,13 +12,13 @@ import { PaymentFacadeService } from './payment-facade.service';
 @UseGuards(JwtAuthGuard)
 @Controller('payment-facade')
 export class PaymentFacadeController {
-  constructor(private paymentFacadeService: PaymentFacadeService) {}
+  constructor(private paymentFacadeService: PaymentFacadeService) { }
 
   @Get('payments/user')
   getAllPaymentsByUserId(
     @Query()
     {
-      offset = DEFAULT_OFFSET,
+      offset = DEFAULT_PAGINATION_OFFSET,
       limit = DEFAULT_PAGINATION_LIMIT,
     }: GetPaymentsByUserQueryDto,
     @Req() request: AuthenticatedRequest,
