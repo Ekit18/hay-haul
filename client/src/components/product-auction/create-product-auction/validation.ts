@@ -76,6 +76,6 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
     description: string().required('Description is required').min(10, 'Description must be at least 10 characters'),
     productId: string().required('Product is required'),
     farmId: string().required('Farm is required'),
-    photos: array<FileObject>().min(1, 'At least one photo has to provided').required('Photos are required')
+    photos: array<FileObject>().min(1, 'At least one photo has to be provided').required('Photos are required')
   });
 };

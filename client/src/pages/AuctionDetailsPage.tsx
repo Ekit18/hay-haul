@@ -229,7 +229,7 @@ export function AuctionDetailsPage() {
       <div className="pt-10">
         <h2 className="mb-9 text-3xl font-bold">Auction details ({auctionId})</h2>
         <div className="flex h-full w-full flex-col items-center gap-4 xl:grid xl:grid-cols-[1fr_2fr_1fr] xl:flex-row">
-          <div className="w-[500px]">
+          <div className="lg:w-[500px]">
             <ImageCarousel items={productAuction.photos.map((photo) => ({ preview: photo.signedUrl }))} />
           </div>
           <div className=" xl:justify-left flex w-full flex-col items-center justify-center gap-4 xl:items-start">

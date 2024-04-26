@@ -6,7 +6,7 @@ import { StripeRefreshPage } from '@/pages/StripeRefreshPage';
 import { StripeRegisterPage } from '@/pages/StripeRegisterPage';
 import { StripeReturnPage } from '@/pages/StripeReturnPage';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { authRoutes, businessRoutes, carrierRoutes, farmerRoutes, generalRoutes } from '../routes';
+import { authRoutes, businessRoutes, carrierRoutes, driverRoutes, farmerRoutes, generalRoutes } from '../routes';
 import { AuthLayout } from './layouts/AuthLayout';
 import { SidebarLayout } from './layouts/SidebarLayout';
 
@@ -14,7 +14,7 @@ const roleToRoutes = {
   [UserRole.Farmer]: farmerRoutes,
   [UserRole.Businessman]: businessRoutes,
   [UserRole.Carrier]: carrierRoutes,
-  [UserRole.Driver]: []
+  [UserRole.Driver]: driverRoutes
 };
 
 export function AppRouter() {

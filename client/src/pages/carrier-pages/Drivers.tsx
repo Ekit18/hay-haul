@@ -70,14 +70,6 @@ export function Drivers() {
     }
   };
 
-  if (isFetching || isLoading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="h-full bg-gray-100 pb-4">
       <div className="bg-white p-4 pt-10">

@@ -3,7 +3,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import { FieldValues, Path, SubmitHandler, UseFormReturn } from 'react-hook-form';
 import { Button } from '../ui/button';
-import './stepper.css';
+import styles from './stepper.module.css';
 
 export type StepItem = {
   stepName: string;
@@ -67,14 +67,16 @@ export function Stepper<T extends FieldValues>({
     setCurrentStep(step);
   };
 
+  console.log();
+
   return (
     <div className="flex h-full w-full flex-col items-center justify-between py-5">
       <div className="flex justify-between">
         {steps?.map((step, index) => (
           <div
             key={step.stepName}
-            className={`step-item ${currentStep === index + 1 && 'active'} ${
-              (index + 1 < currentStep || complete) && 'complete'
+            className={`${styles['step-item']} ${currentStep === index + 1 && `${styles['active']}`} ${
+              (index + 1 < currentStep || complete) && `${styles['complete']}`
             } w-24 sm:w-36`}
           >
             <button

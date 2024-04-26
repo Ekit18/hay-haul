@@ -138,6 +138,7 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
                     values={paidAuctions?.data as ProductAuction[]}
                     placeholder="Select a product auction"
                     valueProperty="id"
+                    labelProperty={['product.name', ' by ', 'product.facilityDetails.name']}
                     containerClassName="w-full items-center"
                   />
                 )}
@@ -159,6 +160,7 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
                   values={depots}
                   placeholder="Select a depot"
                   valueProperty="name"
+                  labelProperty={'name'}
                   containerClassName="w-full items-center"
                 />
               </div>

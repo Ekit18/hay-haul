@@ -3,6 +3,7 @@ import { DeliveryOfferCard } from '@/components/delivery-offer/delivery-offer-ca
 import { CreateDeliveryOfferForm } from '@/components/delivery-offer/modals/create-delivery-offer/CreateDeliveryOfferModal';
 import { deliveryOrderStatus } from '@/components/delivery-order/card/DeliveryOrderCardStatus.enum';
 import { DeliveryOrderDestination } from '@/components/delivery-order/card/DeliveryOrderDestination';
+import { Timeline } from '@/components/timeline/Timeline';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +19,7 @@ import { UserRole } from '@/lib/enums/user-role.enum';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { stripePromise } from '@/lib/stripe/stripePromise';
+import { DeliveryStatus, DeliveryStatusValues } from '@/lib/types/Delivery/Delivery.type';
 import { DeliveryOrderStatus, deliveryOrderStatusText } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { cn } from '@/lib/utils';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
@@ -169,7 +171,7 @@ export function DeliveryOrderDetails() {
       <div className="pt-10">
         <h2 className="mb-9 text-3xl font-bold">Delivery order details ({deliveryOrderId})</h2>
         <div className="flex h-full w-full flex-col items-center gap-4 xl:grid xl:grid-cols-[1fr_2fr_1fr] xl:flex-row">
-          <div className="w-[500px]">
+          <div className="lg:w-[500px]">
             <ImageCarousel items={deliveryOrder.productAuction.photos.map((photo) => ({ preview: photo.signedUrl }))} />
           </div>
           <div className="xl:justify-left flex w-full flex-col items-center justify-center gap-4 xl:items-start">
@@ -227,10 +229,21 @@ export function DeliveryOrderDetails() {
                 </div>
               )}
               {deliveryOrder.chosenDeliveryOffer && deliveryOrder.chosenDeliveryOffer.userId === user.id && (
-                <div className="flex gap-2">
-                  <Crown className="text-yellow-400" />
-                  <p className="">You were selected for this order</p>
-                </div>
+                <>
+                  <div className="flex gap-2">
+                    <Crown className="text-yellow-400" />
+                    <p className="">You were selected for this order</p>
+                  </div>
+                  {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Paid && (
+                    <Button
+                      className="mt-4 w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                      type="button"
+                      onClick={() => navigate(generatePath(AppRoute.Carrier.Deliveries))}
+                    >
+                      Create delivery
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -264,15 +277,22 @@ export function DeliveryOrderDetails() {
           )}
         </div>
         <div className="mt-4">
-          {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Active && (
+          {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Delivering ? (
             <>
-              <h1 className="text-2xl font-bold">Delivery offers:</h1>
-              <div className="grid w-full grid-cols-1 gap-4 py-4 pb-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {deliveryOrder.deliveryOffers.map((deliveryOffer) => (
-                  <DeliveryOfferCard key={deliveryOffer.id} deliveryOffer={deliveryOffer} />
-                ))}
-              </div>
+              <h1 className="text-2xl font-bold">Delivery progress:</h1>
+              <Timeline deliveryStatus={deliveryOrder.delivery.status} />
             </>
+          ) : (
+            deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Active && (
+              <>
+                <h1 className="text-2xl font-bold">Delivery offers:</h1>
+                <div className="grid w-full grid-cols-1 gap-4 py-4 pb-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                  {deliveryOrder.deliveryOffers.map((deliveryOffer) => (
+                    <DeliveryOfferCard key={deliveryOffer.id} deliveryOffer={deliveryOffer} />
+                  ))}
+                </div>
+              </>
+            )
           )}
         </div>
       </div>

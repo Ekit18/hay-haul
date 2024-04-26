@@ -26,6 +26,13 @@ export const deliveryOfferApi = api.injectEndpoints({
         method: 'DELETE'
       }),
       invalidatesTags: [TagType.DeliveryOrder, TagType.DeliveryOffer]
+    }),
+    declineDeliveryOfferById: build.mutation<undefined, string>({
+      query: (id) => ({
+        url: generatePath('delivery-offer/decline/:id', { id }),
+        method: 'POST'
+      }),
+      invalidatesTags: [TagType.DeliveryOffer, TagType.DeliveryOrder]
     })
     // updateDeliveryOffer: build.mutation({
     //   query: (data) => ({

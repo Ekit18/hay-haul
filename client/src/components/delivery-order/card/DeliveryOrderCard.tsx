@@ -102,7 +102,7 @@ export function DeliveryOrderCard({ deliveryOrder }: DeliveryOrderCardProps) {
           )}
           {/* todo: create counter of offers */}
         </CardContent>
-        <CardFooter className="flex w-full flex-col items-center justify-center gap-5">
+        <CardFooter className="flex w-full flex-col items-center justify-center gap-2">
           {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Inactive &&
             user.role === UserRole.Businessman &&
             user.id === deliveryOrder.userId && (
@@ -133,6 +133,19 @@ export function DeliveryOrderCard({ deliveryOrder }: DeliveryOrderCardProps) {
           >
             Learn more
           </Button>
+          {user.role === UserRole.Carrier &&
+            deliveryOrder.chosenDeliveryOffer?.userId === user.id &&
+            deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Paid && (
+              <Button
+                className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
+                type="button"
+                onClick={() =>
+                  navigate(generatePath(AppRoute.General.DeliveryOrder, { deliveryOrderId: deliveryOrder.id }))
+                }
+              >
+                Create delivery
+              </Button>
+            )}
         </CardFooter>
       </Card>
       <DeleteModal

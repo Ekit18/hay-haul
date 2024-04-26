@@ -1,5 +1,3 @@
-import { useAppSelector } from '@/lib/hooks/redux';
-import { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -8,10 +6,8 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Sparkles } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,9 +16,7 @@ import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { UpdateDriverValues, useUpdateDriverFormSchema } from './validation';
 import { driverApi } from '@/store/reducers/driver-details/driverApi';
 import { Driver } from '@/lib/types/Driver/Driver.type';
-import { PasswordInput } from '@/components/ui/password-input';
-import { generatePassword } from '@/lib/helpers/generatePassword';
-import { RegeneratePasswordInput } from './regeneratePasswordInput';
+import { RegeneratePasswordInput } from './RegeneratePasswordInput';
 
 type UpdateDriverModalProps = {
   driver: Driver;

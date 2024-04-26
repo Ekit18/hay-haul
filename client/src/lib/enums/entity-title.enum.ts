@@ -8,4 +8,5 @@ export const EntityTitle = {
   CarrierCompany: 'Carrier company',
   CarrierTransport: 'Carrier transport',
   CarrierDriver: 'Carrier driver',
+  Delivery: 'Delivery'
 } as const;

@@ -6,8 +6,10 @@ import { ChevronDown, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useAppSelector } from '@/lib/hooks/redux';
-import { UserRole } from '@/lib/enums/user-role.enum';
 import { DeliveriesFilterFormValues } from './validation';
+import { CreateDeliveryModalHOC } from '../modals/create-delivery/CreateDeliveryModal';
+import { DeliveriesFilterForm } from './DeliveriesFilterForm';
+import { UserRole } from '@/lib/enums/user-role.enum';
 
 export function DeliveriesFilter() {
   const { control, reset } = useFormContext<DeliveriesFilterFormValues>();
@@ -56,12 +58,14 @@ export function DeliveriesFilter() {
           >
             Clear filter
           </Button>
-          <div className="relative ml-auto">
-            <CreateDeliveryModalHOC />
-          </div>
+          {user?.role === UserRole.Carrier && (
+            <div className="relative ml-auto">
+              <CreateDeliveryModalHOC />
+            </div>
+          )}
         </div>
       </div>
-      {/* <div className="">{filterOpen && <DeliveriesFilterForm />}</div> */}
+      <div className="">{filterOpen && <DeliveriesFilterForm />}</div>
     </>
   );
 }

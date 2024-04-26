@@ -21,8 +21,9 @@ export type DateRange = Range<Date>;
 export type RequiredDateRange = RequiredRange<Date>;
 
 export type NonTypeKeys<T, V> = {
-  [K in keyof T]: Exclude<T[K], undefined> extends V ? never : K;
+  [K in keyof T]: Exclude<T[K], undefined> extends V | symbol ? never : K;
 }[keyof T];
+
 
 export type IfArray<T, U> = T extends Array<U> ? U : never;
 export type IfRange<T, U> = T extends Range<U> | RequiredRange<U> ? T : never;
@@ -57,3 +58,25 @@ export type UpdateRequestDto<T> = {
 };
 
 export type FirstParameter<T> = T extends (..._arguments: [infer Parameter]) => unknown ? Parameter : never;
+
+export type DeepKey<
+  T,
+  K extends keyof T = keyof T
+> = K extends string | number
+  ? T[K] extends infer R
+  ? (R extends Record<string, unknown> ? `${K}.${DeepKey<R>}` : `${K}`)
+  : never // impossible route
+  : never // impossible route
+
+export type DeepValue<
+  T,
+  P extends DeepKey<T>,
+> = P extends `${infer K}.${infer Rest}`
+  ? T[(K extends `${infer R extends number}` ? R : K) & keyof T] extends infer S
+  ? S extends never // make S distributive to work with union object
+  ? never
+  : Rest extends DeepKey<S>
+  ? DeepValue<S, Rest>
+  : never // impossible route
+  : never // impossible route
+  : T[(P extends `${infer R extends number}` ? R : P) & keyof T]

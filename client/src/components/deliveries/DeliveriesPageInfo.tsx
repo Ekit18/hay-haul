@@ -15,7 +15,7 @@ import {
   useDeliveriesFilterFormSchema
 } from './deliveries-filter/validation';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Form, SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import useInfiniteScroll from '@/lib/hooks/useInfiniteScroll';
@@ -24,6 +24,13 @@ import { DEBOUNCE_DELAY } from '@/lib/constants/constants';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DeliveriesFilter } from './deliveries-filter/DeliveriesFilter';
+import { Form } from '../ui/form';
+import { DeliveryCard } from './cards/DeliveryCard';
+import { toast } from '../ui/use-toast';
+import { DeleteModal } from '../delete-modal/delete-modal';
+import { EntityTitle } from '@/lib/enums/entity-title.enum';
+import { deliveryApi } from '@/store/reducers/delivery/deliveryApi';
+import { UpdateDeliveryModal, UpdateDeliveryModalHOC } from './modals/update-delivery/UpdateDeliveryModal';
 
 export type DeliveriesPageInfoProps = {
   deliveries: DataWithCount<Delivery> | undefined;
@@ -119,14 +126,55 @@ export function DeliveriesPageInfo({
     };
   }, []);
 
-  if (isFetching || isLoading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
-      </div>
-    );
-  }
-  // console.log(data);
+  const [deleteDelivery] = deliveryApi.useDeleteDeliveryMutation();
+
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+
+  const [chosenDelivery, setChosenDelivery] = useState<Delivery | null>(null);
+
+  const handleDeleteDelivery = async () => {
+    if (!chosenDelivery) {
+      return;
+    }
+
+    await deleteDelivery(chosenDelivery.id)
+      .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'Delivery deleted',
+          description: 'Delivery has been deleted successfully.'
+        });
+        setOpenDeleteModal(false);
+      })
+      .catch(handleRtkError);
+  };
+
+  const handleDeleteClick = (delivery: Delivery) => {
+    setChosenDelivery(delivery);
+    setOpenDeleteModal(true);
+  };
+
+  const handleUpdateClick = (delivery: Delivery) => {
+    setChosenDelivery(delivery);
+    setOpenUpdateModal(true);
+  };
+
+  const handleOpenDeleteChange = (open: boolean) => {
+    if (!open) {
+      setOpenDeleteModal(false);
+      setChosenDelivery(null);
+    }
+  };
+
+  const handleOpenUpdateChange = (open: boolean) => {
+    if (!open) {
+      setOpenUpdateModal(false);
+      setChosenDelivery(null);
+    }
+  };
 
   if (!user) return null;
 
@@ -138,25 +186,55 @@ export function DeliveriesPageInfo({
             <h2 className="mb-9 text-3xl font-bold">{label}</h2>
             <DeliveriesFilter />
           </div>
-          {data?.count === 0 ? (
+          {isFetching || isLoading ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <Loader2 className="h-10 w-10 animate-spin" />
+            </div>
+          ) : data?.count === 0 ? (
             <div className="flex h-full w-full items-center justify-center">
               <h3 className="text-xl font-bold">No {label.toLowerCase()}</h3>
             </div>
           ) : (
-            !!data?.data && <div ref={loadMoreRef} className="h-5 w-5" />
-            // <div
-            //   className={cn(
-            //     'grid w-full grid-cols-1 gap-4 bg-gray-100 px-4 py-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
-            //     data?.data && data?.data.length >= 3 && 'pb-5'
-            //   )}
-            // >
-            //   {data?.data.map((deliveries) => <DeliveriesCard key={deliveries.id} deliveries={deliveries} />)}
+            <div
+              className={cn(
+                'grid w-full grid-cols-1 gap-4 bg-gray-100 px-4 py-5 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
+                data?.data && data?.data.length >= 3 && 'pb-5'
+              )}
+            >
+              {data?.data.map((delivery) => (
+                <DeliveryCard
+                  key={delivery.id}
+                  delivery={delivery}
+                  onEditClick={function (): void {
+                    handleUpdateClick(delivery);
+                  }}
+                  onDeleteClick={function (): void {
+                    handleDeleteClick(delivery);
+                  }}
+                />
+              ))}
 
-            //   {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5" />}
-            // </div>
+              {!!data?.data && <div ref={loadMoreRef} className="h-5 w-5" />}
+            </div>
           )}
         </form>
       </Form>
+      {chosenDelivery && (
+        <>
+          <DeleteModal
+            name={'DELIVERY'}
+            open={openDeleteModal}
+            handleOpenChange={handleOpenDeleteChange}
+            deleteCallback={handleDeleteDelivery}
+            entityTitle={EntityTitle.Delivery}
+          />
+          <UpdateDeliveryModal
+            delivery={chosenDelivery}
+            handleOpenChange={handleOpenUpdateChange}
+            open={openUpdateModal}
+          />
+        </>
+      )}
     </div>
   );
 }

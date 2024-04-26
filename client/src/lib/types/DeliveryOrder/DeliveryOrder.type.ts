@@ -1,3 +1,4 @@
+import { DeliveryStatusValues } from '../Delivery/Delivery.type';
 import { DeliveryOffer } from '../DeliveryOffer/DeliveryOffer.type';
 import { FacilityDetails } from '../FacilityDetails/FacilityDetails.type';
 import { ProductAuction } from '../ProductAuction/ProductAuction.type';
@@ -22,7 +23,7 @@ export type DeliveryOrder = {
   id: string;
   desiredPrice: number;
   desiredDate: Date;
-  deliveryOrderStatus: DeliveryOrderStatusValues;
+  deliveryOrderStatus: DeliveryOrderStatusValues | null;
   productAuctionId: string;
   userId: string;
   depotId: string;
@@ -31,6 +32,10 @@ export type DeliveryOrder = {
   facilityDetails: FacilityDetails;
   productAuction: ProductAuction;
   deliveryOffers: DeliveryOffer[];
+  delivery: {
+    id: string;
+    status: DeliveryStatusValues | null;
+  }
 };
 
 export const deliveryOrderStatusText = {

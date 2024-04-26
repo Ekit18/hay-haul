@@ -35,5 +35,9 @@ export const AppRoute = {
     Transport: '/transport',
     Drivers: '/drivers',
     Deliveries: '/deliveries'
+  },
+  Driver: {
+    Deliveries: '/deliveries',
+    DeliveryDetails: '/delivery-details/:deliveryId'
   }
 } as const;

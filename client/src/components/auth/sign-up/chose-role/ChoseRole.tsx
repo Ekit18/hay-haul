@@ -49,13 +49,15 @@ export function ChoseRole() {
                       field.value === role.value && 'border-primary shadow-custom'
                     )}
                   >
-                    <div className="flex gap-2">
+                    <div className="flex w-full gap-2">
                       <FormControl>
                         <RadioGroupItem value={role.value} />
                       </FormControl>
-                      <FormLabel className="font-normal">{role.name}</FormLabel>
+                      <FormLabel className="flex w-full flex-col gap-2 font-normal">
+                        <p>{role.name}</p>
+                        <FormDescription>{role.description}</FormDescription>
+                      </FormLabel>
                     </div>
-                    <FormDescription>{role.description}</FormDescription>
                   </FormItem>
                 ))}
               </RadioGroup>

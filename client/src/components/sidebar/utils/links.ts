@@ -139,6 +139,12 @@ export const links: Links = {
       title: 'Home',
       url: AppRoute.General.Main,
       icon: Home
-    }
+    },
+    {
+      title: 'Deliveries',
+      url: AppRoute.Driver.Deliveries,
+      icon: Route
+    },
+
   ]
 };

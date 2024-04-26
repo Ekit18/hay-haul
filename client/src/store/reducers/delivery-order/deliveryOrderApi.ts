@@ -114,6 +114,15 @@ export const deliveryOrderApi = api.injectEndpoints({
       onCacheEntryAdded: onDeliveryOrderCacheEntryAdded,
       providesTags: [TagType.DeliveryOrder]
     }),
+    getAllOrdersForDelivery: build.query<DataWithCount<DeliveryOrder>, URLSearchParams>({
+      query: (searchParams) => ({
+        url: '/delivery-order/orders-for-delivery',
+        method: 'GET',
+        params: searchParams
+      }),
+      onCacheEntryAdded: onDeliveryOrderCacheEntryAdded,
+      providesTags: [TagType.DeliveryOrder]
+    }),
     deleteDeliveryOrder: build.mutation<void, string>({
       query: (id) => ({
         url: generatePath('/delivery-order/:id', { id }),

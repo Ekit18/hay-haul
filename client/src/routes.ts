@@ -29,11 +29,33 @@ import { CarrierOffers } from './pages/carrier-pages/CarrierOffers';
 import { Transport } from './pages/carrier-pages/Transport';
 import { Drivers } from './pages/carrier-pages/Drivers';
 import { DeliveriesPage } from './pages/carrier-pages/DeliveriesPage';
+import { Deliveries } from './pages/driver-pages/Deliveries';
+import { DeliveryDetails } from './pages/driver-pages/DeliveryDetails';
+import { MainPage as DriverMainPage } from './pages/driver-pages/MainPage';
 
 type Route = {
   path: string;
   Component: () => React.ReactNode;
 };
+
+export const driverRoutes: Route[] = [
+  {
+    path: AppRoute.Driver.Deliveries,
+    Component: Deliveries
+  },
+  {
+    path: AppRoute.Driver.DeliveryDetails,
+    Component: DeliveryDetails
+  },
+  {
+    path: AppRoute.General.Notifications,
+    Component: Notifications
+  },
+  {
+    path: AppRoute.General.Main,
+    Component: DriverMainPage
+  }
+]
 
 export const generalRoutes: Route[] = [
   {

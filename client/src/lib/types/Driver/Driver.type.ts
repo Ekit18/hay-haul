@@ -2,7 +2,7 @@ import { User } from '../User/User.type';
 import { ValueOf } from '../types';
 
 export const DriverStatus = {
-    Active: 'Active',
+    Idle: 'Idle',
     Inactive: 'Inactive',
 } as const;
 

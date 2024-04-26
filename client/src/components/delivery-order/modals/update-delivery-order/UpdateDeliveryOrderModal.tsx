@@ -44,7 +44,11 @@ export function UpdateDeliveryOrderModalHOC({ deliveryOrder }: UpdateDeliveryOrd
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} className="w-full bg-green-700 text-white hover:bg-green-600">
+      <Button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="w-full bg-green-700 text-white hover:bg-green-600"
+      >
         Update
       </Button>
       {isOpen && (
@@ -119,6 +123,7 @@ function UpdateDeliveryOrderModal({ deliveryOrder, open, handleOpenChange }: Upd
                   title="Depot"
                   values={depots}
                   placeholder="Select a depot"
+                  labelProperty={'name'}
                   valueProperty="name"
                   containerClassName="w-full items-center"
                 />

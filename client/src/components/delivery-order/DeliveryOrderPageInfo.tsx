@@ -133,15 +133,6 @@ export function DeliveryOrderPageInfo({
     };
   }, []);
 
-  if (isFetching || isLoading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
-      </div>
-    );
-  }
-  // console.log(data);
-
   if (!user) return null;
 
   return (
@@ -152,7 +143,11 @@ export function DeliveryOrderPageInfo({
             <h2 className="mb-9 text-3xl font-bold">{label}</h2>
             <DeliveryOrderFilter />
           </div>
-          {data?.count === 0 ? (
+          {isFetching || isLoading ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <Loader2 className="h-10 w-10 animate-spin" />
+            </div>
+          ) : data?.count === 0 ? (
             <div className="flex h-full w-full items-center justify-center">
               <h3 className="text-xl font-bold">No {label.toLowerCase()}</h3>
             </div>

@@ -48,11 +48,20 @@ export function DeliveryOfferCard({ deliveryOffer }: DeliveryOfferCardProps) {
 
   const [acceptOffer] = deliveryOfferApi.useAcceptDeliveryOfferByIdMutation();
 
+  const [declineOffer] = deliveryOfferApi.useDeclineDeliveryOfferByIdMutation();
+
   const handleAcceptDeliveryOffer = async () => {
     if (user?.role !== UserRole.Businessman) {
       return;
     }
     acceptOffer(deliveryOffer.id);
+  };
+
+  const handleDeclineDeliveryOffer = async () => {
+    if (user?.role !== UserRole.Businessman) {
+      return;
+    }
+    declineOffer(deliveryOffer.id);
   };
 
   return (
@@ -98,7 +107,7 @@ export function DeliveryOfferCard({ deliveryOffer }: DeliveryOfferCardProps) {
           )}
           {deliveryOffer.offerStatus === DeliveryOfferStatus.Pending && user?.role === UserRole.Businessman && (
             <div className="flex w-full flex-row justify-center gap-2">
-              <Button variant="destructive" type="button">
+              <Button variant="destructive" type="button" onClick={handleDeclineDeliveryOffer}>
                 Decline
               </Button>
               <Button type="button" onClick={handleAcceptDeliveryOffer}>

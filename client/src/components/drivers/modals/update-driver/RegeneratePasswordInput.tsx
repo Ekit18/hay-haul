@@ -55,7 +55,7 @@ export function RegeneratePasswordInput({ driver }: RegeneratePasswordInputProps
               type="button"
               className="rounded-s-none border-l-0 px-2"
             >
-              <Sparkles size={18} />
+              <Sparkles size={18} strokeWidth={1.5} />
             </Button>
           </div>
         </FormControl>
