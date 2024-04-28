@@ -4,6 +4,7 @@ import { ProductAuction } from 'src/product-auction/product-auction.entity';
 import { ProductType } from 'src/product-type/product-type.entity';
 import {
   Column,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -40,4 +41,8 @@ export class Product extends Timestamps {
 
   @OneToOne(() => ProductAuction, (auction) => auction.product)
   productAuction: ProductAuction;
+
+
+  @Column({ nullable: true, default: null })
+  deletedAt: Date | null;
 }

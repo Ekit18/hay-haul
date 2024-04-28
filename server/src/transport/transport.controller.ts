@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { TransportService } from './transport.service';
 import { CreateTransportDto } from './dto/create-transport.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -7,7 +7,7 @@ import { UserRole } from 'src/user/user.entity';
 import { UpdateTransportDto } from './dto/update-transport.dto';
 
 @UseGuards(JwtAuthGuard)
-@AllowedRoles(UserRole.Carrier)
+@AllowedRoles(UserRole.Carrier, UserRole.Driver)
 @Controller('transport')
 export class TransportController {
     constructor(private readonly transportService: TransportService) { }
@@ -28,8 +28,13 @@ export class TransportController {
     }
 
     @Get('carrier/:carrierId')
-    async getTransportsByCarrierId(@Param('carrierId') carrierId: string) {
-        return await this.transportService.getTransportsByCarrierId(carrierId);
+    async getTransportsByCarrierId(@Param('carrierId') carrierId: string, @Query('isAvailable') isAvailable: boolean) {
+        return await this.transportService.getTransportsByCarrierId(carrierId, isAvailable);
+    }
+
+    @Get('driver/:driverId')
+    async getTransportsByDriverId(@Param('driverId') driverId: string) {
+        return await this.transportService.getTransportsByDriverId(driverId);
     }
 
     @Get(':id')

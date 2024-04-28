@@ -108,9 +108,10 @@ export class ProductAuctionService {
     }
   }
 
-  async findOneById(id: string) {
+  async findOneById(id: string, req?: AuthenticatedRequest) {
     try {
-      const productAuction = await this.productAuctionRepository
+
+      const queryBuilder = this.productAuctionRepository
         .createQueryBuilder('productAuction')
         .leftJoinAndSelect('productAuction.photos', 'photos')
         .leftJoinAndSelect('productAuction.product', 'product')
@@ -121,7 +122,27 @@ export class ProductAuctionService {
         .addSelect('user.id')
         .addSelect('user.fullName')
         .where('productAuction.id = :id', { id })
-        .getOne();
+
+      if (req) {
+        const userId = req.user.id;
+        queryBuilder.leftJoin(
+          'productAuction.deliveryOrder',
+          'deliveryOrder',
+          'user.id = :userId',
+          { userId },
+        )
+          .addSelect('deliveryOrder.id')
+          .leftJoin(
+            'deliveryOrder.delivery',
+            'delivery',
+            'user.id = :userId',
+            { userId },
+          )
+          .addSelect('delivery.id')
+          .addSelect('delivery.status')
+      }
+
+      const productAuction = await queryBuilder.getOne();
 
       if (!productAuction) {
         throw new HttpException(
@@ -136,6 +157,7 @@ export class ProductAuctionService {
 
       return { count: 1, data: [productAuction] };
     } catch (error) {
+      console.log(error)
       throw new HttpException(
         ProductAuctionErrorMessage.FailedFetchProductAuction,
         HttpStatus.INTERNAL_SERVER_ERROR,

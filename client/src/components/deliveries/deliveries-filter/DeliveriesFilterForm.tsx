@@ -1,8 +1,5 @@
 import { TagInput } from '@/components/tag-input/TagInput';
-import { DatePickerWithRange } from '@/components/ui/date-picker-with-range';
-import { NumberInputWithRange } from '@/components/ui/number-input-with-range';
 import { useFormContext } from 'react-hook-form';
-import { FormLabel } from '@/components/ui/form';
 import { DeliveriesFilterFormValues } from './validation';
 import { deliveryStatusToReadableMap } from '../cards/DeliveryCardStatus.enum';
 import { DeliveryStatus } from '@/lib/types/Delivery/Delivery.type';
@@ -15,44 +12,58 @@ import { skipToken } from '@reduxjs/toolkit/query';
 import { driverApi } from '@/store/reducers/driver-details/driverApi';
 import { Driver } from '@/lib/types/Driver/Driver.type';
 import { Transport } from '@/lib/types/Transport/Transport.type';
+import { UserRole } from '@/lib/enums/user-role.enum';
 
 export function DeliveriesFilterForm() {
   const { control } = useFormContext<DeliveriesFilterFormValues>();
 
   const user = useAppSelector((state) => state.user.user);
 
+  if (!user) return null;
+
   const carrierTransportsSearchParams = useMemo(() => {
     const searchParams = new URLSearchParams();
     return searchParams;
   }, []);
-  const { data: transports } = transportApi.useGetAllCarrierTransportsQuery(
-    user ? { carrierId: user.id, searchParams: carrierTransportsSearchParams } : skipToken
-  );
 
   const carrierDriversSearchParams = useMemo(() => {
     const searchParams = new URLSearchParams();
     return searchParams;
   }, []);
+
   const { data: drivers } = driverApi.useGetAllDriversByCarrierIdQuery(
     user ? { carrierId: user.id, searchParams: carrierTransportsSearchParams } : skipToken
   );
 
+  const { data: carrierTransports } = transportApi.useGetAllCarrierTransportsQuery(
+    user.role === UserRole.Carrier ? { carrierId: user.id, searchParams: carrierTransportsSearchParams } : skipToken
+  );
+
+  const { data: driverTransports } = transportApi.useGetTransportsByDriverIdQuery(
+    user.role === UserRole.Driver ? user.id : skipToken
+  );
+
+  const transports: Transport[] = carrierTransports ?? driverTransports ?? [];
+
   return (
     <>
       <div className="mt-10 grid flex-col gap-4 md:grid-cols-3 md:flex-row">
-        <FilterSelect<DeliveriesFilterFormValues, Driver[]>
-          title="Driver"
-          placeholder="Select a driver"
-          values={drivers?.data ?? []}
-          labelProperty="user.fullName"
-          valueProperty="id"
-          fieldName="driverId"
-          containerClassName=" flex gap-4 flex-col md:flex-row w-full"
-        />
+        {user?.role === UserRole.Carrier && (
+          <FilterSelect<DeliveriesFilterFormValues, Driver[]>
+            title="Driver"
+            placeholder="Select a driver"
+            values={drivers?.data ?? []}
+            labelProperty="user.fullName"
+            valueProperty="id"
+            fieldName="driverId"
+            containerClassName=" flex gap-4 flex-col md:flex-row w-full"
+          />
+        )}
+
         <FilterSelect<DeliveriesFilterFormValues, Transport[]>
           title="Transport"
           placeholder="Select a transport"
-          values={transports ?? []}
+          values={transports}
           valueProperty="id"
           labelProperty="licensePlate"
           fieldName="transportId"
@@ -72,7 +83,6 @@ export function DeliveriesFilterForm() {
             value: item
           })}
         />
-        <DeliveriesSortSelect containerClassName="lg:ml-0" />
       </div>
     </>
   );

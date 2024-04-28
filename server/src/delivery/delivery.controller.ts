@@ -10,10 +10,11 @@ import { AllowedRoles } from 'src/lib/decorators/roles-auth.decorator';
 import { UserRole } from 'src/user/user.entity';
 import { UpdateDeliveryDto } from './dto/update-delivery.dto';
 import { FilterDeliveriesDto } from './dto/filter-deliveries.dto';
+import { DriverUpdateDeliveryDto } from './dto/driver-update-delivery.dto';
 
 
 @UseGuards(JwtAuthGuard)
-@AllowedRoles(UserRole.Carrier)
+@AllowedRoles(UserRole.Carrier, UserRole.Driver)
 @Controller('delivery')
 export class DeliveryController {
     constructor(private deliveryService: DeliveryService) { }
@@ -23,6 +24,10 @@ export class DeliveryController {
         return this.deliveryService.findAll(dto, request)
     }
 
+    @Get('/drivers-deliveries')
+    getAllDeliveriesByDriverId(@Query() dto: FilterDeliveriesDto, @Req() request: AuthenticatedRequest) {
+        return this.deliveryService.findAllDriverDeliveries(dto, request)
+    }
 
     @Post()
     create(@Body() dto: CreateDeliveryDto, @Req() request: AuthenticatedRequest) {
@@ -31,9 +36,22 @@ export class DeliveryController {
 
     @UseGuards(PoliciesGuard)
     @CheckPolicies([UpdateDeliveryPolicyHandler])
-    @Patch(':id')
+    @Patch('/by-carrier/:id')
     update(@Body() dto: UpdateDeliveryDto, @Param('id') id: string) {
         return this.deliveryService.update(dto, id);
+    }
+
+
+    @Patch('/by-driver/:id')
+    @AllowedRoles(UserRole.Driver)
+    updateByDriver(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+        return this.deliveryService.updateStatusByDriver(id, req);
+    }
+
+
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+        return this.deliveryService.findOne(id);
     }
 
     @Delete(':id')

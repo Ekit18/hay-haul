@@ -14,10 +14,10 @@ export type TimelineItem = {
 };
 
 interface TimelineProps {
-  deliveryStatus: DeliveryStatusStep;
+  deliveryStatus: DeliveryStatusStep | null;
 }
 
-const steps = [
+const steps: TimelineItem[] = [
   {
     stepName: 'Awaiting Driver',
     deliveryStatus: DeliveryStatus.AwaitingDriver
@@ -35,18 +35,22 @@ const steps = [
     deliveryStatus: DeliveryStatus.OnTheWay
   },
   {
-    stepName: 'Unloading',
-    deliveryStatus: DeliveryStatus.Unloading
+    stepName: 'At Warehouse',
+    deliveryStatus: DeliveryStatus.AtBusinessFacility
   },
   {
-    stepName: 'Delivered',
-    deliveryStatus: DeliveryStatus.AtBusinessFacility
+    stepName: 'Unloading',
+    deliveryStatus: DeliveryStatus.Unloading
   }
 ];
 
 export function Timeline({ deliveryStatus }: TimelineProps) {
   const [currentStep, setCurrentStep] = useState(steps.findIndex((step) => step.deliveryStatus === deliveryStatus) + 1);
   const [complete, setComplete] = useState(false);
+
+  if (deliveryStatus === null) {
+    return <p className="mt-2 text-center text-xl font-bold">Driver hasn't accepted delivery yet</p>;
+  }
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-between  py-5 ">
@@ -77,7 +81,7 @@ export function Timeline({ deliveryStatus }: TimelineProps) {
                 </>
               )}
             </div>
-            <p className="text-center text-base text-gray-500">{step.stepName}</p>
+            <p className="text-center text-sm text-gray-500">{step.stepName}</p>
           </div>
         ))}
       </div>

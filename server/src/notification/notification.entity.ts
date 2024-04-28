@@ -17,7 +17,7 @@ export type NotifiableTypes = ProductAuction | DeliveryOrder | DeliveryOffer;
 
 export enum Notifiable {
   ProductAuction = 'ProductAuction',
-  DeliveryOrder = 'DeliveryOrder'
+  DeliveryOrder = 'DeliveryOrder',
 }
 
 const notificationMessages = Object.values(NotificationMessage)

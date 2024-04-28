@@ -23,7 +23,7 @@ export type DeliveryOrder = {
   id: string;
   desiredPrice: number;
   desiredDate: Date;
-  deliveryOrderStatus: DeliveryOrderStatusValues | null;
+  deliveryOrderStatus: DeliveryOrderStatusValues;
   productAuctionId: string;
   userId: string;
   depotId: string;

@@ -3,7 +3,7 @@ import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { CreateDeliveryDto } from './create-delivery.dto';
 import { DeliveryStatus } from '../delivery.entity';
 
-export class UpdateDeliveryDto extends PartialType(PickType(CreateDeliveryDto, ['driverId', 'transportId'])) {
+export class DriverUpdateDeliveryDto {
     @IsOptional()
     @IsEnum(DeliveryStatus)
     status: DeliveryStatus;

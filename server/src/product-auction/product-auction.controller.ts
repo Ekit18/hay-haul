@@ -29,7 +29,7 @@ import { ProductAuctionService } from './product-auction.service';
 @Controller('product-auction')
 export class ProductAuctionController {
   private static IMAGE_FIELD_NAME = 'photos';
-  constructor(private readonly productAuctionService: ProductAuctionService) {}
+  constructor(private readonly productAuctionService: ProductAuctionService) { }
 
   @Post('/product/:productId')
   @UseInterceptors(FilesInterceptor(ProductAuctionController.IMAGE_FIELD_NAME))
@@ -62,9 +62,9 @@ export class ProductAuctionController {
   }
 
   @Get('/:id')
-  async getOne(@Param('id') id: string) {
-    return this.productAuctionService.findOneById(id);
-  }
+  async getOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return this.productAuctionService.findOneById(id, req);
+  } s
 
   @AllowedRoles(UserRole.Farmer)
   @Get('/filter/farmer')

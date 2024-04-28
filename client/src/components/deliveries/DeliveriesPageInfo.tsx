@@ -30,7 +30,7 @@ import { toast } from '../ui/use-toast';
 import { DeleteModal } from '../delete-modal/delete-modal';
 import { EntityTitle } from '@/lib/enums/entity-title.enum';
 import { deliveryApi } from '@/store/reducers/delivery/deliveryApi';
-import { UpdateDeliveryModal, UpdateDeliveryModalHOC } from './modals/update-delivery/UpdateDeliveryModal';
+import { UpdateDeliveryModal } from './modals/update-delivery/UpdateDeliveryModal';
 
 export type DeliveriesPageInfoProps = {
   deliveries: DataWithCount<Delivery> | undefined;

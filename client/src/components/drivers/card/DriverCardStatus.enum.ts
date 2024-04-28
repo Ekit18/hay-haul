@@ -5,6 +5,6 @@ export type DriverCardStatusType = {
 };
 
 export const driverCardStatus: DriverCardStatusType = {
-    [DriverStatus.Idle]: 'bg-green-500 text-white',
-    [DriverStatus.Inactive]: 'bg-gray-400 text-white'
+    [DriverStatus.Idle]: 'bg-gray-400 text-white',
+    [DriverStatus.Busy]: 'bg-green-500 text-white',
 };

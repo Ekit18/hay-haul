@@ -23,6 +23,7 @@ import { ProductQueryDto } from './dto/product-query.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductErrorMessage } from './product-error-message.enum';
 import { Product } from './product.entity';
+import { ProductType } from 'src/product-type/product-type.entity';
 
 @Injectable()
 export class ProductService {
@@ -34,6 +35,31 @@ export class ProductService {
     @Inject(forwardRef(() => ProductTypeService))
     private readonly productTypeService: ProductTypeService,
   ) { }
+
+  async createCopyToFacility(id: string, facilityId: string) {
+    const { id: productId, ...product } = await this.productRepository.findOne({ where: { id }, relations: { productType: true } });
+
+    await this.productRepository.update(id, { deletedAt: new Date() });
+
+    const productTypes = await this.productTypeService.findAllByFacility(facilityId);
+
+    const targetProductType = product.productType.name
+
+    const productType: ProductType | undefined = productTypes.find((type) => type.name === product.productType.name);
+
+    if (productType) {
+      product.productType = productType;
+    } else {
+      const productType = await this.productTypeService.create({ name: targetProductType }, facilityId)
+      product.productType = productType;
+    }
+
+    return await this.productRepository.save({
+      ...product,
+      facilityDetailsId: facilityId,
+    });
+
+  }
 
   async filterAll(
     {
@@ -60,7 +86,8 @@ export class ProductService {
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .leftJoinAndSelect('product.productType', 'productType')
-        .leftJoinAndSelect('product.productAuction', 'productAuction');
+        .leftJoinAndSelect('product.productAuction', 'productAuction')
+        .where('product.deletedAt IS NULL');
 
       if (nameSort) {
         queryBuilder.addOrderBy('product.name', nameSort);
@@ -138,7 +165,7 @@ export class ProductService {
   async findAllByFacilityId(facilityId: string) {
     try {
       return await this.productRepository.find({
-        where: { facilityDetailsId: facilityId },
+        where: { facilityDetailsId: facilityId, deletedAt: null },
       });
     } catch (error) {
       throw new HttpException(

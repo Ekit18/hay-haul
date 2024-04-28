@@ -13,4 +13,11 @@ export enum NotificationMessage {
   DeliveryOrderPaid = 'DELIVERY_ORDER_PAID',
   DeclinedDeliveryOffer = 'DECLINED_DELIVERY_OFFER',
   AcceptedDeliveryOffer = 'ACCEPTED_DELIVERY_OFFER',
+  DriverAcceptedDelivery = 'DRIVER_ACCEPTED_DELIVERY',
+  DriverArriveToFarm = 'DRIVER_ARRIVE_TO_FARM',
+  DriverLoading = 'DRIVER_LOADING',
+  DriverOnTheWay = 'DRIVER_ON_THE_WAY',
+  DriverUnloading = 'DRIVER_UNLOADING',
+  DriverArriveToBusiness = 'DRIVER_ARRIVE_TO_BUSINESS',
+  DriverEndedDelivery = 'DRIVER_ENDED_DELIVERY',
 }

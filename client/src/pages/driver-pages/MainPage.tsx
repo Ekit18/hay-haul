@@ -1,3 +1,3 @@
 export function MainPage() {
-  return <div>MainPage</div>;
+  return <div>Main page</div>;
 }

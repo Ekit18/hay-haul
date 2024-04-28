@@ -8,7 +8,7 @@ import { UpdateDriverDto } from './dto/update-driver.dto';
 import { RegeneratePasswordDriverDto } from './dto/regenerate-password-driver.dto';
 
 @UseGuards(JwtAuthGuard)
-@AllowedRoles(UserRole.Carrier)
+@AllowedRoles(UserRole.Carrier, UserRole.Driver)
 @Controller('driver-details')
 export class DriverDetailsController {
     constructor(private readonly driverDetailsService: DriverDetailsService) { }

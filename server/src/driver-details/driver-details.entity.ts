@@ -5,15 +5,15 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, ManyToOne
 
 export enum DriverStatus {
     Idle = 'Idle',
-    Inactive = 'Inactive',
+    Busy = 'Busy',
 }
 
-const roles = Object.values(DriverStatus)
-    .map((role) => `'${role}'`)
+const statuses = Object.values(DriverStatus)
+    .map((status) => `'${status}'`)
     .join(', ');
 
 @Entity()
-@Check(`"status" IN (${roles})`)
+@Check(`"status" IN (${statuses})`)
 export class DriverDetails extends Timestamps {
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -38,7 +38,7 @@ export class DriverDetails extends Timestamps {
     @JoinColumn({ name: 'userId' })
     user: User;
 
-    @Column({ default: DriverStatus.Inactive })
+    @Column({ default: DriverStatus.Idle })
     status: DriverStatus;
 
     @OneToMany(() => Delivery, (delivery) => delivery.driver)

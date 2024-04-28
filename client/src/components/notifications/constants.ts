@@ -59,4 +59,32 @@ export const notificationMessages: Record<NotificationMessage, { icon: LucideIco
     icon: AlertCircleIcon,
     message: 'Delivery offer has been accepted'
   },
+  [NotificationMessage.DriverAcceptedDelivery]: {
+    icon: AlertCircleIcon,
+    message: 'Driver has accepted the delivery'
+  },
+  [NotificationMessage.DriverArriveToFarm]: {
+    icon: AlertCircleIcon,
+    message: 'Driver has arrived to the farm'
+  },
+  [NotificationMessage.DriverLoading]: {
+    icon: AlertCircleIcon,
+    message: 'Driver is loading'
+  },
+  [NotificationMessage.DriverOnTheWay]: {
+    icon: AlertCircleIcon,
+    message: 'Driver is on the way'
+  },
+  [NotificationMessage.DriverUnloading]: {
+    icon: AlertCircleIcon,
+    message: 'Driver is unloading'
+  },
+  [NotificationMessage.DriverArriveToBusiness]: {
+    icon: AlertCircleIcon,
+    message: 'Driver has arrived to the warehouse'
+  },
+  [NotificationMessage.DriverEndedDelivery]: {
+    icon: AlertCircleIcon,
+    message: 'Driver has ended the delivery'
+  }
 };

@@ -3,4 +3,5 @@ export enum ServerToClientEventName {
   BaseEvent = 'base_event',
   AuctionUpdated = 'auction_updated',
   DeliveryOrderUpdated = 'delivery_order_updated',
+  DeliveryUpdated = 'delivery_updated',
 }

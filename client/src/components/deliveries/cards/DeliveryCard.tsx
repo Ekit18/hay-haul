@@ -7,6 +7,10 @@ import { Trash2 } from 'lucide-react';
 import { deliveryCardStatus, deliveryStatusToReadableMap } from './DeliveryCardStatus.enum';
 import { Delivery } from '@/lib/types/Delivery/Delivery.type';
 import { format } from 'date-fns';
+import { UserRole } from '@/lib/enums/user-role.enum';
+import { useAppSelector } from '@/lib/hooks/redux';
+import { generatePath, useNavigate } from 'react-router-dom';
+import { AppRoute } from '@/lib/constants/routes';
 
 interface DeliveryCardProps {
   delivery: Delivery;
@@ -15,6 +19,10 @@ interface DeliveryCardProps {
 }
 
 export function DeliveryCard({ delivery, onDeleteClick, onEditClick }: DeliveryCardProps) {
+  const user = useAppSelector((state) => state.user.user);
+
+  const navigate = useNavigate();
+
   return (
     <Card className="flex w-full flex-col justify-between">
       <CardHeader>
@@ -53,16 +61,29 @@ export function DeliveryCard({ delivery, onDeleteClick, onEditClick }: DeliveryC
           </p>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex flex-col items-center justify-center gap-2">
         {delivery.status === null && (
           <>
-            <Button onClick={onDeleteClick} type="button" variant="destructive" className="gap-2">
-              <Trash2 size={20} /> Delete
-            </Button>
-            <Button onClick={onEditClick} type="button">
-              Update
-            </Button>
+            {user?.role === UserRole.Carrier && (
+              <div className="flex w-full flex-row items-center justify-start gap-2">
+                <Button onClick={onDeleteClick} type="button" variant="destructive" className="gap-2">
+                  <Trash2 size={20} /> Delete
+                </Button>
+                <Button onClick={onEditClick} type="button">
+                  Update
+                </Button>
+              </div>
+            )}
           </>
+        )}
+        {user?.role === UserRole.Driver && (
+          <Button
+            className="w-full"
+            type="button"
+            onClick={() => navigate(generatePath(AppRoute.Driver.DeliveryDetails, { deliveryId: delivery.id }))}
+          >
+            Learn more
+          </Button>
         )}
       </CardFooter>
     </Card>

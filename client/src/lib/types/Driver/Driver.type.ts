@@ -3,7 +3,7 @@ import { ValueOf } from '../types';
 
 export const DriverStatus = {
     Idle: 'Idle',
-    Inactive: 'Inactive',
+    Busy: 'Busy',
 } as const;
 
 export type DriverStatusValues = ValueOf<typeof DriverStatus>;

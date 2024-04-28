@@ -6,13 +6,13 @@ export type DeliveryCardStatusType = {
 };
 
 export const deliveryCardStatus: DeliveryCardStatusType = {
-    'null': 'bg-gray-400 text-white',
-    [DeliveryStatus.AwaitingDriver]: 'bg-purple-400 text-white',
-    [DeliveryStatus.AtFarmerFacility]: 'bg-gray-400 text-white',
-    [DeliveryStatus.Loading]: 'bg-yellow-500 text-black',
-    [DeliveryStatus.OnTheWay]: 'bg-green-500 text-white',
-    [DeliveryStatus.Unloading]: 'bg-yellow-500 text-black',
-    [DeliveryStatus.AtBusinessFacility]: 'bg-green-400 text-white',
+    'null': 'bg-gray-400 text-white hover:brightness-95 hover:bg-gray-400',
+    [DeliveryStatus.AwaitingDriver]: 'bg-purple-400 text-white hover:brightness-95 hover:bg-purple-400',
+    [DeliveryStatus.AtFarmerFacility]: 'bg-gray-400 text-white hover:brightness-95 hover:bg-gray-400',
+    [DeliveryStatus.Loading]: 'bg-yellow-500 text-black hover:brightness-95 hover:bg-yellow-500',
+    [DeliveryStatus.OnTheWay]: 'bg-green-500 text-white hover:brightness-95 hover:bg-green-500',
+    [DeliveryStatus.Unloading]: 'bg-yellow-500 text-black hover:brightness-95 hover:bg-yellow-500',
+    [DeliveryStatus.AtBusinessFacility]: 'bg-green-400 text-white hover:brightness-95 hover:bg-green-400',
 };
 
 export const deliveryStatusToReadableMap: DeliveryCardStatusType = {

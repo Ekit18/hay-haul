@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Delivery } from './delivery.entity';
+import { Delivery, DeliveryStatus } from './delivery.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateDeliveryDto } from './dto/create-delivery.dto';
@@ -11,12 +11,24 @@ import { FilterDeliveriesDto } from './dto/filter-deliveries.dto';
 import { DEFAULT_PAGINATION_OFFSET, DEFAULT_PAGINATION_LIMIT } from 'src/lib/constants/constants';
 import { DeliveryOrderService } from 'src/delivery-order/delivery-order.service';
 import { DeliveryOrder, DeliveryOrderStatus } from 'src/delivery-order/delivery-order.entity';
+import { DriverUpdateDeliveryDto } from './dto/driver-update-delivery.dto';
+import { DriverDetails, DriverStatus } from 'src/driver-details/driver-details.entity';
+import { ProductService } from 'src/product/product.service';
+import { SocketService } from 'src/socket/socket.service';
+import { ServerEventName } from 'src/lib/enums/enums';
+import { NotificationService } from 'src/notification/notification.service';
+import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
+import { Notifiable } from 'src/notification/notification.entity';
+import { Product } from 'src/product/product.entity';
 
 @Injectable()
 export class DeliveryService {
     constructor(
         @InjectRepository(Delivery) private deliveryRepository: Repository<Delivery>,
         @InjectRepository(DeliveryOrder) private deliveryOrderRepository: Repository<DeliveryOrder>,
+        @InjectRepository(DriverDetails) private driverDetailsRepository: Repository<DriverDetails>,
+        private readonly productService: ProductService,
+        private readonly notificationService: NotificationService,
     ) { }
 
     async create(dto: CreateDeliveryDto, req: AuthenticatedRequest) {
@@ -27,7 +39,85 @@ export class DeliveryService {
     }
 
     async update(dto: UpdateDeliveryDto, id: string) {
-        return this.deliveryRepository.save({ ...dto, id })
+        return this.deliveryRepository.update({ id }, { ...dto })
+    }
+
+
+    async updateStatusByDriver(id: string, req: AuthenticatedRequest) {
+
+        const delivery = await this.deliveryRepository.findOne({
+            where: { id }, relations: {
+                deliveryOrder: true
+            }
+        })
+        // this.deliveryOrderRepository.createQueryBuilder('s').where('deleted at !=')
+
+        let notificationMessage: NotificationMessage;
+
+
+        switch (delivery.status) {
+            case null:
+                delivery.status = DeliveryStatus.AwaitingDriver;
+                await this.driverDetailsRepository.update(delivery.driverId, { status: DriverStatus.Busy })
+                notificationMessage = NotificationMessage.DriverAcceptedDelivery
+                break;
+            case DeliveryStatus.AwaitingDriver:
+                delivery.status = DeliveryStatus.AtFarmerFacility;
+                notificationMessage = NotificationMessage.DriverArriveToFarm
+                break;
+            case DeliveryStatus.AtFarmerFacility:
+                delivery.status = DeliveryStatus.Loading
+                notificationMessage = NotificationMessage.DriverLoading
+                break;
+            case DeliveryStatus.Loading:
+                delivery.status = DeliveryStatus.OnTheWay
+                notificationMessage = NotificationMessage.DriverOnTheWay
+                break;
+            case DeliveryStatus.OnTheWay:
+                delivery.status = DeliveryStatus.AtBusinessFacility
+                notificationMessage = NotificationMessage.DriverArriveToBusiness
+                break;
+            case DeliveryStatus.AtBusinessFacility:
+                delivery.status = DeliveryStatus.Unloading
+                notificationMessage = NotificationMessage.DriverUnloading
+                break;
+            case DeliveryStatus.Unloading:
+                await this.driverDetailsRepository.update(delivery.driverId, { status: DriverStatus.Idle })
+                notificationMessage = NotificationMessage.DriverEndedDelivery
+                await this.moveProductByDeliveryId(id)
+                // TODO:remove
+                delivery.status = null;
+            default:
+                break;
+        }
+
+        await this.notificationService.createNotification(delivery.deliveryOrder.userId, delivery.deliveryOrder.id, notificationMessage, Notifiable.DeliveryOrder)
+        await this.deliveryRepository.save({ id, status: delivery.status })
+
+        //TODO: Notifications and socket emits go here
+
+        // SocketService.SocketServer.to(delivery.deliveryOrder.userId).emit(
+        //     ServerEventName.DeliveryUpdated,
+        // );
+    }
+
+    async moveProductByDeliveryId(deliveryId: string) {
+
+        const delivery = await this.deliveryRepository.findOne({
+            where: { id: deliveryId }, relations: {
+                deliveryOrder: {
+                    productAuction: {
+                        product: true
+                    }
+                }
+            }
+        });
+
+        const productId = delivery.deliveryOrder.productAuction.productId
+        const businessmanFacilityId = delivery.deliveryOrder.depotId
+
+        await this.productService.createCopyToFacility(productId, businessmanFacilityId)
+
     }
 
     async delete(id: string) {
@@ -35,13 +125,39 @@ export class DeliveryService {
     }
 
     async findOne(id: string) {
-        return this.deliveryRepository.findOne({
-            where: { id }, relations: {
-                driver: true,
-                transport: true,
-                deliveryOrder: true
-            }
-        });
+        return this.deliveryRepository.createQueryBuilder('delivery')
+            .leftJoinAndSelect('delivery.driver', 'driver')
+            .leftJoin('driver.user', 'driverUser')
+            .addSelect(['driverUser.id', 'driverUser.fullName', 'driverUser.email'])
+            .leftJoinAndSelect('delivery.transport', 'transport')
+            .leftJoinAndSelect('delivery.deliveryOrder', 'deliveryOrder')
+            .leftJoinAndSelect('deliveryOrder.productAuction', 'productAuction')
+            .leftJoinAndSelect('deliveryOrder.facilityDetails', 'depotFacilityDetails')
+            .leftJoinAndSelect('productAuction.product', 'product')
+            .leftJoinAndSelect('product.productType', 'productType')
+            .leftJoinAndSelect('product.facilityDetails', 'farmFacilityDetails')
+            .where('delivery.id = :id', { id })
+            .getOne();
+    }
+
+    async findAllDriverDeliveries({
+        limit = DEFAULT_PAGINATION_LIMIT,
+        offset = DEFAULT_PAGINATION_OFFSET,
+        ...dto }: FilterDeliveriesDto,
+        { user: { id: driverId } }: AuthenticatedRequest) {
+        const queryBuilder = await this.getPreFilteredQueryBuilder(dto)
+        const [deliveries, total] = await queryBuilder
+            .andWhere('driverUser.id = :driverId', { driverId })
+            .take(limit)
+            .skip(offset)
+            .getManyAndCount()
+
+        const pageCount = Math.ceil(total / limit);
+
+        return {
+            data: deliveries,
+            count: pageCount,
+        };
     }
 
     async findAll({

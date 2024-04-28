@@ -48,6 +48,8 @@ import { DeliveryOrderPayment } from './delivery-order-payment/delivery-order-pa
 import { DeliveryModule } from './delivery/delivery.module';
 import { Delivery } from './delivery/delivery.entity';
 import { CaslModule } from './casl/casl.module';
+import { MapController } from './map/map.controller';
+import { MapModule } from './map/map.module';
 
 @Module({
   imports: [
@@ -136,6 +138,7 @@ import { CaslModule } from './casl/casl.module';
     DeliveryOrderPaymentModule,
     DeliveryModule,
     CaslModule,
+    MapModule,
   ],
   providers: [TriggerService, FunctionService],
 })

@@ -37,6 +37,7 @@ import { format, parseISO } from 'date-fns';
 import { Crown, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, generatePath, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Timeline } from '@/components/timeline/Timeline';
 
 export function AuctionDetailsPage() {
   const user = useAppSelector((state) => state.user.user);
@@ -380,8 +381,14 @@ export function AuctionDetailsPage() {
         </div>
         <div className="mt-4">
           <p>Information about product:</p>
-          <p className="mt-8">{productAuction.description}</p>
+          <p className="mt-4">{productAuction.description}</p>
         </div>
+        {!!productAuction.deliveryOrder?.delivery?.status && (
+          <div className="mt-4">
+            <p>Delivery progress:</p>
+            <Timeline deliveryStatus={productAuction.deliveryOrder?.delivery?.status} />
+          </div>
+        )}
       </div>
       <DeleteModal
         handleOpenChange={handleDeleteModalOpenChange}

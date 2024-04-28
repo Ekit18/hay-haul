@@ -43,6 +43,13 @@ export const transportApi = api.injectEndpoints({
                 body: data
             }),
             invalidatesTags: [TagType.Transport]
-        })
+        }),
+        getTransportsByDriverId: build.query<Transport[], string>({
+            query: (driverId) => ({
+                url: generatePath('/transport/driver/:driverId', { driverId }),
+                method: 'GET'
+            }),
+            providesTags: [TagType.Transport]
+        }),
     })
 })
