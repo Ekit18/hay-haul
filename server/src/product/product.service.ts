@@ -66,7 +66,7 @@ export class ProductService {
       limit = DEFAULT_PAGINATION_LIMIT,
       offset = DEFAULT_PAGINATION_OFFSET,
       searchQuery = '',
-      farmId,
+      facilityId,
       maxQuantity,
       minQuantity,
       productTypeId,
@@ -87,7 +87,7 @@ export class ProductService {
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
         .leftJoinAndSelect('product.productType', 'productType')
         .leftJoinAndSelect('product.productAuction', 'productAuction')
-        .where('product.deletedAt IS NULL');
+        .andWhere('product.deletedAt IS NULL');
 
       if (nameSort) {
         queryBuilder.addOrderBy('product.name', nameSort);
@@ -102,12 +102,12 @@ export class ProductService {
         queryBuilder.addOrderBy('product.createdAt', SortOrder.DESC);
       }
 
-      if (farmId) {
-        queryBuilder.where('product.facilityDetailsId = :facilityDetailsId', {
-          facilityDetailsId: farmId,
+      if (facilityId) {
+        queryBuilder.andWhere('product.facilityDetailsId = :facilityDetailsId', {
+          facilityDetailsId: facilityId,
         });
       } else {
-        queryBuilder.where('facilityDetails.userId = :userId', {
+        queryBuilder.andWhere('facilityDetails.userId = :userId', {
           userId,
         });
       }

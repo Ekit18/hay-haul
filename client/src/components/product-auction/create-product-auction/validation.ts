@@ -14,7 +14,7 @@ export type CreateProductAuctionFormValues = {
   bidStep: number;
   description: string;
   productId: string;
-  farmId: string;
+  facilityId: string;
   photos: FileObject[];
 };
 
@@ -29,7 +29,7 @@ export const createProductAuctionDefaultValues: CreateProductAuctionFormValues =
   bidStep: 0,
   description: '',
   productId: '',
-  farmId: '',
+  facilityId: '',
   photos: []
 };
 
@@ -47,7 +47,7 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
     bidStep: undefined;
     description: undefined;
     productId: undefined;
-    farmId: undefined;
+    facilityId: undefined;
   },
   ''
 > => {
@@ -75,7 +75,7 @@ export const useProductAuctionCreateFormSchema = (): ObjectSchema<
     bidStep: number().required('Bid step is required').min(1, 'Bid step must be greater than 0'),
     description: string().required('Description is required').min(10, 'Description must be at least 10 characters'),
     productId: string().required('Product is required'),
-    farmId: string().required('Farm is required'),
+    facilityId: string().required('Farm is required'),
     photos: array<FileObject>().min(1, 'At least one photo has to be provided').required('Photos are required')
   });
 };

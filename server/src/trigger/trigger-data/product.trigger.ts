@@ -1,6 +1,6 @@
-// TODO rewrite to trigger
+export const DELETE_PRODUCT_TYPE_TRIGGER_NAME = 'delete_product_type_trigger'
 export const deleteProductTypeTrigger = `
-create or alter trigger delete_product_type_trigger
+create or alter trigger ${DELETE_PRODUCT_TYPE_TRIGGER_NAME}
 ON product_type
 after delete
 as
@@ -8,11 +8,30 @@ BEGIN
     DECLARE @productTypeId varchar(255);
     SELECT @productTypeId = id FROM deleted;
 
-    IF EXISTS (SELECT * FROM product WHERE productTypeId = @productTypeId)
-    BEGIN
-        RAISERROR('Product type with products is prohibited to delete', 12, 1);
-        RETURN;
-    END
+	DECLARE db_cursor CURSOR FOR 
+		SELECT id FROM product WHERE productTypeId = @productTypeId
+
+	DECLARE @productId varchar(255);
+
+	OPEN db_cursor
+
+	FETCH NEXT FROM db_cursor INTO @productId
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN  
+		IF @productId != NULL
+		BEGIN
+			RAISERROR('Product type with products is prohibited to delete', 12, 1);
+			RETURN;
+		END
+
+ 		FETCH NEXT FROM db_cursor INTO @productId 
+	END 
+
+	CLOSE db_cursor  
+
+	DEALLOCATE db_cursor 
+	  
 END
 `;
 

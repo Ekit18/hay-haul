@@ -11,13 +11,14 @@ import { ProductService } from 'src/product/product.service';
 import { S3FileService, S3Folder } from 'src/s3-file/s3-file.service';
 import { SocketService } from 'src/socket/socket.service';
 import { UserRole } from 'src/user/user.entity';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductAuctionDto } from './dto/create-product-auction.dto';
 import { ProductAuctionQueryDto } from './dto/product-auction-query.dto';
 import { RestartProductAuctionDto } from './dto/restart-product-auction.dto';
 import { UpdateProductAuctionDto } from './dto/update-product-auction.dto';
 import { ProductAuctionErrorMessage } from './product-auction-error-message.enum';
 import { ProductAuction, ProductAuctionStatus } from './product-auction.entity';
+import { UPDATE_AUCTION_STATUS_TRIGGER_NAME, UPDATE_AUCTION_TRIGGER_NAME } from 'src/trigger/trigger-data/auction.trigger';
 
 @Injectable()
 export class ProductAuctionService {
@@ -470,6 +471,21 @@ export class ProductAuctionService {
         photos: fileEntities,
       });
     } catch (error) {
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.precedingErrors[0];
+
+        const triggerErrorMessage = errorObject.message;
+
+        const isTriggerErrorMessage =
+          errorObject.procName === UPDATE_AUCTION_TRIGGER_NAME || UPDATE_AUCTION_STATUS_TRIGGER_NAME;
+
+        throw new HttpException(
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : ProductAuctionErrorMessage.FailedUpdateProductAuction,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

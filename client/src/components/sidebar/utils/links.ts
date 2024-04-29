@@ -30,11 +30,6 @@ type Links = {
 export const links: Links = {
   [UserRole.Farmer]: [
     {
-      title: 'Home',
-      url: AppRoute.General.Main,
-      icon: Home
-    },
-    {
       title: 'Farms',
       url: AppRoute.Farmer.Farms,
       icon: Tractor
@@ -61,11 +56,6 @@ export const links: Links = {
     }
   ],
   [UserRole.Businessman]: [
-    {
-      title: 'Home',
-      url: AppRoute.General.Main,
-      icon: Home
-    },
     {
       title: 'Depots',
       url: AppRoute.Businessman.Depots,
@@ -99,11 +89,6 @@ export const links: Links = {
   ],
   [UserRole.Carrier]: [
     {
-      title: 'Home',
-      url: AppRoute.General.Main,
-      icon: Home
-    },
-    {
       title: 'Deliveries',
       url: AppRoute.Carrier.Deliveries,
       icon: Route
@@ -135,11 +120,6 @@ export const links: Links = {
     }
   ],
   [UserRole.Driver]: [
-    {
-      title: 'Home',
-      url: AppRoute.General.Main,
-      icon: Home
-    },
     {
       title: 'Deliveries',
       url: AppRoute.Driver.Deliveries,

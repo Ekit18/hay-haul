@@ -19,12 +19,12 @@ export function GMapPreview({ fromAddress, toAddress }: GMapPreviewProps) {
   );
 
   return (
-    <div className="flex h-72 w-72 items-center justify-center ">
+    <div className="flex h-72 min-h-72 w-72 min-w-72 items-center justify-center ">
       {isLoading || isFetching || isUninitialized ? (
         <Loader2 className="h-10 w-10 animate-spin " />
       ) : (
         <div className="relative rounded border border-input">
-          <img className="h-full w-full rounded" src={data?.mapPreviewLink} alt={'Map'} />
+          <img className=" h-72 min-h-72 w-72 min-w-72 rounded" src={data?.mapPreviewLink} alt={'Map'} />
 
           <a
             href={data?.mapLink}

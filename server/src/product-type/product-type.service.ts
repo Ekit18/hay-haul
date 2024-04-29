@@ -9,9 +9,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FacilityDetailsErrorMessage } from 'src/facility-details/facility-details-error-message.enum';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductTypeDto } from './dto/create-product-type.dto';
 import { ProductType } from './product-type.entity';
+import { DELETE_PRODUCT_TYPE_TRIGGER_NAME } from 'src/trigger/trigger-data/product.trigger';
+import { ProductTypeErrorMessage } from './product-type-error-message.enum';
 
 @Injectable()
 export class ProductTypeService {
@@ -20,7 +22,7 @@ export class ProductTypeService {
     private readonly productTypeRepository: Repository<ProductType>,
     @Inject(forwardRef(() => FacilityDetailsService))
     private readonly facilityDetailsService: FacilityDetailsService,
-  ) {}
+  ) { }
 
   public async createMany(
     productTypeNames: string[],
@@ -53,7 +55,7 @@ export class ProductTypeService {
   public async findOneById(id: string): Promise<ProductType> {
     try {
       return this.productTypeRepository.findOne({ where: { id } });
-    } catch (error) {}
+    } catch (error) { }
   }
 
   public async create(
@@ -97,6 +99,21 @@ export class ProductTypeService {
       );
       console.log('delete response', res);
     } catch (error) {
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.precedingErrors[0];
+
+        const triggerErrorMessage = errorObject.message;
+
+        const isTriggerErrorMessage =
+          errorObject.procName === DELETE_PRODUCT_TYPE_TRIGGER_NAME;
+
+        throw new HttpException(
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : ProductTypeErrorMessage.FailedToDeleteProductType,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }

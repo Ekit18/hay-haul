@@ -3,6 +3,7 @@ import { Notification } from '../Notifications/Notifications.type';
 import { ProductAuction } from '../ProductAuction/ProductAuction.type';
 import { ProductAuctionBid } from '../ProductAuctionBid/ProductAuctionBid.type';
 import { DeliveryOrder } from '../DeliveryOrder/DeliveryOrder.type';
+import { Delivery } from '../Delivery/Delivery.type';
 
 type ServerToClientEventParameter = {
   //   [ServerEventName.TRUCKS_LIST_UPDATE]: (payload: TruckEntityT[]) => void;
@@ -29,6 +30,7 @@ type ServerToClientEventParameter = {
     deliveryOffers: DeliveryOrder['deliveryOffers'];
 
   }) => void;
+  [ServerToClientEventName.DeliveryUpdated]: (payload: { deliveryId: Delivery['id'], deliveryStatus: Delivery['status'] }) => void;
   [ServerToClientEventName.BaseEvent]: (payload: unknown) => void;
   [ServerToClientEventName.Notification]: (payload: Notification) => void;
 };

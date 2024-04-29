@@ -9,6 +9,8 @@ import { CreateProductModal } from '../modals/create-product-modal/create-produc
 import { ProductFilterForm } from './ProductFilterForm';
 import './styles.module.css';
 import { ProductFilterFormValues } from './validation';
+import { useAppSelector } from '@/lib/hooks/redux';
+import { UserRole } from '@/lib/enums/user-role.enum';
 
 export function ProductsFilter() {
   const { control, reset } = useFormContext<ProductFilterFormValues>();
@@ -22,11 +24,13 @@ export function ProductsFilter() {
     reset({
       minQuantity: 0,
       maxQuantity: 0,
-      farmId: '',
+      facilityId: '',
       productTypeId: [],
       searchQuery: undefined
     });
   };
+
+  const user = useAppSelector((state) => state.user.user);
 
   return (
     <>
@@ -57,7 +61,7 @@ export function ProductsFilter() {
             Clear filter
           </Button>
         </div>
-        <CreateProductModal />
+        {user?.role === UserRole.Farmer && <CreateProductModal />}
       </div>
       <div className="">{filterOpen && <ProductFilterForm />}</div>
     </>

@@ -30,6 +30,10 @@ export class DeliveryService {
         private readonly productService: ProductService,
         private readonly notificationService: NotificationService,
     ) { }
+    async getDeliveryStatus(id: string) {
+        const delivery = await this.deliveryRepository.findOne({ where: { id } })
+        return { deliveryStatus: delivery.status };
+    }
 
     async create(dto: CreateDeliveryDto, req: AuthenticatedRequest) {
         const { user: { id: carrierId } } = req;
@@ -47,7 +51,16 @@ export class DeliveryService {
 
         const delivery = await this.deliveryRepository.findOne({
             where: { id }, relations: {
-                deliveryOrder: true
+                deliveryOrder: {
+                    chosenDeliveryOffer: true,
+                    productAuction: {
+                        product: {
+                            facilityDetails: {
+                                user: true
+                            }
+                        }
+                    }
+                }
             }
         })
         // this.deliveryOrderRepository.createQueryBuilder('s').where('deleted at !=')
@@ -83,10 +96,13 @@ export class DeliveryService {
                 break;
             case DeliveryStatus.Unloading:
                 await this.driverDetailsRepository.update(delivery.driverId, { status: DriverStatus.Idle })
+                delivery.status = DeliveryStatus.Finished
                 notificationMessage = NotificationMessage.DriverEndedDelivery
+
                 await this.moveProductByDeliveryId(id)
-                // TODO:remove
-                delivery.status = null;
+                await this.deliveryOrderRepository.update(delivery.deliveryOrder.id, { deliveryOrderStatus: DeliveryOrderStatus.Delivered })
+
+            // TODO:remove
             default:
                 break;
         }
@@ -95,10 +111,13 @@ export class DeliveryService {
         await this.deliveryRepository.save({ id, status: delivery.status })
 
         //TODO: Notifications and socket emits go here
+        const businessmanId = delivery.deliveryOrder.userId;
+        const carrierId = delivery.deliveryOrder.chosenDeliveryOffer.userId
+        const farmerId = delivery.deliveryOrder.productAuction.product.facilityDetails.user.id;
 
-        // SocketService.SocketServer.to(delivery.deliveryOrder.userId).emit(
-        //     ServerEventName.DeliveryUpdated,
-        // );
+        SocketService.SocketServer.to([businessmanId, carrierId, farmerId]).emit(
+            ServerEventName.DeliveryUpdated,
+        );
     }
 
     async moveProductByDeliveryId(deliveryId: string) {

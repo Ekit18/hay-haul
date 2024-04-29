@@ -51,10 +51,6 @@ export const driverRoutes: Route[] = [
     path: AppRoute.General.Notifications,
     Component: Notifications
   },
-  {
-    path: AppRoute.General.Main,
-    Component: DriverMainPage
-  }
 ]
 
 export const generalRoutes: Route[] = [
@@ -81,10 +77,6 @@ export const generalRoutes: Route[] = [
 ];
 
 export const carrierRoutes: Route[] = [
-  {
-    path: AppRoute.General.Main,
-    Component: CarrierMainPage
-  },
   {
     path: AppRoute.Carrier.DeliveryOrders,
     Component: CarrierDeliveryOrderPage
@@ -121,10 +113,6 @@ export const businessRoutes: Route[] = [
     Component: StripeDeliveryOrderPaymentPage
   },
   {
-    path: AppRoute.General.Main,
-    Component: BusinessmanMainPage
-  },
-  {
     path: AppRoute.Businessman.ProductAuctionPaymentPage,
     Component: StripeProductAuctionPaymentPage
   },
@@ -151,14 +139,13 @@ export const businessRoutes: Route[] = [
   {
     path: AppRoute.General.DeliveryOrder,
     Component: DeliveryOrderDetails
-  }
+  }, {
+    path: AppRoute.Businessman.Products,
+    Component: ProductsPage
+  },
 ];
 
 export const farmerRoutes: Route[] = [
-  {
-    path: AppRoute.General.Main,
-    Component: FarmerMainPage
-  },
   {
     path: AppRoute.Farmer.Products,
     Component: ProductsPage

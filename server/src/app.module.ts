@@ -144,12 +144,12 @@ import { MapModule } from './map/map.module';
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(
-    private readonly seedingService: TriggerService,
+    private readonly triggerService: TriggerService,
     private readonly functionService: FunctionService,
   ) { }
 
   async onApplicationBootstrap(): Promise<void> {
     await this.functionService.seed();
-    await this.seedingService.seed();
+    await this.triggerService.seed();
   }
 }

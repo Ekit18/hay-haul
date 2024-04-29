@@ -50,7 +50,7 @@ export class User extends Timestamps {
   })
   role: UserRole;
 
-  @Column()
+  @Column({ default: false })
   isVerified: boolean;
 
   @OneToMany(() => FacilityDetails, (facilityDetail) => facilityDetail.user, {

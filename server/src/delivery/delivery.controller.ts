@@ -24,6 +24,12 @@ export class DeliveryController {
         return this.deliveryService.findAll(dto, request)
     }
 
+    @AllowedRoles(UserRole.Carrier, UserRole.Driver, UserRole.Farmer)
+    @Get('status/:id')
+    getDeliveryStatus(@Param('id') id: string) {
+        return this.deliveryService.getDeliveryStatus(id);
+    }
+
     @Get('/drivers-deliveries')
     getAllDeliveriesByDriverId(@Query() dto: FilterDeliveriesDto, @Req() request: AuthenticatedRequest) {
         return this.deliveryService.findAllDriverDeliveries(dto, request)

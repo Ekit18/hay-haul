@@ -6,10 +6,13 @@ import {
 } from './trigger-data/auction.trigger';
 import { productAuctionBidTrigger } from './trigger-data/product-auction-bid.trigger';
 import { deleteProductTypeTrigger } from './trigger-data/product.trigger';
+import { insertUserTrigger } from './trigger-data/user.trigger';
+import { updateOrDeleteTransportTrigger } from './trigger-data/transport.trigger';
+import { createTokenTrigger } from './trigger-data/token.trigger';
 
 @Injectable()
 export class TriggerService {
-  constructor(private readonly entityManager: EntityManager) {}
+  constructor(private readonly entityManager: EntityManager) { }
 
   async seed(): Promise<void> {
     await this.seedTrigger();
@@ -20,6 +23,9 @@ export class TriggerService {
     deleteProductTypeTrigger,
     productAuctionBidTrigger,
     updateAuctionStatusTrigger,
+    insertUserTrigger,
+    updateOrDeleteTransportTrigger,
+    createTokenTrigger
   ];
 
   private async seedTrigger() {

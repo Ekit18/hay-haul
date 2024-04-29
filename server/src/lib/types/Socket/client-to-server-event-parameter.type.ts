@@ -8,6 +8,9 @@ type ClientToServerEventParameter = {
   [ClientToServerEventName.JOIN_DELIVERY_ORDER_ROOMS]: (
     payload: string[],
   ) => void;
+  [ClientToServerEventName.JOIN_DELIVERY_ROOMS]: (
+    payload: string[],
+  ) => void;
 };
 
 export { type ClientToServerEventParameter };

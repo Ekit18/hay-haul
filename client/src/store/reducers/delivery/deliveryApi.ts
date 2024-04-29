@@ -1,58 +1,55 @@
 import { DeliveriesFilterFormValues } from '@/components/deliveries/deliveries-filter/validation';
 import { CreateDeliveryFormValues } from '@/components/deliveries/modals/create-delivery/validation';
 import { UpdateDeliveryFormValues } from '@/components/deliveries/modals/update-delivery/validation';
+import { ClientToServerEventName } from '@/lib/enums/client-to-server-event-name.enum';
 import { ServerToClientEventName } from '@/lib/enums/server-to-client-event-name.enum';
 import { socket } from '@/lib/helpers/socketService';
-import { Delivery } from '@/lib/types/Delivery/Delivery.type';
+import { Delivery, DeliveryStatusValues } from '@/lib/types/Delivery/Delivery.type';
 import { DataWithCount } from '@/lib/types/types';
 import { TagType, api } from '@/store/api';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { QueryCacheLifecycleApi } from 'node_modules/@reduxjs/toolkit/dist/query/endpointDefinitions';
 import { generatePath } from 'react-router-dom';
 
-async function onDeliveryCacheEntryAdded(
+async function onDeliveryCacheEntryAdded<T>(
     arg: URLSearchParams | string,
     {
         updateCachedData,
         cacheDataLoaded,
-        cacheEntryRemoved
-    }: QueryCacheLifecycleApi<URLSearchParams | string, BaseQueryFn, DataWithCount<Delivery>, 'api'>
+        cacheEntryRemoved,
+        dispatch
+    }: QueryCacheLifecycleApi<URLSearchParams | string, BaseQueryFn, T, 'api'>
 ) {
     try {
-        //TODO
-        // const { data } = await cacheDataLoaded;
-        // const auctionIds = data.data.map(({ id }) => id);
-
-        // socket.addListener(
-        //     ServerToClientEventName.DeliveryUpdated,
-        //     ({ auctionId, currentMaxBid, currentMaxBidId, auctionStatus, currentMaxBidUserId }) => {
-        //         updateCachedData((draft) => {
-        //             const updatedAuction = draft.data.find((auction) => auction.id === auctionId);
-        //             if (!updatedAuction) return;
-        //             console.log({ auctionId, currentMaxBid, currentMaxBidId, auctionStatus, currentMaxBidUserId });
-        //             if (updatedAuction.currentMaxBid) {
-        //                 updatedAuction.currentMaxBid.price = currentMaxBid;
-        //                 updatedAuction.currentMaxBid.userId = currentMaxBidUserId;
-        //                 updatedAuction.currentMaxBidId = currentMaxBidId;
-        //             }
-
-        //             if (auctionStatus) {
-        //                 updatedAuction.auctionStatus = auctionStatus;
-        //             }
-        //         });
-        //     }
-        // );
+        socket.addListener(
+            ServerToClientEventName.DeliveryUpdated,
+            () => {
+                console.log("DELIVERY UPDATE")
+                dispatch(api.util.invalidateTags([TagType.Delivery, TagType.Drivers]))
+            }
+        );
     } catch (e) {
         console.log(e);
         // no-op in case `cacheEntryRemoved` resolves before `cacheDataLoaded`,
         // in which case `cacheDataLoaded` will throw
     }
     await cacheEntryRemoved;
-    socket.removeAllListeners(ServerToClientEventName.AuctionUpdated);
+    socket.removeAllListeners(ServerToClientEventName.DeliveryUpdated);
+}
+
+export type GetDeliveryStatusResponse = {
+    deliveryStatus: DeliveryStatusValues
 }
 
 export const deliveryApi = api.injectEndpoints({
     endpoints: (builder) => ({
+        getDeliveryStatusById: builder.query<GetDeliveryStatusResponse, string>({
+            query: (id) => ({
+                url: generatePath('delivery/status/:id', { id }),
+            }),
+            onCacheEntryAdded: onDeliveryCacheEntryAdded,
+            providesTags: [TagType.Delivery]
+        }),
         createDelivery: builder.mutation<void, CreateDeliveryFormValues>({
             query: (body) => ({
                 url: 'delivery',

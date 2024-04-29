@@ -89,4 +89,18 @@ export class ProductsAuctionGateway
     );
     client.join(deliveryOrderIds);
   }
+
+  @SubscribeMessage(ClientToServerEventName.JOIN_DELIVERY_ROOMS)
+  joinDeliveryRooms(
+    @MessageBody()
+    deliveryIds: FirstParameter<
+      ClientToServerEventParameter[ClientToServerEventName.JOIN_DELIVERY_ROOMS]
+    >,
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    this.logger.log(
+      `Client ${client.user?.id} joined rooms: ${deliveryIds}`,
+    );
+    client.join(deliveryIds);
+  }
 }

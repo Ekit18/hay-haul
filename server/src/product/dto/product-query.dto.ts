@@ -23,7 +23,7 @@ export class ProductQueryDto {
 
   @IsString()
   @IsOptional()
-  farmId?: string;
+  facilityId?: string;
 
   @IsOptional()
   @IsArray()

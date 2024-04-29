@@ -13,7 +13,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { SignInFormValues, defaultSignInFormValues, useSignInFormSchema } from './validation';
 // eslint-disable-next-line camelcase
-import { AppRoute } from '@/lib/constants/routes';
+import { AppRoute, roleToMainRoute } from '@/lib/constants/routes';
 import jwt_decode from 'jwt-decode';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -40,8 +40,12 @@ export function SignInForm() {
         dispatch(setUser(user));
 
         dispatch(setAccessToken(accessToken));
+
+        return user;
       })
-      .then(() => navigate(AppRoute.General.Main))
+      .then((user: User) => {
+        navigate(roleToMainRoute[user.role]);
+      })
       .catch(handleRtkError);
   };
 

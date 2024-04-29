@@ -13,6 +13,7 @@ export const deliveryCardStatus: DeliveryCardStatusType = {
     [DeliveryStatus.OnTheWay]: 'bg-green-500 text-white hover:brightness-95 hover:bg-green-500',
     [DeliveryStatus.Unloading]: 'bg-yellow-500 text-black hover:brightness-95 hover:bg-yellow-500',
     [DeliveryStatus.AtBusinessFacility]: 'bg-green-400 text-white hover:brightness-95 hover:bg-green-400',
+    [DeliveryStatus.Finished]: 'bg-blue-500 text-white hover:brightness-95 hover:bg-blue-500'
 };
 
 export const deliveryStatusToReadableMap: DeliveryCardStatusType = {
@@ -22,5 +23,6 @@ export const deliveryStatusToReadableMap: DeliveryCardStatusType = {
     [DeliveryStatus.Loading]: 'Loading',
     [DeliveryStatus.OnTheWay]: 'On the way',
     [DeliveryStatus.AtBusinessFacility]: 'At business facility',
-    [DeliveryStatus.AtFarmerFacility]: 'At farmer facility'
+    [DeliveryStatus.AtFarmerFacility]: 'At farmer facility',
+    [DeliveryStatus.Finished]: 'Finished'
 }

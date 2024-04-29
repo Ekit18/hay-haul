@@ -114,7 +114,7 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: 'facilityDetails.name',
     id: 'farmName',
     header: () => {
-      return <div className="w-full text-center">Farm name</div>;
+      return <div className="w-full text-center">Facility name</div>;
     },
     cell: ({ row }) => {
       const facilityDetailsName = row.getValue('farmName') as string;
@@ -124,7 +124,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: 'facilityDetails.address',
     header: () => {
-      return <div className="w-full text-center">Farm address</div>;
+      return <div className="w-full text-center">Facility address</div>;
     },
     id: 'farmAddress',
     cell: ({ row }) => {

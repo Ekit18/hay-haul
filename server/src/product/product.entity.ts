@@ -6,6 +6,7 @@ import {
   Column,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToOne,
@@ -13,6 +14,7 @@ import {
 } from 'typeorm';
 
 @Entity()
+@Index(['name', 'quantity'])
 export class Product extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;

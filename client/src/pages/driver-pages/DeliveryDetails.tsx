@@ -24,6 +24,8 @@ import { PropsWithChildren, useState } from 'react';
 import { driverApi } from '@/store/reducers/driver-details/driverApi';
 import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { ConfirmModal } from '@/components/confirm-modal/ConfirmModal';
+import { DeliveryOrderStatus } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
+import { toast } from '@/components/ui/use-toast';
 
 export function DeliveryDetails() {
   const navigate = useNavigate();
@@ -43,7 +45,14 @@ export function DeliveryDetails() {
   const handleUpdateDeliveryClick = (id: string) => () => {
     update({ id })
       .unwrap()
-      .then(() => setOpen(false))
+      .then(() => {
+        setOpen(false);
+        toast({
+          variant: 'success',
+          title: 'Delivery updated',
+          description: 'Delivery has been updated successfully.'
+        });
+      })
       .catch(handleRtkError);
   };
 
@@ -134,7 +143,8 @@ export function DeliveryDetails() {
             fromAddress={delivery.deliveryOrder.productAuction?.product.facilityDetails?.address}
             toAddress={delivery.deliveryOrder.facilityDetails?.address}
           />
-          {statusToButtonMap({ status: delivery.status, handleClick: handleOpenChange })}
+          {delivery.deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Delivered &&
+            statusToButtonMap({ status: delivery.status, handleClick: handleOpenChange })}
         </div>
       </div>
       <div className="w-full pt-10">

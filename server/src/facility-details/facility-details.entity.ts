@@ -6,6 +6,7 @@ import { User } from 'src/user/user.entity';
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -16,6 +17,7 @@ export class FacilityDetails extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column()
   name: string;
 

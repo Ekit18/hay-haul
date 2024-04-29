@@ -35,10 +35,10 @@ import { ProductService } from './product.service';
 @ApiBearerAuth()
 @ApiTags('product')
 @UseGuards(JwtAuthGuard)
-@AllowedRoles(UserRole.Farmer)
+@AllowedRoles(UserRole.Farmer, UserRole.Businessman)
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   @ApiOperation({ summary: 'Return filtered products' })
   @ApiOkResponse({ description: 'Successfully fetch products' })

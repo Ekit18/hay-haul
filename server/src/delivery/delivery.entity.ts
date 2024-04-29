@@ -19,6 +19,7 @@ export enum DeliveryStatus {
   OnTheWay = 'ON_THE_WAY',
   Unloading = 'UNLOADING',
   AtBusinessFacility = 'AT_BUSINESS_FACILITY',
+  Finished = 'Finished'
 }
 
 @Entity()

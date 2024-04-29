@@ -1,12 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, QueryFailedError, Repository } from 'typeorm';
 import { Transport } from './transport.entity';
 import { CreateTransportDto } from './dto/create-transport.dto';
 import { TransportErrorMessage } from './transport-error-message.enum';
 import { UpdateTransportDto } from './dto/update-transport.dto';
 import { DeliveryStatus } from 'src/delivery/delivery.entity';
 import { DeliveryOrderStatus } from 'src/delivery-order/delivery-order.entity';
+import { UPDATE_OR_DELETE_TRANSPORT_TRIGGER_NAME } from 'src/trigger/trigger-data/transport.trigger';
+import { GET_AVAILABLE_TRANSPORT_FUNCTION_NAME } from 'src/function/function-data/transport.function';
 
 @Injectable()
 export class TransportService {
@@ -22,6 +24,21 @@ export class TransportService {
             });
             return transport;
         } catch (error) {
+            if (error instanceof QueryFailedError) {
+                const errorObject = error.driverError.precedingErrors[0];
+
+                const triggerErrorMessage = errorObject.message;
+
+                const isTriggerErrorMessage =
+                    errorObject.procName === UPDATE_OR_DELETE_TRANSPORT_TRIGGER_NAME;
+
+                throw new HttpException(
+                    isTriggerErrorMessage
+                        ? triggerErrorMessage
+                        : TransportErrorMessage.FailedToUpdateTransport,
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
             throw new HttpException(
                 TransportErrorMessage.FailedToCreateTransport || error.message,
                 HttpStatus.BAD_REQUEST || error.message,
@@ -69,12 +86,8 @@ export class TransportService {
         try {
             console.log('isAvailable', isAvailable)
             if (isAvailable) {
-                return await this.transportRepository.createQueryBuilder('transport').leftJoinAndSelect('transport.deliveries', 'deliveries')
-                    .leftJoin('deliveries.deliveryOrder', 'deliveryOrder')
-                    .where('transport.carrierId = :carrierId', { carrierId }).andWhere(new Brackets(qb => {
-                        qb.andWhere('deliveries.transportId IS NULL')
-                            .orWhere('deliveryOrder.deliveryOrderStatus = :status', { status: DeliveryOrderStatus.Delivered })
-                    })).getMany();
+                const res = await this.transportRepository.query(`SELECT * FROM ${GET_AVAILABLE_TRANSPORT_FUNCTION_NAME} (@0)`, [carrierId]);
+                return res;
             }
             return await this.transportRepository.find({ where: { carrierId } });
         } catch (error) {

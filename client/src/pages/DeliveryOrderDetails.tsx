@@ -23,7 +23,9 @@ import { DeliveryStatus, DeliveryStatusValues } from '@/lib/types/Delivery/Deliv
 import { DeliveryOrderStatus, deliveryOrderStatusText } from '@/lib/types/DeliveryOrder/DeliveryOrder.type';
 import { cn } from '@/lib/utils';
 import { deliveryOrderApi } from '@/store/reducers/delivery-order/deliveryOrderApi';
+import { deliveryApi } from '@/store/reducers/delivery/deliveryApi';
 import { stripeApi } from '@/store/reducers/stripe/stripeApi';
+import { skipToken } from '@reduxjs/toolkit/query';
 import { Stripe } from '@stripe/stripe-js';
 import { format, parseISO } from 'date-fns';
 import { Crown, Loader2, Package } from 'lucide-react';
@@ -46,6 +48,12 @@ export function DeliveryOrderDetails() {
   }, [deliveryOrderId]);
 
   const deliveryOrder = data?.data[0];
+
+  const {
+    data: deliveryStatusData,
+    isLoading: isDeliveryStatusLoading,
+    isFetching: isDeliveryStatusFetching
+  } = deliveryApi.useGetDeliveryStatusByIdQuery(deliveryOrder?.delivery?.id || skipToken);
 
   const currentOffer = useMemo(
     () => deliveryOrder?.deliveryOffers.find((offer) => offer.userId === user?.id),
@@ -123,7 +131,7 @@ export function DeliveryOrderDetails() {
     });
   }, [stripe]);
 
-  if (isFetching || isLoading || !data) {
+  if (isFetching || isLoading || isDeliveryStatusFetching || isDeliveryStatusLoading || !data) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin" />
@@ -280,7 +288,7 @@ export function DeliveryOrderDetails() {
           {deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Delivering ? (
             <>
               <h1 className="text-2xl font-bold">Delivery progress:</h1>
-              <Timeline deliveryStatus={deliveryOrder.delivery.status} />
+              <Timeline deliveryStatus={deliveryStatusData?.deliveryStatus ?? null} />
             </>
           ) : (
             deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Active && (

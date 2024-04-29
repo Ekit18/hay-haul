@@ -51,7 +51,7 @@ export function CreateProductAuctionForm() {
     resolver: yupResolver(productAuctionFormSchema)
   });
 
-  const farmId = form.watch('farmId');
+  const facilityId = form.watch('facilityId');
   const photos = form.watch('photos');
   const startPrice = form.watch('startPrice');
   const buyoutPrice = form.watch('buyoutPrice');
@@ -60,10 +60,10 @@ export function CreateProductAuctionForm() {
   // const { fields: photos } = useFieldArray({ control: form.control, name: 'photos' });
 
   useEffect(() => {
-    if (farmId) {
-      getProductsWithNoAuctions(new URLSearchParams({ farmId }));
+    if (facilityId) {
+      getProductsWithNoAuctions(new URLSearchParams({ facilityId }));
     }
-  }, [farmId]);
+  }, [facilityId]);
 
   const onSubmit: SubmitHandler<CreateProductAuctionFormValues> = async (data) => {
     await createProductAuction(data)
@@ -119,7 +119,7 @@ export function CreateProductAuctionForm() {
             <div className="flex w-full flex-col gap-4 py-4 md:flex-row">
               <div className="flex w-full flex-col gap-4">
                 <FilterSelect
-                  fieldName="farmId"
+                  fieldName="facilityId"
                   title="Farm"
                   values={farms}
                   placeholder="Select a farm"

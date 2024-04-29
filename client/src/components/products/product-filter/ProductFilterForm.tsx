@@ -19,15 +19,15 @@ export function ProductFilterForm() {
   }
 
   const userId = user.id;
-  const farmId = getValues('farmId');
+  const facilityId = getValues('facilityId');
   const productTypeId = getValues('productTypeId');
 
-  const { data: farms } = facilityDetailsApi.useGetAllByUserIdQuery(userId);
+  const { data: facilities } = facilityDetailsApi.useGetAllByUserIdQuery(userId);
 
-  const productTypesByFarmId = farms?.find((farm) => farm.id === farmId)?.productTypes || [];
+  const productTypesByFarmId = facilities?.find((facility) => facility.id === facilityId)?.productTypes || [];
 
   useEffect(() => {
-    if (!farmId) return;
+    if (!facilityId) return;
 
     if (
       productTypeId &&
@@ -37,26 +37,26 @@ export function ProductFilterForm() {
       return;
 
     setValue('productTypeId', []);
-  }, [farmId]);
+  }, [facilityId]);
 
   return (
     <>
       <div className=" flex flex-col gap-4 md:flex-row">
         <FilterSelect<ProductFilterFormValues, FacilityDetails[]>
           valueProperty="name"
-          title="Farm"
-          placeholder="Select a farm"
-          values={farms}
-          fieldName="farmId"
+          title="Facility"
+          placeholder="Select facility"
+          values={facilities}
+          fieldName="facilityId"
           containerClassName="mt-10 flex gap-4 flex-col md:flex-row w-full"
         />
         <div className="mt-10 w-full">
           <TagInput
-            labelText="Select farm products"
+            labelText="Select facility products"
             control={control}
             noOptionsText="No matching products"
             name="productTypeId"
-            disabled={!farms?.length || !farmId}
+            disabled={!facilities?.length || !facilityId}
             suggestions={productTypesByFarmId.map((productType) => ({
               label: productType.name,
               value: productType.id

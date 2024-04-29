@@ -12,6 +12,7 @@ export const DeliveryStatus = {
     OnTheWay: 'ON_THE_WAY',
     Unloading: 'UNLOADING',
     AtBusinessFacility: 'AT_BUSINESS_FACILITY',
+    Finished: 'Finished'
 } as const
 
 export type DeliveryStatusValues = ValueOf<typeof DeliveryStatus>

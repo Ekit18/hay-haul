@@ -154,7 +154,7 @@ export const productAuctionApi = api.injectEndpoints({
       })
     }),
     createProductAuction: builder.mutation<ProductAuction, CreateProductAuctionFormValues>({
-      query: ({ farmId: _, productId, photos, ...body }) => {
+      query: ({ facilityId: _, productId, photos, ...body }) => {
         const bodyFormData = new FormData();
         photos.forEach(async (photo) => {
           const arrayBuffer = await photo.arrayBuffer;

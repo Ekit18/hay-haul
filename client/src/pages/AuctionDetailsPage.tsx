@@ -38,6 +38,8 @@ import { Crown, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Navigate, generatePath, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Timeline } from '@/components/timeline/Timeline';
+import { deliveryApi } from '@/store/reducers/delivery/deliveryApi';
+import { skipToken } from '@reduxjs/toolkit/query';
 
 export function AuctionDetailsPage() {
   const user = useAppSelector((state) => state.user.user);
@@ -50,6 +52,12 @@ export function AuctionDetailsPage() {
     productAuctionApi.useLazyGetProductAuctionQuery();
 
   const productAuction = productAuctionWithCount?.data[0];
+
+  const {
+    data: deliveryStatusData,
+    isLoading: isDeliveryStatusLoading,
+    isFetching: isDeliveryStatusFetching
+  } = deliveryApi.useGetDeliveryStatusByIdQuery(productAuction?.deliveryOrder?.delivery?.id || skipToken);
 
   const [hookPaymentSuccessful] = stripeApi.usePaymentSuccessHookMutation();
 
@@ -189,7 +197,7 @@ export function AuctionDetailsPage() {
   if (!auctionId || isError) {
     return <Navigate to={generatePath(AppRoute.General.Auctions)} />;
   }
-  if (isFetching || isLoading || !productAuction) {
+  if (isFetching || isLoading || isDeliveryStatusFetching || isDeliveryStatusLoading || !productAuction) {
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin" />
@@ -386,7 +394,7 @@ export function AuctionDetailsPage() {
         {!!productAuction.deliveryOrder?.delivery?.status && (
           <div className="mt-4">
             <p>Delivery progress:</p>
-            <Timeline deliveryStatus={productAuction.deliveryOrder?.delivery?.status} />
+            <Timeline deliveryStatus={deliveryStatusData?.deliveryStatus ?? null} />
           </div>
         )}
       </div>

@@ -6,7 +6,7 @@ import { AnyObject, ObjectSchema, array, number, object, string } from 'yup';
 export type ProductFilterFormValues = {
   searchQuery?: string;
   productTypeId?: string[];
-  farmId?: string;
+  facilityId?: string;
   minQuantity?: number;
   maxQuantity?: number;
   nameSort?: SortOrderValues;
@@ -19,7 +19,7 @@ export type ProductFilterFormValues = {
 export const productFilterFormDefaultValues: ProductFilterFormValues = {
   searchQuery: '',
   productTypeId: [],
-  farmId: '',
+  facilityId: '',
   minQuantity: 0,
   maxQuantity: 0,
   nameSort: undefined,
@@ -35,7 +35,7 @@ export const useProductFilterFormSchema = (): ObjectSchema<
   {
     searchQuery: undefined;
     productTypeId: '';
-    farmId: undefined;
+    facilityId: undefined;
     minQuantity: undefined;
     maxQuantity: undefined;
     nameSort: undefined;
@@ -49,7 +49,7 @@ export const useProductFilterFormSchema = (): ObjectSchema<
   return object({
     searchQuery: string(),
     productTypeId: array().of(string().nonNullable().defined()),
-    farmId: string(),
+    facilityId: string(),
     minQuantity: number().test('minQuantity', 'Min quantity must be less than max quantity', function (value, context) {
       const { maxQuantity } = this.parent;
       if (!value) {

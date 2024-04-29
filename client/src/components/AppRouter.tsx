@@ -1,4 +1,4 @@
-import { AppRoute } from '@/lib/constants/routes';
+import { AppRoute, roleToMainRoute } from '@/lib/constants/routes';
 import { UserRole } from '@/lib/enums/user-role.enum';
 import { useAppSelector } from '@/lib/hooks/redux';
 import { OtpConfirmPage } from '@/pages/OtpConfirmPage';
@@ -51,7 +51,7 @@ export function AppRouter() {
           <Route key={path} path={path} element={<Component />} />
         ))}
       </Route>
-      <Route path="*" element={<Navigate to={AppRoute.General.Main} replace />} />
+      <Route path="*" element={<Navigate to={roleToMainRoute[user?.role as UserRole]} replace />} />
     </Route>
   );
   if (user?.role && [UserRole.Farmer, UserRole.Carrier].includes(user.role) && !user?.payoutsEnabled) {

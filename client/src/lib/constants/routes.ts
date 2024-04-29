@@ -1,3 +1,5 @@
+import { UserRole } from '../enums/user-role.enum';
+
 export const AppRoute = {
   General: {
     Main: '/',
@@ -40,4 +42,12 @@ export const AppRoute = {
     Deliveries: '/deliveries',
     DeliveryDetails: '/delivery-details/:deliveryId'
   }
+} as const;
+
+
+export const roleToMainRoute = {
+  [UserRole.Farmer]: AppRoute.Farmer.Farms,
+  [UserRole.Businessman]: AppRoute.Businessman.Depots,
+  [UserRole.Carrier]: AppRoute.Carrier.Deliveries,
+  [UserRole.Driver]: AppRoute.Driver.Deliveries
 } as const;
