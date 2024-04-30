@@ -50,6 +50,7 @@ import { Delivery } from './delivery/delivery.entity';
 import { CaslModule } from './casl/casl.module';
 import { MapController } from './map/map.controller';
 import { MapModule } from './map/map.module';
+import { ProcedureService } from './procedures/procedure.service';
 
 @Module({
   imports: [
@@ -140,16 +141,18 @@ import { MapModule } from './map/map.module';
     CaslModule,
     MapModule,
   ],
-  providers: [TriggerService, FunctionService],
+  providers: [TriggerService, FunctionService, ProcedureService],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(
     private readonly triggerService: TriggerService,
     private readonly functionService: FunctionService,
+    private readonly procedureService: ProcedureService,
   ) { }
 
   async onApplicationBootstrap(): Promise<void> {
     await this.functionService.seed();
     await this.triggerService.seed();
+    await this.procedureService.seed();
   }
 }

@@ -7,7 +7,7 @@ import {
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductAuctionService } from 'src/product-auction/product-auction.service';
 import { S3FileService } from 'src/s3-file/s3-file.service';
-import { And, Brackets, LessThanOrEqual, MoreThanOrEqual, Repository, SelectQueryBuilder } from 'typeorm';
+import { And, Brackets, LessThanOrEqual, MoreThanOrEqual, QueryFailedError, Repository, SelectQueryBuilder } from 'typeorm';
 import { DeliveryOrderErrorMessage } from './delivery-order-error-message.enum';
 import { DeliveryOrder, DeliveryOrderStatus } from './delivery-order.entity';
 import { CreateDeliveryOrderDto } from './dto/create-delivery-order.dto';
@@ -16,6 +16,8 @@ import { UpdateDeliveryOrderDto } from './dto/update-delivery-order.dto';
 import { DeliveryOrderLocationsQueryDto } from './dto/delivery-order-locations-query.dto';
 import { DeliveryOrderLocationsQueryResponse } from './dto/delivery-order-locations-query-response.dto';
 import { UserRole } from 'src/user/user.entity';
+import { GET_ALL_LOCATIONS_FUNCTION_NAME } from 'src/function/function-data/delivery-order.function';
+import { DELETE_ORDER_BY_ID_PROCEDURE_NAME } from 'src/procedures/procedures-data/delivery-order.procedure';
 
 @Injectable()
 export class DeliveryOrderService {
@@ -86,45 +88,25 @@ export class DeliveryOrderService {
     query: DeliveryOrderLocationsQueryDto,
   ): Promise<DeliveryOrderLocationsQueryResponse> {
 
-    const queryBuilder = await this.deliveryOrderRepository
-      .createQueryBuilder('order')
-      .leftJoinAndSelect('order.facilityDetails', 'facilityDetails')
-      .leftJoinAndSelect('order.productAuction', 'productAuction')
-      .leftJoinAndSelect('productAuction.product', 'product')
-      .leftJoinAndSelect('product.facilityDetails', 'productFacilityDetails');
-
-    if (query.carrierId) {
-      queryBuilder.leftJoinAndSelect('order.deliveryOffers', 'deliveryOffers')
-        .leftJoinAndSelect('order.chosenDeliveryOffer', 'chosenOffer')
-        .where(new Brackets(qb => {
-          qb.where('deliveryOffers.userId = :carrierId', { carrierId: query.carrierId })
-            .andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus: DeliveryOrderStatus.Active });
-        }))
-        .orWhere(new Brackets(qb => {
-          qb.where('chosenOffer.userId = :carrierId', { carrierId: query.carrierId })
-            .andWhere('order.deliveryOrderStatus IN (:...statuses)', { statuses: [DeliveryOrderStatus.Paid, DeliveryOrderStatus.WaitingPayment] });
-        }));
-    }
-
-    if (query.userId) {
-      queryBuilder.andWhere('order.userId = :userId', { userId: query.userId });
-    }
-
-    if (!query.userId && !query.carrierId) {
-      queryBuilder.andWhere('order.deliveryOrderStatus = :deliveryOrderStatus', { deliveryOrderStatus: DeliveryOrderStatus.Active });
-    }
-    const orders = await queryBuilder.getMany();
+    const res: { address: string, isDepot: boolean }[] = await this.deliveryOrderRepository.query(
+      `SELECT * FROM ${GET_ALL_LOCATIONS_FUNCTION_NAME}(@0,@1)`,
+      [query.userId ?? null, query.carrierId ?? null]
+    )
+    console.log("TEST")
+    console.log(res)
 
     const response: DeliveryOrderLocationsQueryResponse = {
       fromFarmLocations: [],
       toDepotLocations: [],
     };
-    for (const order of orders) {
-      response.fromFarmLocations.push(
-        order.productAuction.product.facilityDetails.address,
-      );
-      response.toDepotLocations.push(order.facilityDetails.address);
-    }
+
+    res.forEach(({ address, isDepot }) => {
+      if (isDepot) {
+        response.toDepotLocations.push(address)
+      } else {
+        response.fromFarmLocations.push(address)
+      }
+    })
     return response;
   }
 
@@ -369,27 +351,26 @@ export class DeliveryOrderService {
 
   public async deleteById(id: string, request: AuthenticatedRequest) {
     try {
-      const { data } = await this.findOneById(id);
-      const deliveryOrder = data[0];
 
       const userId = request.user.id;
+      await this.deliveryOrderRepository.query(`execute ${DELETE_ORDER_BY_ID_PROCEDURE_NAME} @id=@0, @userId=@1`, [id, userId])
+    } catch (error) {
+      console.log(error)
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.originalError.info;
 
-      if (deliveryOrder.userId !== userId) {
-        throw new HttpException(
-          DeliveryOrderErrorMessage.UnauthorizedDeleteDeliveryOrder,
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
+        const triggerErrorMessage = errorObject.message;
 
-      if (deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Inactive) {
+        const isTriggerErrorMessage =
+          errorObject.procName === `${DELETE_ORDER_BY_ID_PROCEDURE_NAME}`;
+
         throw new HttpException(
-          DeliveryOrderErrorMessage.CannotDeleteActiveDeliveryOrder,
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : DeliveryOrderErrorMessage.FailedToDeleteDeliveryOrder,
           HttpStatus.BAD_REQUEST,
         );
       }
-
-      await this.deliveryOrderRepository.delete(id);
-    } catch (error) {
       throw new HttpException(
         DeliveryOrderErrorMessage.FailedToDeleteDeliveryOrder,
         HttpStatus.INTERNAL_SERVER_ERROR,

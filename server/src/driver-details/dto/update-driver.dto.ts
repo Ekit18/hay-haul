@@ -4,7 +4,6 @@ import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { DriverStatus } from '../driver-details.entity';
 
 export class UpdateDriverDto extends PickType(UpdateUserDto, [
-    'email',
     'fullName',
 ]) {
     @IsString()

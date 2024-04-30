@@ -17,13 +17,14 @@ import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
 import { ProductAuctionStatus } from 'src/product-auction/product-auction.entity';
 import { ProductTypeErrorMessage } from 'src/product-type/product-type-error-message.enum';
 import { ProductTypeService } from 'src/product-type/product-type.service';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductErrorMessage } from './product-error-message.enum';
 import { Product } from './product.entity';
 import { ProductType } from 'src/product-type/product-type.entity';
+import { CREATE_PRODUCT_PROCEDURE_NAME, DELETE_PRODUCT_PROCEDURE_NAME, UPDATE_PRODUCT_PROCEDURE_NAME } from 'src/procedures/procedures-data/product.procedure';
 
 @Injectable()
 export class ProductService {
@@ -32,32 +33,38 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
     @Inject(forwardRef(() => FacilityDetailsService))
     private readonly facilityDetailsService: FacilityDetailsService,
-    @Inject(forwardRef(() => ProductTypeService))
-    private readonly productTypeService: ProductTypeService,
+    @Inject(forwardRef(() => ProductTypeService)) private readonly productTypeService: ProductTypeService,
+    @InjectRepository(ProductType) private readonly productTypeRepository: Repository<ProductType>,
+
+
   ) { }
 
   async createCopyToFacility(id: string, facilityId: string) {
     const { id: productId, ...product } = await this.productRepository.findOne({ where: { id }, relations: { productType: true } });
 
-    await this.productRepository.update(id, { deletedAt: new Date() });
+    await this.productRepository.manager.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.update(Product, id, { deletedAt: new Date() })
 
-    const productTypes = await this.productTypeService.findAllByFacility(facilityId);
+      const productTypes = await transactionalEntityManager.find(ProductType, {
+        where: { facilityDetailsId: facilityId },
+      });
 
-    const targetProductType = product.productType.name
+      const targetProductType = product.productType.name
 
-    const productType: ProductType | undefined = productTypes.find((type) => type.name === product.productType.name);
+      const productType: ProductType | undefined = productTypes.find((type) => type.name === product.productType.name);
 
-    if (productType) {
-      product.productType = productType;
-    } else {
-      const productType = await this.productTypeService.create({ name: targetProductType }, facilityId)
-      product.productType = productType;
-    }
+      if (productType) {
+        product.productType = productType;
+      } else {
+        const productType = await this.productTypeService.create({ name: targetProductType }, facilityId, transactionalEntityManager)
+        product.productType = productType;
+      }
 
-    return await this.productRepository.save({
-      ...product,
-      facilityDetailsId: facilityId,
-    });
+      return await transactionalEntityManager.save(Product, {
+        ...product,
+        facilityDetailsId: facilityId,
+      });
+    })
 
   }
 
@@ -79,8 +86,6 @@ export class ProductService {
   ) {
     try {
       const userId = request.user.id;
-
-      console.log();
 
       const queryBuilder = this.productRepository
         .createQueryBuilder('product')
@@ -219,14 +224,28 @@ export class ProductService {
     }
 
     try {
-      return await this.productRepository.save({
-        name: dto.name,
-        quantity: dto.quantity,
-        facilityDetails,
-        productType,
-      });
+      await this.productRepository.query(`execute ${CREATE_PRODUCT_PROCEDURE_NAME} 
+      @name=@0,
+      @quantity=@1,
+      @facilityId=@2,
+      @productTypeId=@3
+      `, [dto.name, dto.quantity, facilityId, productTypeId])
     } catch (error) {
-      console.error(error);
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.originalError.info;
+
+        const triggerErrorMessage = errorObject.message;
+
+        const isTriggerErrorMessage =
+          errorObject.procName === `${CREATE_PRODUCT_PROCEDURE_NAME}`;
+
+        throw new HttpException(
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : ProductErrorMessage.FailedUpdateProduct,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       throw new HttpException(
         ProductErrorMessage.FailedCreateProduct,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -241,63 +260,90 @@ export class ProductService {
   ) {
     const userId = request.user.id;
 
-    const product = await this.findOne(id);
-
-    if (
-      product.productAuction &&
-      product.productAuction.auctionStatus !== ProductAuctionStatus.Inactive &&
-      product.productAuction.auctionStatus !== ProductAuctionStatus.StartSoon
-    ) {
-      throw new HttpException(
-        ProductErrorMessage.ProductCannotBeUpdated,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (product.facilityDetails.user.id !== userId) {
-      throw new HttpException(
-        ProductErrorMessage.UnauthorizedUpdateProduct,
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
 
     try {
-      return await this.productRepository.save({
-        id,
-        ...updateProductDto,
-      });
-    } catch (error) {
-      console.error(error.message);
-      throw new HttpException(
-        ProductErrorMessage.FailedUpdateProduct,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      const res = await this.productTypeRepository.query(
+        `execute [dbo].[${UPDATE_PRODUCT_PROCEDURE_NAME}] @id=@0, @userId=@1, @name=@2, @quantity=@3`,
+        [
+          id,
+          userId,
+          updateProductDto.name ?? null,
+          updateProductDto.quantity ?? null,
+        ],
       );
+
+    } catch (error) {
+
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.originalError.info;
+
+        const triggerErrorMessage = errorObject.message;
+
+        const isTriggerErrorMessage =
+          errorObject.procName === `dbo.${UPDATE_PRODUCT_PROCEDURE_NAME}`;
+
+        throw new HttpException(
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : ProductErrorMessage.FailedUpdateProduct,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+
   }
 
   async remove(id: string, request: AuthenticatedRequest) {
     try {
-      const product = await this.findOne(id);
+      // const product = await this.findOne(id);
+
       const userId = request.user.id;
-      if (product.facilityDetails.user.id !== userId) {
+
+      // if (product.facilityDetails.user.id !== userId) {
+      //   throw new HttpException(
+      //     ProductErrorMessage.UnauthorizedUpdateProduct,
+      //     HttpStatus.UNAUTHORIZED,
+      //   );
+      // }
+
+      // if (
+      //   product.productAuction &&
+      //   product.productAuction.auctionStatus !==
+      //   ProductAuctionStatus.Inactive &&
+      //   product.productAuction.auctionStatus !== ProductAuctionStatus.StartSoon
+      // ) {
+      //   throw new HttpException(
+      //     ProductErrorMessage.CannotDeleteProductInEndedAuction,
+      //     HttpStatus.BAD_REQUEST,
+      //   );
+      // }
+
+      // await this.productRepository.delete(id);
+      const res = await this.productRepository.query(
+        `execute [dbo].[${DELETE_PRODUCT_PROCEDURE_NAME}] @id=@0, @userId=@1`,
+        [id, userId],
+
+      );
+    } catch (error) {
+      console.log(error)
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.originalError.info;
+
+        const triggerErrorMessage = errorObject.message;
+
+        const isTriggerErrorMessage =
+          errorObject.procName === `dbo.${DELETE_PRODUCT_PROCEDURE_NAME}`;
+
         throw new HttpException(
-          ProductErrorMessage.UnauthorizedUpdateProduct,
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-      if (
-        product.productAuction &&
-        product.productAuction.auctionStatus !==
-        ProductAuctionStatus.Inactive &&
-        product.productAuction.auctionStatus !== ProductAuctionStatus.StartSoon
-      ) {
-        throw new HttpException(
-          ProductErrorMessage.CannotDeleteProductInEndedAuction,
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : ProductErrorMessage.FailedDeleteProduct,
           HttpStatus.BAD_REQUEST,
         );
       }
-      await this.productRepository.delete(id);
-    } catch (error) {
+
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }

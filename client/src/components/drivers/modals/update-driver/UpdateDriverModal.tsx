@@ -88,7 +88,7 @@ export function UpdateDriverModal({ driver, handleUpdateModalOpenChange, open }:
                     <FormItem className="w-full">
                       <FormLabel htmlFor="email">Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter email" {...field} />
+                        <Input placeholder="Enter email" {...field} disabled />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

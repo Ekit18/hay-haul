@@ -10,11 +10,12 @@ import { AuthErrorMessage } from 'src/auth/auth-error-message.enum';
 import { ProductTypeService } from 'src/product-type/product-type.service';
 import { ProductService } from 'src/product/product.service';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { CreateFacilityDetailsDto } from './dto/create-facility-details.dto';
 import { UpdateFacilityDetailsDto } from './dto/update-facility-details.dto';
 import { FacilityDetailsErrorMessage } from './facility-details-error-message.enum';
 import { FacilityDetails } from './facility-details.entity';
+import { DELETE_FACILITY_DETAILS_PROCEDURE_NAME } from 'src/procedures/procedures-data/facility-details.procedure';
 
 @Injectable()
 export class FacilityDetailsService {
@@ -26,7 +27,7 @@ export class FacilityDetailsService {
     private readonly productTypeService: ProductTypeService,
     @Inject(forwardRef(() => ProductService))
     private readonly productService: ProductService,
-  ) {}
+  ) { }
 
   public async create(
     facilityDetailsDto: CreateFacilityDetailsDto,
@@ -48,12 +49,14 @@ export class FacilityDetailsService {
         code: facilityDetailsDto.code,
         user,
       });
+
       if (facilityDetailsDto.facilityProductTypes) {
         await this.productTypeService.createMany(
           facilityDetailsDto.facilityProductTypes,
           facilityDetails,
         );
       }
+
       return facilityDetails;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -86,16 +89,25 @@ export class FacilityDetailsService {
 
   public async remove(id: string): Promise<void> {
     try {
-      const products = await this.productService.findAllByFacilityId(id);
-      console.log(products);
-      if (products.length !== 0) {
+      await this.facilityDetailsRepository.query(`execute ${DELETE_FACILITY_DETAILS_PROCEDURE_NAME} @id=@0`, [id])
+    } catch (error) {
+      console.log(error);
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.originalError.info;
+
+        const triggerErrorMessage = errorObject.message;
+
+        const isTriggerErrorMessage =
+          errorObject.procName === `${DELETE_FACILITY_DETAILS_PROCEDURE_NAME}`;
+
         throw new HttpException(
-          FacilityDetailsErrorMessage.CannotDeleteFacilityWithProducts,
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : FacilityDetailsErrorMessage.FailedToDeleteFacilityDetails,
           HttpStatus.BAD_REQUEST,
         );
       }
-      await this.facilityDetailsRepository.delete(id);
-    } catch (error) {
+
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }

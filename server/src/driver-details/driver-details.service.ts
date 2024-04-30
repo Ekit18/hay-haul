@@ -4,7 +4,7 @@ import { Brackets, Repository } from 'typeorm';
 import { DriverDetails, DriverStatus } from './driver-details.entity';
 import { UserService } from 'src/user/user.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
-import { UserRole } from 'src/user/user.entity';
+import { User, UserRole } from 'src/user/user.entity';
 import { DriverDetailsErrorMessage } from './driver-details-error-message.enum';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 import { hash } from 'bcrypt';
@@ -18,6 +18,7 @@ import { GET_DRIVER_DETAILS_FUNCTION_NAME } from 'src/function/function-data/dri
 export class DriverDetailsService {
     constructor(@InjectRepository(DriverDetails) private readonly driverDetailsRepository: Repository<DriverDetails>,
         private readonly userService: UserService,
+        @InjectRepository(User) private readonly userRepository: Repository<User>
     ) { }
 
     async createDriver(carrierId: string, dto: CreateDriverDto) {
@@ -33,15 +34,27 @@ export class DriverDetailsService {
             );
         }
         try {
-            const hashPassword = await hash(dto.password, 5);
+            await this.driverDetailsRepository.manager.transaction(
+                async (transactionalEntityManager) => {
+                    const hashPassword = await hash(dto.password, 5);
+                    const user = await transactionalEntityManager.save(User, {
+                        email: dto.email,
+                        fullName: dto.fullName,
+                        password: hashPassword,
+                        role: UserRole.Driver,
+                        isVerified: true,
+                    });
 
-            const user = await this.userService.createDriver({ email: dto.email, fullName: dto.fullName, password: hashPassword, role: UserRole.Driver });
-            const driverDetails = await this.driverDetailsRepository.save({
-                ...dto,
-                user,
-                carrierId,
-            });
-            return driverDetails;
+                    const driverDetails = await transactionalEntityManager.save(DriverDetails, {
+                        ...dto,
+                        user,
+                        carrierId,
+                    });
+
+                    return driverDetails;
+                }
+            )
+
         } catch (error) {
             console.error(error)
             throw new HttpException(
@@ -61,10 +74,15 @@ export class DriverDetailsService {
                     HttpStatus.NOT_FOUND,
                 );
             }
-            await this.driverDetailsRepository.delete(driverId);
-            await this.userService.remove(driverDetails.userId);
-        } catch (error) {
 
+            await this.driverDetailsRepository.manager.transaction(
+                async (transactionalEntityManager) => {
+                    await transactionalEntityManager.delete(DriverDetails, driverId);
+                    await transactionalEntityManager.delete(User, driverDetails.userId);
+                }
+            )
+        } catch (error) {
+            console.log(error)
             throw new HttpException(
                 DriverDetailsErrorMessage.FailedToDeleteDriver || error.message,
                 HttpStatus.BAD_REQUEST,
@@ -85,13 +103,18 @@ export class DriverDetailsService {
 
             const status = DriverStatus[dto.driverStatus as keyof typeof DriverStatus];
 
-            await this.driverDetailsRepository.update(driverId, {
-                licenseId: dto.licenseId,
-                yearsOfExperience: dto.yearsOfExperience,
-                status,
-            });
+            await this.driverDetailsRepository.manager.transaction(
+                async (transactionalEntityManager) => {
+                    await transactionalEntityManager.update(DriverDetails, driverId, {
+                        licenseId: dto.licenseId,
+                        yearsOfExperience: dto.yearsOfExperience,
+                        status,
+                    });
 
-            await this.userService.update(driverDetails.userId, { email: dto.email, fullName: dto.fullName });
+                    await transactionalEntityManager.update(User, driverDetails.userId, { fullName: dto.fullName });
+                }
+            )
+
         } catch (error) {
             throw new HttpException(
                 DriverDetailsErrorMessage.FailedToUpdateDriver || error.message,

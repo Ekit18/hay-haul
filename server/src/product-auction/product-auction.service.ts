@@ -477,7 +477,7 @@ export class ProductAuctionService {
         const triggerErrorMessage = errorObject.message;
 
         const isTriggerErrorMessage =
-          errorObject.procName === UPDATE_AUCTION_TRIGGER_NAME || UPDATE_AUCTION_STATUS_TRIGGER_NAME;
+          errorObject.procName === UPDATE_AUCTION_TRIGGER_NAME;
 
         throw new HttpException(
           isTriggerErrorMessage
@@ -500,6 +500,7 @@ export class ProductAuctionService {
         photos: true,
       },
     });
+
     if (
       auction.auctionStatus !== ProductAuctionStatus.Inactive &&
       auction.auctionStatus !== ProductAuctionStatus.StartSoon
@@ -509,10 +510,14 @@ export class ProductAuctionService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     try {
       const photosKeys = auction.photos.map((photo) => photo.key);
+
       await this.s3FileService.removeByKeys(photosKeys);
+
       await this.productAuctionRepository.delete(auctionId);
+
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

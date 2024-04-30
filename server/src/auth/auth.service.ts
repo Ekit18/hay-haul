@@ -29,7 +29,7 @@ import { TokenResponse } from './dto/token-response.dto';
 import { generateOtpCode } from './helpers/generate-otp-code.helper';
 import { getCookieExpireDate } from './helpers/get-cookie-expire-date';
 import { Otp } from './otp.entity';
-import {EmailService} from "../email/email.service";
+import { EmailService } from "../email/email.service";
 
 @Injectable()
 export class AuthService {
@@ -54,7 +54,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly productTypeService: ProductTypeService,
     @InjectRepository(Otp) private readonly otpRepository: Repository<Otp>,
-  ) {}
+  ) { }
 
   async login(
     userDto: Login,

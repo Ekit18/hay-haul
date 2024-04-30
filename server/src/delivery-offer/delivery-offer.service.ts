@@ -2,7 +2,7 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeliveryOrderService } from 'src/delivery-order/delivery-order.service';
 import { AuthenticatedRequest } from 'src/lib/types/user.request.type';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { DeliveryOfferErrorMessage } from './delivery-offer-error-message.enum';
 import { DeliveryOffer, DeliveryOfferStatus } from './delivery-offer.entity';
 import { CreateDeliveryOfferDto } from './dto/create-delivery-offer.dto';
@@ -14,6 +14,7 @@ import { DeliveryOrderPaymentService } from 'src/delivery-order-payment/delivery
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationMessage } from 'src/notification/enums/notification-message.enum';
 import { Notifiable } from 'src/notification/notification.entity';
+import { CREATE_OFFER_PROCEDURE_NAME } from 'src/procedures/procedures-data/delivery-offer.procedure';
 
 @Injectable()
 export class DeliveryOfferService {
@@ -108,64 +109,14 @@ export class DeliveryOfferService {
     dto: CreateDeliveryOfferDto,
   ) {
     try {
-      const deliveryOrder =
-        await this.deliveryOrderService.findOneById(deliveryOrderId);
 
-      const candidateOffer = await this.deliveryOfferRepository.findOne({
-        where: {
-          deliveryOrderId,
-          userId: req.user.id,
-        },
-        relations: {
-          user: {
-            facilityDetails: true,
-          },
-        }
-      });
-
-      let offer: DeliveryOffer;
-
-      if (candidateOffer) {
-        offer = { ...candidateOffer, price: dto.price };
-        // SocketService.SocketServer.to(deliveryOrderId).emit(ServerEventName.DeliveryOrderUpdated, {
-        //   deliveryOrderId,
-        //   deliveryOrderStatus: deliveryOrder.data[0].deliveryOrderStatus,
-        //   deliveryOffers: deliveryOrder.data[0].deliveryOffers.map((deliveryOffer) => deliveryOffer.id === candidateOffer.id ? offer : deliveryOffer),
-        // });
-        // return
-        if (candidateOffer.price === dto.price) {
-          throw new HttpException(
-            DeliveryOfferErrorMessage.CannotSetSamePrice,
-            HttpStatus.BAD_REQUEST,
-          )
-        }
-        await this.deliveryOfferRepository.update({
-          userId: req.user.id,
-          deliveryOrderId,
-        }, {
-          ...dto,
-          offerStatus: DeliveryOfferStatus.Pending,
-        });
-      } else {
-
-        await this.deliveryOfferRepository.save({
-          ...dto,
-          deliveryOrderId,
-          userId: req.user.id,
-        });
-      }
-
-      // offer = await this.deliveryOfferRepository.findOne({
-      //   where: {
-      //     deliveryOrderId,
-      //     userId: req.user.id,
-      //   },
-      //   relations: {
-      //     user: {
-      //       facilityDetails: true,
-      //     },
-      //   }
-      // });
+      await this.deliveryOfferRepository.query(
+        `execute ${CREATE_OFFER_PROCEDURE_NAME} 
+        @orderId=@0,
+        @price=@1,
+        @userId=@2`,
+        [deliveryOrderId, dto.price, req.user.id]
+      )
 
       const { data: deliveryOrderData } = await this.deliveryOrderService.findOneById(deliveryOrderId);
 
@@ -177,9 +128,26 @@ export class DeliveryOfferService {
         deliveryOffers: deliveryOrderWithChangedOffers.deliveryOffers,
       });
 
-      return offer;
+      return await this.deliveryOfferRepository.findOne({ where: { deliveryOrderId, userId: req.user.id } });
 
     } catch (error) {
+      console.log(error)
+      if (error instanceof QueryFailedError) {
+        const errorObject = error.driverError.originalError.info;
+
+        const triggerErrorMessage = errorObject.message;
+
+        const isTriggerErrorMessage =
+          errorObject.procName === `${CREATE_OFFER_PROCEDURE_NAME}`;
+
+        throw new HttpException(
+          isTriggerErrorMessage
+            ? triggerErrorMessage
+            : DeliveryOfferErrorMessage.FailedToCreateDeliveryOffer,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       throw new HttpException(
         error.message,
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -202,7 +170,7 @@ export class DeliveryOfferService {
 
   public async deleteDeliveryOffer(deliveryOfferId: string, req: AuthenticatedRequest) {
     try {
-      const deliveryOffer = await this.deliveryOfferRepository.findOne({ where: { id: deliveryOfferId }, relations: { deliveryOrder: true } });
+      const deliveryOffer = await this.deliveryOfferRepository.findOne({ where: { id: deliveryOfferId, userId: req.user.id }, relations: { deliveryOrder: true } });
       if (!deliveryOffer) {
         throw new HttpException(
           DeliveryOfferErrorMessage.CannotDeleteNotOwnedDeliveryOffer,

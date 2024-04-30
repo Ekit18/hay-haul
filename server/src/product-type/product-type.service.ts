@@ -9,11 +9,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FacilityDetailsErrorMessage } from 'src/facility-details/facility-details-error-message.enum';
 import { FacilityDetails } from 'src/facility-details/facility-details.entity';
 import { FacilityDetailsService } from 'src/facility-details/facility-details.service';
-import { QueryFailedError, Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { CreateProductTypeDto } from './dto/create-product-type.dto';
 import { ProductType } from './product-type.entity';
-import { DELETE_PRODUCT_TYPE_TRIGGER_NAME } from 'src/trigger/trigger-data/product.trigger';
 import { ProductTypeErrorMessage } from './product-type-error-message.enum';
+import { DELETE_PRODUCT_TYPE_PROCEDURE_NAME } from 'src/procedures/procedures-data/product.procedure';
 
 @Injectable()
 export class ProductTypeService {
@@ -35,7 +35,9 @@ export class ProductTypeService {
           facilityDetailsId: facility.id,
         })),
       );
+
       await this.productTypeRepository.save(productTypes);
+
       return productTypes;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -61,7 +63,10 @@ export class ProductTypeService {
   public async create(
     productType: CreateProductTypeDto,
     facilityId: string,
+    transactionalEntityManager?: EntityManager
   ): Promise<ProductType> {
+    const entityManager = transactionalEntityManager || this.productTypeRepository.manager;
+
     const facilityDetails =
       await this.facilityDetailsService.getOneById(facilityId);
 
@@ -72,7 +77,7 @@ export class ProductTypeService {
       );
     }
 
-    return this.productTypeRepository.save({ ...productType, facilityDetails });
+    return entityManager.save(ProductType, { ...productType, facilityDetails });
   }
 
   public async update({
@@ -94,18 +99,19 @@ export class ProductTypeService {
   public async delete(id: string): Promise<void> {
     try {
       const res = await this.productTypeRepository.query(
-        'execute [dbo].[delete_product_type_procedure] @0',
+        `execute [dbo].[${DELETE_PRODUCT_TYPE_PROCEDURE_NAME}] @0`,
         [id],
       );
-      console.log('delete response', res);
+
     } catch (error) {
+
       if (error instanceof QueryFailedError) {
-        const errorObject = error.driverError.precedingErrors[0];
+        const errorObject = error.driverError.originalError.info;
 
         const triggerErrorMessage = errorObject.message;
 
         const isTriggerErrorMessage =
-          errorObject.procName === DELETE_PRODUCT_TYPE_TRIGGER_NAME;
+          errorObject.procName === `dbo.${DELETE_PRODUCT_TYPE_PROCEDURE_NAME}`;
 
         throw new HttpException(
           isTriggerErrorMessage
@@ -114,6 +120,7 @@ export class ProductTypeService {
           HttpStatus.BAD_REQUEST,
         );
       }
+
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
