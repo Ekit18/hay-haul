@@ -10,9 +10,11 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 
 @Entity()
+@Unique(['code'])
 export class FacilityDetails extends Timestamps {
   @PrimaryGeneratedColumn('uuid')
   id: string;

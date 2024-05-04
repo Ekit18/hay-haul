@@ -40,7 +40,7 @@ export function UpdateDriverModal({ driver, handleUpdateModalOpenChange, open }:
     resolver: yupResolver(updateDriverFormSchema)
   });
 
-  const onSubmit: SubmitHandler<UpdateDriverValues> = async (data) => {
+  const onSubmit: SubmitHandler<UpdateDriverValues> = async ({ email, ...data }: UpdateDriverValues) => {
     await updateDriver({ id: driver.id, data })
       .unwrap()
       .then(() => {

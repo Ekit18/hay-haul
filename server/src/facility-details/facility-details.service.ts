@@ -29,6 +29,10 @@ export class FacilityDetailsService {
     private readonly productService: ProductService,
   ) { }
 
+  public async findByCode(code: string) {
+    return await this.facilityDetailsRepository.findOne({ where: { code } })
+  }
+
   public async create(
     facilityDetailsDto: CreateFacilityDetailsDto,
     userId: string,

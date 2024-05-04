@@ -4,6 +4,7 @@ import { Timestamps } from 'src/lib/classes/timestamps.class';
 import { Transport } from 'src/transport/transport.entity';
 import { User } from 'src/user/user.entity';
 import {
+  Check,
   Column,
   Entity,
   JoinColumn,
@@ -22,6 +23,11 @@ export enum DeliveryStatus {
   Finished = 'Finished'
 }
 
+const statuses = Object.values(DeliveryStatus)
+  .map((status) => `'${status}'`)
+  .join(', ');
+
+@Check(`"status" IN (${statuses})`)
 @Entity()
 export class Delivery extends Timestamps {
   @PrimaryGeneratedColumn('uuid')

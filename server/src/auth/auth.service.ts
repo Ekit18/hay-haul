@@ -185,13 +185,27 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
+    const candidateFacility = await this.facilityDetailsService.findByCode(registerUserDto.facilityOfficialCode);
+
+    if (candidateFacility) {
+      throw new HttpException(
+        { message: AuthErrorMessage.FacilityWithCodeAlreadyExists },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+
     const hashPassword = await hash(registerUserDto.password, 5);
+
     const user = await this.userService.create({
       email: registerUserDto.email,
       fullName: registerUserDto.fullName,
       role: registerUserDto.role,
       password: hashPassword,
     });
+
+
 
     const facilityDetails = await this.facilityDetailsService.create(
       {

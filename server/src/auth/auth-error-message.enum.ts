@@ -12,4 +12,5 @@ export enum AuthErrorMessage {
   UserAlreadyVerified = 'User already verified',
   SomethingWentWrong = 'Something went wrong',
   UserNotFoundInToken = 'User not found in token',
+  FacilityWithCodeAlreadyExists = 'Facility with this code already exists',
 }
