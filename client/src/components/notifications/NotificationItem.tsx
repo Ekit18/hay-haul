@@ -35,6 +35,11 @@ const notifiableToItem: NotifiableItem = {
     route: AppRoute.General.DeliveryOrder,
     getRouteFill: (notification: Notification) => ({ deliveryOrderId: notification.notifiableId }),
     label: 'delivery order'
+  },
+  [Notifiable.Delivery]: {
+    route: AppRoute.Driver.DeliveryDetails,
+    getRouteFill: (notification: Notification) => ({ deliveryId: notification.notifiableId }),
+    label: 'delivery'
   }
 };
 

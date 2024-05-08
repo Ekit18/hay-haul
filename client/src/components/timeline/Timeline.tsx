@@ -46,11 +46,12 @@ const steps: TimelineItem[] = [
 
 export function Timeline({ deliveryStatus }: TimelineProps) {
   const [currentStep, setCurrentStep] = useState(steps.findIndex((step) => step.deliveryStatus === deliveryStatus) + 1);
-  const [complete, setComplete] = useState(false);
 
   if (deliveryStatus === null) {
     return <p className="mt-2 text-center text-xl font-bold">Driver hasn't accepted delivery yet</p>;
   }
+
+  const complete = deliveryStatus === DeliveryStatus.Finished;
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-between  py-5 ">

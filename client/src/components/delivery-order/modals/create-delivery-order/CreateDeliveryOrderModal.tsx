@@ -32,6 +32,8 @@ import {
   createDeliveryOrderDefaultValues,
   useCreateDeliveryOrderFormSchema
 } from './validation';
+import { AppRoute } from '@/lib/constants/routes';
+import { useNavigate } from 'react-router-dom';
 
 interface CreateDeliveryOrderModalHOCProps {
   auctionId?: string;
@@ -64,6 +66,8 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
   const user = useAppSelector((state) => state.user.user);
   const [createDeliveryOrder] = deliveryOrderApi.useCreateDeliveryOrderMutation();
 
+  const navigate = useNavigate();
+
   const { data: paidAuctions } = productAuctionApi.useGetPaidProductAuctionsQuery(!auctionId ? '' : skipToken);
 
   if (!user) {
@@ -94,6 +98,7 @@ function CreateDeliveryOrderModal({ auctionId, open, handleOpenChange }: CreateD
           title: 'Delivery order created',
           description: 'Delivery order has been created successfully.'
         });
+        navigate(AppRoute.Businessman.Delivery);
       })
       .finally(() => handleOpenChange(false))
       .catch(handleRtkError);

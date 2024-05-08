@@ -5,6 +5,7 @@ import { User } from '../User/User.type';
 export enum Notifiable {
   ProductAuction = 'ProductAuction',
   DeliveryOrder = 'DeliveryOrder',
+  Delivery = 'Delivery',
 }
 
 export type Notification = {

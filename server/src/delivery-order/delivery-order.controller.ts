@@ -87,6 +87,15 @@ export class DeliveryOrderController {
     return this.deliveryOrderService.update(id, dto, request);
   }
 
+  @AllowedRoles(UserRole.Businessman)
+  @Patch('finish/:id')
+  async finishDeliveryOrder(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.deliveryOrderService.finishDeliveryOrder(id, req);
+  }
+
   @Delete('/:id')
   async deleteDeliveryOrder(
     @Param('id') id: string,

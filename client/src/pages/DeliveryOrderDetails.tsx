@@ -1,4 +1,5 @@
 import { ImageCarousel } from '@/components/carousel/ImageCarousel';
+import { ConfirmModal } from '@/components/confirm-modal/ConfirmModal';
 import { DeliveryOfferCard } from '@/components/delivery-offer/delivery-offer-card/DeliveryOfferCard';
 import { CreateDeliveryOfferForm } from '@/components/delivery-offer/modals/create-delivery-offer/CreateDeliveryOfferModal';
 import { deliveryOrderStatus } from '@/components/delivery-order/card/DeliveryOrderCardStatus.enum';
@@ -54,6 +55,8 @@ export function DeliveryOrderDetails() {
     isLoading: isDeliveryStatusLoading,
     isFetching: isDeliveryStatusFetching
   } = deliveryApi.useGetDeliveryStatusByIdQuery(deliveryOrder?.delivery?.id || skipToken);
+
+  const [finishDelivery] = deliveryOrderApi.useFinishDeliveryOrderMutation();
 
   const currentOffer = useMemo(
     () => deliveryOrder?.deliveryOffers.find((offer) => offer.userId === user?.id),
@@ -131,6 +134,30 @@ export function DeliveryOrderDetails() {
     });
   }, [stripe]);
 
+  const [confirmDeliveryOpen, setConfirmDeliveryOpen] = useState<boolean>(false);
+
+  const handleConfirmDeliveryModalOpenChange = (open: boolean) => {
+    setConfirmDeliveryOpen(open);
+  };
+
+  const handleConfirmDeliveryClick = async () => {
+    if (deliveryOrderId === undefined) return;
+
+    await finishDelivery(deliveryOrderId)
+      .unwrap()
+      .then(() =>
+        toast({
+          variant: 'success',
+          title: 'Delivery was confirmed',
+          description: 'Delivery has been confirmed successfully.'
+        })
+      )
+      .catch(handleRtkError)
+      .finally(() => {
+        setConfirmDeliveryOpen(false);
+      });
+  };
+
   if (isFetching || isLoading || isDeliveryStatusFetching || isDeliveryStatusLoading || !data) {
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -140,7 +167,11 @@ export function DeliveryOrderDetails() {
   }
 
   if (!deliveryOrderId || isError || !deliveryOrder) {
-    return <Navigate to={generatePath(AppRoute.General.DeliveryOrder)} />;
+    return <Navigate to={AppRoute.Businessman.Delivery} />;
+  }
+
+  if (user?.role === UserRole.Businessman && deliveryOrder.userId !== user.id) {
+    return <Navigate to={AppRoute.Businessman.Delivery} />;
   }
 
   const handlePayClick = () => {
@@ -257,15 +288,19 @@ export function DeliveryOrderDetails() {
           )}
           {user?.role === UserRole.Businessman && deliveryOrder.chosenDeliveryOffer && (
             <div className="mb-8 flex h-fit w-80 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
-              <div className="">
+              <div>
                 <p className="text-center">Your chosen offer:</p>
                 <div className="mb-6 flex flex-col items-center gap-2">
                   <h2 className=" text-center text-3xl font-bold">{deliveryOrder.chosenDeliveryOffer.price} USD</h2>
                 </div>
-                <p>Winner:</p>
-                <p className="text-xl">Carrier: {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].name}</p>
-                <p className="text-xl">
-                  Carrier's Address: {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].address}
+                <p className="py-1 text-2xl">Winner:</p>
+                <p className="py-1 text-xl">
+                  <span className="font-bold">Company</span>:{' '}
+                  {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].name}
+                </p>
+                <p className="py-1 text-xl">
+                  <span className="font-bold">Address</span>:{' '}
+                  {deliveryOrder.chosenDeliveryOffer.user.facilityDetails[0].address}
                 </p>
               </div>
               <div className="flex w-3/4 flex-col gap-y-3">
@@ -281,6 +316,18 @@ export function DeliveryOrderDetails() {
                   </div>
                 )}
               </div>
+              {user?.role === UserRole.Businessman &&
+                deliveryOrder.chosenDeliveryOffer &&
+                deliveryOrder.deliveryOrderStatus === DeliveryOrderStatus.Delivering &&
+                deliveryOrder.delivery.status === DeliveryStatus.Finished && (
+                  <Button
+                    className="flex w-full  py-5"
+                    type="button"
+                    onClick={() => handleConfirmDeliveryModalOpenChange(true)}
+                  >
+                    Confirm delivery
+                  </Button>
+                )}
             </div>
           )}
         </div>
@@ -304,6 +351,12 @@ export function DeliveryOrderDetails() {
           )}
         </div>
       </div>
+      <ConfirmModal
+        open={confirmDeliveryOpen}
+        handleOpenChange={handleConfirmDeliveryModalOpenChange}
+        confirmCallback={handleConfirmDeliveryClick}
+        message="Are you sure you want to confirm delivery?"
+      />
     </div>
   );
 }

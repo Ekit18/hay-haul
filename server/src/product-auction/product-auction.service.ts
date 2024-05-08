@@ -119,24 +119,28 @@ export class ProductAuctionService {
         .leftJoinAndSelect('product.productType', 'productType')
         .leftJoinAndSelect('productAuction.currentMaxBid', 'currentMaxBid')
         .leftJoinAndSelect('product.facilityDetails', 'facilityDetails')
-        .leftJoin('facilityDetails.user', 'user')
-        .addSelect('user.id')
-        .addSelect('user.fullName')
+        .leftJoin('facilityDetails.user', 'farmerUser')
+        .leftJoin('currentMaxBid.user', 'bidUser')
+        .addSelect('farmerUser.id')
+        .addSelect('farmerUser.fullName')
         .where('productAuction.id = :id', { id })
+
+
 
       if (req) {
         const userId = req.user.id;
+
         queryBuilder.leftJoin(
           'productAuction.deliveryOrder',
           'deliveryOrder',
-          'user.id = :userId',
+          'farmerUser.id = :userId OR (bidUser.id IS NOT NULL AND bidUser.id = :userId)',
           { userId },
         )
           .addSelect('deliveryOrder.id')
           .leftJoin(
             'deliveryOrder.delivery',
             'delivery',
-            'user.id = :userId',
+            'farmerUser.id = :userId OR (bidUser.id IS NOT NULL AND bidUser.id = :userId)',
             { userId },
           )
           .addSelect('delivery.id')

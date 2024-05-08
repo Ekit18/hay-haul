@@ -19,6 +19,27 @@ import { Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
 
+type PaymentTypeMapItem = {
+  detailsText: string;
+  generatePath: (id: string) => string;
+  payText: string;
+};
+
+const createName = (from: string, to: string) => `${capitalize(from)} to ${capitalize(to)}`;
+
+const targetTypeMap: Record<PaymentTargetType, PaymentTypeMapItem> = {
+  [PaymentTargetType.DeliveryOrder]: {
+    generatePath: (id: string) => generatePath(AppRoute.General.DeliveryOrder, { deliveryOrderId: id }),
+    detailsText: 'Order details',
+    payText: 'Pay for the order'
+  },
+  [PaymentTargetType.ProductAuction]: {
+    generatePath: (id: string) => generatePath(AppRoute.General.AuctionDetails, { auctionId: id }),
+    detailsText: 'Auction details',
+    payText: 'Pay for the product'
+  }
+} as const;
+
 export function PaymentsPage() {
   const [getPaymentsByUserId, { data, isLoading, isError, error }] = paymentsApi.useLazyGetPaymentsByUserIdQuery();
   const { loadMoreRef, page: currentPage } = useInfiniteScroll({ maxPage: data?.count });
@@ -51,89 +72,68 @@ export function PaymentsPage() {
   }
 
   let content = null;
+
   if (data.data.length === 0) {
     content = <h2 className="text-xl font-bold">No payments</h2>;
   } else {
     content = (
       <Accordion type="single" collapsible>
         {data.data.map((payment) => {
-          let name = '';
-          let details = null;
-          if (payment.targetType === PaymentTargetType.DeliveryOrder) {
-            name = `${capitalize(payment.target.productAuction.product.name)} by ${capitalize(payment.target.productAuction.product.facilityDetails.name)}`;
-            details = (
-              <div className="flex w-full justify-between pt-4">
-                <div className="flex flex-row items-end">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      navigate(generatePath(AppRoute.General.DeliveryOrder, { deliveryOrderId: payment.target.id }))
-                    }
-                  >
-                    Order details
-                  </Button>
-                </div>
-                {user?.role === UserRole.Businessman && payment.status === PaymentStatus.WaitingPayment && (
-                  <Button
-                    onClick={() =>
-                      navigate(generatePath(AppRoute.General.DeliveryOrder, { deliveryOrderId: payment.target.id }))
-                    }
-                    type="button"
-                    className=" bg-yellow-400 text-black hover:bg-yellow-500"
-                  >
-                    Pay for the order
-                  </Button>
-                )}
+          const uiForTarget = targetTypeMap[payment.targetType];
+
+          const productName =
+            payment.targetType === PaymentTargetType.DeliveryOrder
+              ? payment.target.productAuction.product.name
+              : payment.target.product.name;
+          const to =
+            payment.targetType === PaymentTargetType.DeliveryOrder
+              ? payment.target.productAuction.product.facilityDetails.name
+              : payment.target.product.facilityDetails.name;
+
+          const name = createName(productName, to);
+
+          const details = (
+            <div className="flex w-full justify-between px-8 pt-4">
+              <div className="flex flex-row items-end">
+                <Button variant="outline" onClick={() => navigate(uiForTarget.generatePath(payment.target.id))}>
+                  {uiForTarget.detailsText}
+                </Button>
               </div>
-            );
-          } else {
-            name = `${capitalize(payment.target.product.name)} by ${capitalize(payment.target.product.facilityDetails.name)}`;
-            details = (
-              <div className="flex w-full justify-between pt-4 ">
-                <div className="flex flex-row items-end">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: payment.target.id }))
-                    }
-                  >
-                    Auction details
-                  </Button>
-                </div>
-                {user?.role === UserRole.Businessman && payment.status === PaymentStatus.WaitingPayment && (
-                  <Button
-                    onClick={() =>
-                      navigate(generatePath(AppRoute.General.AuctionDetails, { auctionId: payment.target.id }))
-                    }
-                    type="button"
-                    className=" bg-yellow-400 text-black hover:bg-yellow-500"
-                  >
-                    Pay for the product
-                  </Button>
-                )}
-              </div>
-            );
-          }
+              {user?.role === UserRole.Businessman && payment.status === PaymentStatus.WaitingPayment && (
+                <Button
+                  onClick={() => navigate(uiForTarget.generatePath(payment.target.id))}
+                  type="button"
+                  className=" bg-yellow-400 text-black hover:bg-yellow-500"
+                >
+                  {uiForTarget.payText}
+                </Button>
+              )}
+            </div>
+          );
 
           return (
             <AccordionItem value={payment.id} key={payment.id}>
-              <AccordionTrigger>
+              <AccordionTrigger className="[&_svg]:w-8">
                 <div className="flex w-full flex-row justify-between px-2">
-                  <div className="flex w-full grid-cols-4">
-                    <div className="border-r-2 px-4 font-bold">{user && getPaymentType({ payment, user })}</div>
-                    <div className="border-r-2 px-4 font-bold">{user && getFormattedAmount({ payment, user })}</div>
-                    <div className="px-4">{name}</div>
-                    <div className="ml-auto pr-4 text-gray-500">
-                      ({format(parseISO(payment.updatedAt), 'dd-MM-yyyy HH:mm:ss')})
+                  <div className="grid w-full grid-cols-1 gap-2 border-r-2 md:grid-cols-1  lg:grid-cols-5 lg:gap-0 lg:border-r-0">
+                    <div className="flex items-center justify-center px-4 font-bold lg:border-r-2">
+                      {user && getPaymentType({ payment, user })}
                     </div>
-                  </div>
-                  <div
-                    className={cn(
-                      'w-max whitespace-nowrap rounded-lg px-2 py-1 text-sm',
-                      productAuctionStatus[payment.status]
-                    )}
-                  >
-                    {ProductAuctionStatusText[payment.status]}
+                    <div className="flex items-center justify-center px-4 font-bold lg:border-r-2">
+                      {user && getFormattedAmount({ payment, user })}
+                    </div>
+                    <div className="flex items-center justify-center px-4 lg:border-r-2">{name}</div>
+                    <div className="flex items-center justify-center text-center text-gray-500 lg:border-r-2">
+                      <span>({format(parseISO(payment.updatedAt), 'dd-MM-yyyy HH:mm:ss')})</span>
+                    </div>
+                    <div
+                      className={cn(
+                        'm-auto h-min w-max whitespace-nowrap rounded-lg  p-2 text-center text-sm',
+                        productAuctionStatus[payment.status]
+                      )}
+                    >
+                      {ProductAuctionStatusText[payment.status]}
+                    </div>
                   </div>
                 </div>
               </AccordionTrigger>

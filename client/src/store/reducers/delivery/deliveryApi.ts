@@ -56,14 +56,14 @@ export const deliveryApi = api.injectEndpoints({
                 method: 'POST',
                 body,
             }),
-            invalidatesTags: [TagType.Delivery, TagType.Drivers]
+            invalidatesTags: [TagType.Delivery, TagType.Drivers, TagType.DeliveryOrder]
         }),
         deleteDelivery: builder.mutation<void, string>({
             query: (id) => ({
                 url: generatePath('delivery/:id', { id }),
                 method: 'DELETE',
             }),
-            invalidatesTags: [TagType.Delivery, TagType.Drivers]
+            invalidatesTags: [TagType.Delivery, TagType.Drivers, TagType.DeliveryOrder]
         }),
         getAllDeliveriesByCarrierId: builder.query<DataWithCount<Delivery>, URLSearchParams>({
             query: (searchParams) => ({
@@ -80,7 +80,7 @@ export const deliveryApi = api.injectEndpoints({
                 method: 'PATCH',
                 body,
             }),
-            invalidatesTags: [TagType.Delivery, TagType.Drivers]
+            invalidatesTags: [TagType.Delivery, TagType.Drivers, TagType.DeliveryOrder]
         }),
         updateDeliveryByDriver: builder.mutation<void, { id: string }>({
             query: ({ id }) => ({

@@ -277,7 +277,8 @@ export function AuctionDetailsPage() {
             </p>
           </div>
           <div className="flex h-fit w-60 flex-col items-center rounded-lg bg-gray-100 px-2 py-4">
-            <p>Don&apos;t waste time!</p>
+            {(productAuction.auctionStatus === ProductAuctionStatus.Active ||
+              productAuction.auctionStatus === ProductAuctionStatus.EndSoon) && <p>Don&apos;t waste time!</p>}
             <div className="pb-4 pt-2">
               {(productAuction.auctionStatus === ProductAuctionStatus.Active ||
                 productAuction.auctionStatus === ProductAuctionStatus.EndSoon) && (

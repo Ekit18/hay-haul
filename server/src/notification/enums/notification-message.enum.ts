@@ -23,6 +23,7 @@ export enum NotificationMessage {
   BusinessmanAuctionEndSoon = 'BUSINESSMAN_AUCTION_END_SOON',
   AuctionEndedNoBids = 'AUCTION_ENDED_NO_BIDS',
   AuctionEndedWithBids = 'AUCTION_ENDED_WITH_BIDS',
+  AuctionPaid = 'AUCTION_PAID',
   DeliveryOrderPaid = 'DELIVERY_ORDER_PAID',
   BusinessmanAuctionWon = 'BUSINESSMAN_AUCTION_WON',
   BusinessmanAuctionPaymentOverdue = 'BUSINESSMAN_AUCTION_PAYMENT_OVERDUE',
@@ -36,4 +37,5 @@ export enum NotificationMessage {
   DriverUnloading = 'DRIVER_UNLOADING',
   DriverArriveToBusiness = 'DRIVER_ARRIVE_TO_BUSINESS',
   DriverEndedDelivery = 'DRIVER_ENDED_DELIVERY',
+  CarrierAssignedDriver = 'CARRIER_ASSIGNED_DRIVER',
 }

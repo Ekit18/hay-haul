@@ -66,8 +66,11 @@ export function CreateProductModal() {
           title: 'Product created',
           description: 'Product has been created successfully.'
         });
+        form.reset();
       })
-      .finally(() => setOpen(false))
+      .finally(() => {
+        setOpen(false);
+      })
       .catch(handleRtkError);
   };
 
@@ -163,10 +166,10 @@ export function CreateProductModal() {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel>Quantity (ton)</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Quantity"
+                          placeholder="Enter quantity"
                           {...field}
                           value={field.value || ''}
                           onBlur={(e) => {

@@ -146,7 +146,7 @@ export class PaymentFacadeService {
       await this.notificationService.createNotification(
         auction.product.facilityDetails.user.id,
         auction.id,
-        NotificationMessage.AuctionEndedWithBids,
+        NotificationMessage.AuctionPaid,
         Notifiable.ProductAuction
       );
 

@@ -41,7 +41,7 @@ export function SidebarSheet() {
               {link.title}
             </Button>
           ))}
-          {[UserRole.Farmer, UserRole.Businessman].includes(userRole) && <NotificationLink />}
+          <NotificationLink />
           <LogOutButton className="mb-7" />
         </div>
       </SheetContent>

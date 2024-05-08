@@ -5,6 +5,7 @@ import { handleRtkError } from '@/lib/helpers/handleRtkError';
 import { userApi } from '@/store/reducers/user/userApi';
 import { useFormContext } from 'react-hook-form';
 import OTPInput from 'react-otp-input';
+import { toast } from '@/components/ui/use-toast';
 import { ResetPasswordFormValues } from '../validation';
 
 export function InputOtp() {
@@ -14,7 +15,16 @@ export function InputOtp() {
   const email = getValues('email');
 
   const handleNewOtp = async () => {
-    await newOtp({ email, type: OtpType.FORGOT_PASSWORD }).unwrap().catch(handleRtkError);
+    await newOtp({ email, type: OtpType.FORGOT_PASSWORD })
+      .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'New OTP sent',
+          description: 'We have sent a new OTP to your email.'
+        });
+      })
+      .catch(handleRtkError);
   };
 
   return (

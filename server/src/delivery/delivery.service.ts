@@ -37,8 +37,15 @@ export class DeliveryService {
 
     async create(dto: CreateDeliveryDto, req: AuthenticatedRequest) {
         const { user: { id: carrierId } } = req;
-        const delivery = this.deliveryRepository.save({ ...dto, carrierId });
+
+        const delivery = await this.deliveryRepository.save({ ...dto, carrierId });
+
+        const driver = await this.driverDetailsRepository.findOne({ where: { id: dto.driverId }, relations: { user: true } })
+
+        await this.notificationService.createNotification(driver.user.id, delivery.id, NotificationMessage.CarrierAssignedDriver, Notifiable.Delivery)
+
         await this.deliveryOrderRepository.update(dto.deliveryOrderId, { deliveryOrderStatus: DeliveryOrderStatus.Delivering })
+
         return delivery;
     }
 
@@ -100,7 +107,6 @@ export class DeliveryService {
                 notificationMessage = NotificationMessage.DriverEndedDelivery
 
                 await this.moveProductByDeliveryId(id)
-                await this.deliveryOrderRepository.update(delivery.deliveryOrder.id, { deliveryOrderStatus: DeliveryOrderStatus.Delivered })
 
             // TODO:remove
             default:
@@ -140,6 +146,10 @@ export class DeliveryService {
     }
 
     async delete(id: string) {
+        const delivery = await this.deliveryRepository.findOne({ where: { id }, relations: { deliveryOrder: true } })
+
+        await this.deliveryOrderRepository.update(delivery.deliveryOrderId, { deliveryOrderStatus: DeliveryOrderStatus.Paid })
+
         return this.deliveryRepository.delete(id);
     }
 

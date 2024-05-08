@@ -31,16 +31,20 @@ export class DeliveryOfferService {
   public async acceptOfferById(req: AuthenticatedRequest, id: string) {
     const offer = await this.deliveryOfferRepository.findOne({
       where: { id }, relations: {
+        user: true,
         deliveryOrder: {
-          user: true
+          user: true,
         }
       }
     })
     console.log(offer.deliveryOrder.chosenDeliveryOffer)
+
     if (offer.deliveryOrder.user.id !== req.user.id) {
       throw new BadRequestException({ message: 'Can accept only own order offers' })
     }
+
     await this.deliveryOrderService.update(offer.deliveryOrder.id, { chosenDeliveryOfferId: id, deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment }, req);
+
     await this.deliveryOfferRepository.manager.transaction(
       'SERIALIZABLE',
       async (transactionalEntityManager) => {
@@ -48,8 +52,8 @@ export class DeliveryOfferService {
         await transactionalEntityManager.save(DeliveryOffer, { id, offerStatus: DeliveryOfferStatus.Accepted })
         const targetId = offer.deliveryOrder.id;
         const buyerId = req.user?.id
-        const sellerId = offer.deliveryOrder.chosenDeliveryOffer.user.id;
-        const amount = offer.deliveryOrder.chosenDeliveryOffer.price
+        const sellerId = offer.user.id;
+        const amount = offer.price
 
         await this.deliveryOrderPaymentService.create({
           targetId,
@@ -58,7 +62,9 @@ export class DeliveryOfferService {
           sellerId,
           amount,
         }, transactionalEntityManager);
+
         await transactionalEntityManager.update(DeliveryOrder, offer.deliveryOrder.id, { deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment, chosenDeliveryOfferId: id });
+
         await this.notificationService.createNotification(
           offer.user.id,
           offer.deliveryOrder.id,
@@ -67,6 +73,7 @@ export class DeliveryOfferService {
           transactionalEntityManager,
         )
       })
+
     SocketService.SocketServer.to(offer.deliveryOrder.id).emit(ServerEventName.DeliveryOrderUpdated, {
       deliveryOrderId: offer.deliveryOrder.id,
       deliveryOrderStatus: DeliveryOrderStatus.WaitingPayment,

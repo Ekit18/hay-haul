@@ -6,6 +6,7 @@ export enum NotificationMessage {
   FarmerAuctionEndSoon = 'FARMER_AUCTION_END_SOON',
   BusinessmanAuctionEndSoon = 'BUSINESSMAN_AUCTION_END_SOON',
   AuctionEndedNoBids = 'AUCTION_ENDED_NO_BIDS',
+  AuctionPaid = 'AUCTION_PAID',
   AuctionEndedWithBids = 'AUCTION_ENDED_WITH_BIDS',
   BusinessmanAuctionWon = 'BUSINESSMAN_AUCTION_WON',
   BusinessmanAuctionPaymentOverdue = 'BUSINESSMAN_AUCTION_PAYMENT_OVERDUE',
@@ -20,4 +21,5 @@ export enum NotificationMessage {
   DriverUnloading = 'DRIVER_UNLOADING',
   DriverArriveToBusiness = 'DRIVER_ARRIVE_TO_BUSINESS',
   DriverEndedDelivery = 'DRIVER_ENDED_DELIVERY',
+  CarrierAssignedDriver = 'CARRIER_ASSIGNED_DRIVER',
 }

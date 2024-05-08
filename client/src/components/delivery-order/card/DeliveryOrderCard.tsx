@@ -139,9 +139,7 @@ export function DeliveryOrderCard({ deliveryOrder }: DeliveryOrderCardProps) {
               <Button
                 className="w-full bg-yellow-400 text-black hover:bg-yellow-500"
                 type="button"
-                onClick={() =>
-                  navigate(generatePath(AppRoute.General.DeliveryOrder, { deliveryOrderId: deliveryOrder.id }))
-                }
+                onClick={() => navigate(AppRoute.Carrier.Deliveries)}
               >
                 Create delivery
               </Button>

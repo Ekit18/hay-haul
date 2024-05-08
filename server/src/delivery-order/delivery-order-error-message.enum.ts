@@ -11,4 +11,6 @@ export enum DeliveryOrderErrorMessage {
   FailedToUpdateDeliveryOrder = 'Failed to update delivery order',
   CannotUpdateActiveDeliveryOrder = 'You cannot update an active delivery order',
   UnauthorizedUpdateDeliveryOrder = 'You are not authorized to update this delivery order',
+  CannotFinishInactiveDeliveryOrder = 'You cannot finish an inactive delivery order',
+  CannotFinishNotFinishedDelivery = 'You cannot finish the order until the delivery is finished'
 }

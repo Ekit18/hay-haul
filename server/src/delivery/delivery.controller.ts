@@ -24,7 +24,7 @@ export class DeliveryController {
         return this.deliveryService.findAll(dto, request)
     }
 
-    @AllowedRoles(UserRole.Carrier, UserRole.Driver, UserRole.Farmer)
+    @AllowedRoles(UserRole.Carrier, UserRole.Driver, UserRole.Farmer, UserRole.Businessman)
     @Get('status/:id')
     getDeliveryStatus(@Param('id') id: string) {
         return this.deliveryService.getDeliveryStatus(id);

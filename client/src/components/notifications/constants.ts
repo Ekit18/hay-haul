@@ -35,6 +35,10 @@ export const notificationMessages: Record<NotificationMessage, { icon: LucideIco
     icon: AlertCircleIcon,
     message: 'Auction ended with bids'
   },
+  [NotificationMessage.AuctionPaid]: {
+    icon: AlertCircleIcon,
+    message: 'Auction was paid'
+  },
   [NotificationMessage.BusinessmanAuctionWon]: {
     icon: AlertCircleIcon,
     message: 'You have won the businessman auction'
@@ -86,5 +90,9 @@ export const notificationMessages: Record<NotificationMessage, { icon: LucideIco
   [NotificationMessage.DriverEndedDelivery]: {
     icon: AlertCircleIcon,
     message: 'Driver has ended the delivery'
+  },
+  [NotificationMessage.CarrierAssignedDriver]: {
+    icon: AlertCircleIcon,
+    message: 'Carrier has assigned you for delivery'
   }
 };

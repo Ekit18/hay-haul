@@ -18,10 +18,13 @@ import { DeliveryOrderLocationsQueryResponse } from './dto/delivery-order-locati
 import { UserRole } from 'src/user/user.entity';
 import { GET_ALL_LOCATIONS_FUNCTION_NAME } from 'src/function/function-data/delivery-order.function';
 import { DELETE_ORDER_BY_ID_PROCEDURE_NAME } from 'src/procedures/procedures-data/delivery-order.procedure';
+import { Delivery, DeliveryStatus } from 'src/delivery/delivery.entity';
 
 @Injectable()
 export class DeliveryOrderService {
   public constructor(
+    @InjectRepository(Delivery)
+    private readonly deliveryRepository: Repository<Delivery>,
     @InjectRepository(DeliveryOrder)
     private readonly deliveryOrderRepository: Repository<DeliveryOrder>,
     private readonly productAuctionService: ProductAuctionService,
@@ -403,6 +406,31 @@ export class DeliveryOrderService {
         DeliveryOrderErrorMessage.FailedToUpdateDeliveryOrder,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  public async finishDeliveryOrder(id: string, req: AuthenticatedRequest) {
+    try {
+      const deliveryOrder = await this.deliveryOrderRepository.findOne({ where: { id }, relations: { delivery: true } });
+
+      if (deliveryOrder.delivery.status !== DeliveryStatus.Finished) {
+        throw new HttpException(
+          DeliveryOrderErrorMessage.CannotFinishNotFinishedDelivery,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+      if (deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Delivering) {
+        throw new HttpException(
+          DeliveryOrderErrorMessage.CannotFinishInactiveDeliveryOrder,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      deliveryOrder.deliveryOrderStatus = DeliveryOrderStatus.Delivered;
+
+      await this.deliveryOrderRepository.save(deliveryOrder);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 }

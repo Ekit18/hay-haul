@@ -144,6 +144,13 @@ export const deliveryOrderApi = api.injectEndpoints({
         body
       }),
       invalidatesTags: [TagType.DeliveryOrder, TagType.DeliveryOrderLocations]
-    })
+    }),
+    finishDeliveryOrder: build.mutation<void, string>({
+      query: (id) => ({
+        url: generatePath('/delivery-order/finish/:id', { id }),
+        method: 'PATCH'
+      }),
+      invalidatesTags: [TagType.DeliveryOrder, TagType.DeliveryOrderLocations]
+    }),
   })
 });

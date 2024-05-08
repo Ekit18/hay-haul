@@ -12,12 +12,14 @@ import {
 import { NotificationMessage } from './enums/notification-message.enum';
 import { DeliveryOrder } from 'src/delivery-order/delivery-order.entity';
 import { DeliveryOffer } from 'src/delivery-offer/delivery-offer.entity';
+import { Delivery } from 'src/delivery/delivery.entity';
 
-export type NotifiableTypes = ProductAuction | DeliveryOrder | DeliveryOffer;
+export type NotifiableTypes = ProductAuction | DeliveryOrder | DeliveryOffer | Delivery;
 
 export enum Notifiable {
   ProductAuction = 'ProductAuction',
   DeliveryOrder = 'DeliveryOrder',
+  Delivery = 'Delivery',
 }
 
 const notificationMessages = Object.values(NotificationMessage)

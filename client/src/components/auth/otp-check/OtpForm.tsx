@@ -13,6 +13,7 @@ import jwt_decode from 'jwt-decode';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import OtpInput from 'react-otp-input';
 import { OtpFormValues, otpDefaultValues, useOtpFormSchema } from './validation';
+import { toast } from '@/components/ui/use-toast';
 
 interface OtpFormProps {
   onSetIsSuccess: React.Dispatch<React.SetStateAction<boolean>>;
@@ -50,7 +51,16 @@ export function OtpForm({ onSetIsSuccess }: OtpFormProps) {
   };
 
   const handleNewOtp = async () => {
-    await newOtp({ userId: user.id, type: OtpType.REGISTER }).unwrap().catch(handleRtkError);
+    await newOtp({ userId: user.id, type: OtpType.REGISTER })
+      .unwrap()
+      .then(() => {
+        toast({
+          variant: 'success',
+          title: 'New OTP sent',
+          description: 'We have sent a new OTP to your email.'
+        });
+      })
+      .catch(handleRtkError);
   };
 
   return (

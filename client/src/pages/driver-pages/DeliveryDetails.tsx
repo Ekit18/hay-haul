@@ -143,7 +143,7 @@ export function DeliveryDetails() {
             fromAddress={delivery.deliveryOrder.productAuction?.product.facilityDetails?.address}
             toAddress={delivery.deliveryOrder.facilityDetails?.address}
           />
-          {delivery.deliveryOrder.deliveryOrderStatus !== DeliveryOrderStatus.Delivered &&
+          {delivery.status !== DeliveryStatus.Finished &&
             statusToButtonMap({ status: delivery.status, handleClick: handleOpenChange })}
         </div>
       </div>
@@ -187,7 +187,8 @@ export const statusToButtonMap = ({
     [DeliveryStatus.Loading]: 'Loaded',
     [DeliveryStatus.OnTheWay]: 'Arrived to warehouse',
     [DeliveryStatus.AtBusinessFacility]: 'Started unloading',
-    [DeliveryStatus.Unloading]: 'Finish delivery'
+    [DeliveryStatus.Unloading]: 'Finish delivery',
+    [DeliveryStatus.Finished]: 'Finished'
   };
 
   const statusValue = String(status) as `${`${null}` | DeliveryStatusValues}`;
